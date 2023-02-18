@@ -244,7 +244,6 @@ class R3BLosCal2Hit : public FairTask
     TH2F* fhQ3_vs_Q7_corr;
     TH2F* fhQ4_vs_Q8;
     TH2F* fhQ4_vs_Q8_corr;
-    ;
     TH2F* fhTresX_M;
     TH2F* fhTresY_M;
     TH2F* fhTresX_T;
