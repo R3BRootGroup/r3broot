@@ -17,10 +17,7 @@
 #include <TNamed.h>
 #include <TString.h>
 
-extern "C"
-{
-#include "ext_data_struct_info.hh"
-}
+#include <ext_data_struct_info.hh>
 
 class TClonesArray;
 class R3BEventHeader;

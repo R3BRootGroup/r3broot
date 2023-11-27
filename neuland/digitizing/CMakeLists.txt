@@ -10,11 +10,6 @@
 # granted to it by virtue of its status as an Intergovernmental Organization #
 # or submit itself to any jurisdiction.                                      #
 ##############################################################################
-
-set(INCLUDE_DIRECTORIES ${INCLUDE_DIRECTORIES} ${R3BROOT_SOURCE_DIR}/neuland/calibration
-                        ${R3BROOT_SOURCE_DIR}/neuland/digitizing)
-include_directories(${INCLUDE_DIRECTORIES})
-
 set(SRCS
     R3BDigitizingChannel.cxx
     R3BDigitizingPaddle.cxx
@@ -38,8 +33,16 @@ set(HEADERS
     R3BNeulandDigitizer.h
     R3BNeulandHitMon.h)
 
-set(LINKDEF NeulandDigitizingLinkDef.h)
-set(LIBRARY_NAME R3BNeulandDigitizing)
-set(DEPENDENCIES R3BNeulandShared R3BData R3BNeulandCalibration)
-
-generate_library()
+add_library_with_dictionary(
+    LIBNAME
+    R3BNeulandDigitizing
+    LINKDEF
+    NeulandDigitizingLinkDef.h
+    SRCS
+    ${SRCS}
+    INCLUDEDIRS
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    HEADERS
+    ${HEADERS}
+    DEPENDENCIES
+    R3BNeulandCalibration)

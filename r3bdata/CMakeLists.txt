@@ -17,215 +17,362 @@
 # Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-overloaded-virtual") Set(CMAKE_CXX_FLAGS
 # "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wformat-security -march=native")
 
-set(SYSTEM_INCLUDE_DIRECTORIES ${SYSTEM_INCLUDE_DIRECTORIES} ${BASE_INCLUDE_DIRECTORIES})
-
-set(INCLUDE_DIRECTORIES
-${R3BROOT_SOURCE_DIR}/r3bdata
-${R3BROOT_SOURCE_DIR}/r3bbase
-${R3BROOT_SOURCE_DIR}/r3bdata/xballData
-${R3BROOT_SOURCE_DIR}/r3bdata/califaData
-${R3BROOT_SOURCE_DIR}/r3bdata/wrData
-${R3BROOT_SOURCE_DIR}/r3bdata/beammonitorData
-${R3BROOT_SOURCE_DIR}/r3bdata/dhcData
-${R3BROOT_SOURCE_DIR}/r3bdata/gfiData
-${R3BROOT_SOURCE_DIR}/r3bdata/mtofData
-${R3BROOT_SOURCE_DIR}/r3bdata/tofData
-${R3BROOT_SOURCE_DIR}/r3bdata/pdcData
-${R3BROOT_SOURCE_DIR}/r3bdata/vetoData
-${R3BROOT_SOURCE_DIR}/r3bdata/lumonData
-${R3BROOT_SOURCE_DIR}/r3bdata/trackerData
-${R3BROOT_SOURCE_DIR}/r3bdata/landData
-${R3BROOT_SOURCE_DIR}/r3bdata/roluData
-${R3BROOT_SOURCE_DIR}/r3bdata/losData
-${R3BROOT_SOURCE_DIR}/r3bdata/frssciData
-${R3BROOT_SOURCE_DIR}/r3bdata/sci2Data
-${R3BROOT_SOURCE_DIR}/r3bdata/sci8Data
-${R3BROOT_SOURCE_DIR}/r3bdata/mfiData
-${R3BROOT_SOURCE_DIR}/r3bdata/fibData
-${R3BROOT_SOURCE_DIR}/r3bdata/pspData
-${R3BROOT_SOURCE_DIR}/r3bdata/neulandData
-${R3BROOT_SOURCE_DIR}/r3bdata/actarData
-${R3BROOT_SOURCE_DIR}/r3bdata/strawtubesData
-${R3BROOT_SOURCE_DIR}/r3bdata/amsData
-${R3BROOT_SOURCE_DIR}/r3bdata/footData
-${R3BROOT_SOURCE_DIR}/r3bdata/alpideData
-${R3BROOT_SOURCE_DIR}/r3bdata/musicData
-${R3BROOT_SOURCE_DIR}/r3bdata/sampData
-${R3BROOT_SOURCE_DIR}/r3bdata/sfibData
-${R3BROOT_SOURCE_DIR}/r3bdata/frsData
-${R3BROOT_SOURCE_DIR}/r3bdata/rpcData
-${R3BROOT_SOURCE_DIR}/r3bdata/mwpcData
-${R3BROOT_SOURCE_DIR}/r3bdata/twimData
-${R3BROOT_SOURCE_DIR}/r3bdata/tttxData
-${R3BROOT_SOURCE_DIR}/r3bdata/musliData
-${R3BROOT_SOURCE_DIR}/r3bdata/synccheckData
-)
-
-include_directories(${INCLUDE_DIRECTORIES})
-include_directories(SYSTEM ${SYSTEM_INCLUDE_DIRECTORIES})
-
-set(LINK_DIRECTORIES ${ROOT_LIBRARY_DIR} ${FAIRROOT_LIBRARY_DIR})
-
-link_directories(${LINK_DIRECTORIES})
-
 set(SRCS
-R3BMCStack.cxx
-R3BMCTrack.cxx
-wrData/R3BWRData.cxx
-trloiiData/R3BTrloiiData.cxx
-R3BHit.cxx
-R3BTrack.cxx
-R3BDouble.cxx
-xballData/R3BXBallPoint.cxx
-xballData/R3BXBallCrystalHit.cxx
-xballData/R3BXBallCrystalHitSim.cxx
-califaData/R3BCalifaCrystalCalData.cxx
-califaData/R3BCalifaMappedData.cxx
-califaData/R3BCalifaClusterData.cxx
-califaData/R3BCalifaPoint.cxx
-dchData/R3BDchPoint.cxx
-dchData/R3BDchFullPoint.cxx
-gfiData/R3BGfiPoint.cxx
-mtofData/R3BmTofPoint.cxx
-mtofData/R3BmTofDigi.cxx
-tofData/R3BTofPoint.cxx
-vetoData/R3BVetoPoint.cxx
-lumonData/ELILuMonPoint.cxx
-trackerData/R3BTraPoint.cxx
-trackerData/R3BTraHit.cxx
-trackerData/R3BSitrackerHit.cxx
-trackerData/R3BTrackerHit.cxx
-landData/R3BLandPoint.cxx
-landData/R3BLandDigi.cxx
-landData/R3BLandFirstHits.cxx
-landData/R3BLandHit.cxx
-landData/R3BPaddleCrystalHit.cxx
-landData/R3BNeutronTrack.cxx
-dchData/R3BDchDigi.cxx
-dchData/R3BDch2pDigi.cxx
-tofData/R3BTofDigi.cxx
-tofData/R3BTof2pDigi.cxx
-gfiData/R3BGfiDigi.cxx
-trackerData/R3BTraDigi.cxx
-trackerData/R3BTra2pDigi.cxx
-trackerData/R3BTraFraDigi.cxx
-trackerData/R3BTargetDigi.cxx
-trackerData/R3BTarget2pDigi.cxx
-mfiData/R3BMfiPoint.cxx
-mfiData/R3BMfiDigi.cxx
-pspData/R3BPspPoint.cxx
-pspData/R3BPspDigi.cxx
-neulandData/R3BNeulandTacquilaMappedData.cxx
-neulandData/R3BNeulandCalData.cxx
-neulandData/R3BNeulandPoint.cxx
-neulandData/R3BNeulandHit.cxx
-neulandData/R3BNeulandMultiplicity.cxx
-neulandData/R3BNeulandCluster.cxx
-neulandData/R3BNeulandNeutron.cxx
-pspData/R3BPspxMappedData.cxx
-pspData/R3BPspxPrecalData.cxx
-pspData/R3BPspxCalData.cxx
-pspData/R3BPspxHitData.cxx
-losData/R3BLosMappedData.cxx
-losData/R3BLosCalData.cxx
-losData/R3BLosTCalData.cxx
-losData/R3BLosHitData.cxx
-roluData/R3BRoluMappedData.cxx
-roluData/R3BRoluCalData.cxx
-roluData/R3BRoluHitData.cxx
-frssciData/R3BFrsSciMappedData.cxx
-frssciData/R3BFrsSciTcalData.cxx
-frssciData/R3BFrsSciPosCalData.cxx
-frssciData/R3BFrsSciTofCalData.cxx
-sci2Data/R3BSci2MappedData.cxx
-sci2Data/R3BSci2TcalData.cxx
-sci2Data/R3BSci2CalData.cxx
-sci2Data/R3BSci2HitData.cxx
-sci8Data/R3BSci8MappedData.cxx
-sci8Data/R3BSci8CalData.cxx
-sci8Data/R3BSci8HitData.cxx
-actarData/R3BActarPoint.cxx
-strawtubesData/R3BStrawtubesMappedData.cxx
-strawtubesData/R3BStrawtubesCalData.cxx
-strawtubesData/R3BStrawtubesHitData.cxx
-neulandData/R3BPaddleTamexMappedData.cxx
-tofData/R3BTofdMappedData.cxx
-tofData/R3BTofdCalData.cxx
-tofData/R3BTofdHitData.cxx
-tofData/R3BPaddleCalData.cxx
-tofData/R3BTofdPoint.cxx
-tofData/R3BTofdDigi.cxx
-tofData/R3BPtofHit.cxx
-tofiData/R3BTofiMappedData.cxx
-tofiData/R3BTofiCalData.cxx
-tofiData/R3BTofiHitData.cxx
-tofiData/R3BTofiPoint.cxx
-tofiData/R3BTofiDigi.cxx
-pdcData/R3BPdcMappedData.cxx
-pdcData/R3BPdcCalData.cxx
-pdcData/R3BPdcHitData.cxx
-fibData/R3BBunchedFiberCalData.cxx
-fibData/R3BBunchedFiberHitData.cxx
-fibData/R3BBunchedFiberMappedData.cxx
-fibData/R3BFi4Point.cxx
-fibData/R3BFi4CalItem.cxx
-fibData/R3BFi4HitItem.cxx
-fibData/R3BFiberMappedData.cxx
-fibData/R3BFibMappedData.cxx
-fibData/R3BFibCalData.cxx
-fibData/R3BFibPoint.cxx
-fibData/R3BFiberMAPMTCalData.cxx
-fibData/R3BFiberMAPMTHitData.cxx
-fibData/R3BFiberMAPMTMappedData.cxx
-amsData/R3BAmsMappedData.cxx
-amsData/R3BAmsStripCalData.cxx
-amsData/R3BAmsHitData.cxx
-beammonitorData/R3BBeamMonitorMappedData.cxx
-musicData/R3BMusicPoint.cxx
-musicData/R3BMusicMappedData.cxx
-musicData/R3BMusicCalData.cxx
-musicData/R3BMusicHitData.cxx
-sampData/R3BSamplerMappedData.cxx
-sampData/R3BSampLosMappedData.cxx
-sfibData/R3BSfibMappedData.cxx
-sfibData/R3BSfibCalData.cxx
-sfibData/R3BSfibHitData.cxx
-frsData/R3BFrsData.cxx
-footData/R3BFootMappedData.cxx
-footData/R3BFootCalData.cxx
-footData/R3BFootHitData.cxx
-alpideData/R3BAlpidePoint.cxx
-alpideData/R3BAlpideMappedData.cxx
-alpideData/R3BAlpideCalData.cxx
-alpideData/R3BAlpideHitData.cxx
-rpcData/R3BRpcMappedData.cxx
-rpcData/R3BRpcPreCalData.cxx
-rpcData/R3BRpcCalData.cxx
-rpcData/R3BRpcHitData.cxx
-rpcData/R3BRpcPoint.cxx
-mwpcData/R3BMwpcPoint.cxx
-mwpcData/R3BMwpcMappedData.cxx
-mwpcData/R3BMwpcCalData.cxx
-mwpcData/R3BMwpcHitData.cxx
-twimData/R3BTwimPoint.cxx
-twimData/R3BTwimMappedData.cxx
-twimData/R3BTwimCalData.cxx
-twimData/R3BTwimHitData.cxx
-tttxData/R3BTttxMappedData.cxx
-tttxData/R3BTttxCalData.cxx
-tttxData/R3BTttxHitData.cxx
-musliData/R3BMusliMappedData.cxx
-musliData/R3BMusliCalData.cxx
-musliData/R3BMusliHitData.cxx
-synccheckData/R3BSyncCheckData.cxx
-)
+    #cmake-format: sortable
+    actarData/R3BActarPoint.cxx
+    alpideData/R3BAlpideCalData.cxx
+    alpideData/R3BAlpideHitData.cxx
+    alpideData/R3BAlpideMappedData.cxx
+    alpideData/R3BAlpidePoint.cxx
+    amsData/R3BAmsHitData.cxx
+    amsData/R3BAmsMappedData.cxx
+    amsData/R3BAmsStripCalData.cxx
+    beammonitorData/R3BBeamMonitorMappedData.cxx
+    califaData/R3BCalifaClusterData.cxx
+    califaData/R3BCalifaCrystalCalData.cxx
+    califaData/R3BCalifaMappedData.cxx
+    califaData/R3BCalifaPoint.cxx
+    dchData/R3BDch2pDigi.cxx
+    dchData/R3BDchDigi.cxx
+    dchData/R3BDchFullPoint.cxx
+    dchData/R3BDchPoint.cxx
+    fibData/R3BBunchedFiberCalData.cxx
+    fibData/R3BBunchedFiberHitData.cxx
+    fibData/R3BBunchedFiberMappedData.cxx
+    fibData/R3BFi4CalItem.cxx
+    fibData/R3BFi4HitItem.cxx
+    fibData/R3BFi4Point.cxx
+    fibData/R3BFibCalData.cxx
+    fibData/R3BFiberMAPMTCalData.cxx
+    fibData/R3BFiberMAPMTHitData.cxx
+    fibData/R3BFiberMAPMTMappedData.cxx
+    fibData/R3BFiberMappedData.cxx
+    fibData/R3BFibMappedData.cxx
+    fibData/R3BFibPoint.cxx
+    footData/R3BFootCalData.cxx
+    footData/R3BFootHitData.cxx
+    footData/R3BFootMappedData.cxx
+    frsData/R3BFrsData.cxx
+    frssciData/R3BFrsSciMappedData.cxx
+    frssciData/R3BFrsSciPosCalData.cxx
+    frssciData/R3BFrsSciTcalData.cxx
+    frssciData/R3BFrsSciTofCalData.cxx
+    gfiData/R3BGfiDigi.cxx
+    gfiData/R3BGfiPoint.cxx
+    landData/R3BLandDigi.cxx
+    landData/R3BLandFirstHits.cxx
+    landData/R3BLandHit.cxx
+    landData/R3BLandPoint.cxx
+    landData/R3BNeutronTrack.cxx
+    landData/R3BPaddleCrystalHit.cxx
+    losData/R3BLosCalData.cxx
+    losData/R3BLosHitData.cxx
+    losData/R3BLosMappedData.cxx
+    losData/R3BLosTCalData.cxx
+    lumonData/ELILuMonPoint.cxx
+    mfiData/R3BMfiDigi.cxx
+    mfiData/R3BMfiPoint.cxx
+    mtofData/R3BmTofDigi.cxx
+    mtofData/R3BmTofPoint.cxx
+    musicData/R3BMusicCalData.cxx
+    musicData/R3BMusicHitData.cxx
+    musicData/R3BMusicMappedData.cxx
+    musicData/R3BMusicPoint.cxx
+    musliData/R3BMusliCalData.cxx
+    musliData/R3BMusliHitData.cxx
+    musliData/R3BMusliMappedData.cxx
+    mwpcData/R3BMwpcCalData.cxx
+    mwpcData/R3BMwpcHitData.cxx
+    mwpcData/R3BMwpcMappedData.cxx
+    mwpcData/R3BMwpcPoint.cxx
+    neulandData/R3BNeulandCalData.cxx
+    neulandData/R3BNeulandCluster.cxx
+    neulandData/R3BNeulandHit.cxx
+    neulandData/R3BNeulandMultiplicity.cxx
+    neulandData/R3BNeulandNeutron.cxx
+    neulandData/R3BNeulandPoint.cxx
+    neulandData/R3BNeulandTacquilaMappedData.cxx
+    neulandData/R3BPaddleTamexMappedData.cxx
+    pdcData/R3BPdcCalData.cxx
+    pdcData/R3BPdcHitData.cxx
+    pdcData/R3BPdcMappedData.cxx
+    pspData/R3BPspDigi.cxx
+    pspData/R3BPspPoint.cxx
+    pspData/R3BPspxCalData.cxx
+    pspData/R3BPspxHitData.cxx
+    pspData/R3BPspxMappedData.cxx
+    pspData/R3BPspxPrecalData.cxx
+    R3BDouble.cxx
+    R3BHit.cxx
+    R3BMCStack.cxx
+    R3BMCTrack.cxx
+    R3BTrack.cxx
+    roluData/R3BRoluCalData.cxx
+    roluData/R3BRoluHitData.cxx
+    roluData/R3BRoluMappedData.cxx
+    rpcData/R3BRpcCalData.cxx
+    rpcData/R3BRpcHitData.cxx
+    rpcData/R3BRpcMappedData.cxx
+    rpcData/R3BRpcPoint.cxx
+    rpcData/R3BRpcPreCalData.cxx
+    sampData/R3BSamplerMappedData.cxx
+    sampData/R3BSampLosMappedData.cxx
+    sci2Data/R3BSci2CalData.cxx
+    sci2Data/R3BSci2HitData.cxx
+    sci2Data/R3BSci2MappedData.cxx
+    sci2Data/R3BSci2TcalData.cxx
+    sci8Data/R3BSci8CalData.cxx
+    sci8Data/R3BSci8HitData.cxx
+    sci8Data/R3BSci8MappedData.cxx
+    sfibData/R3BSfibCalData.cxx
+    sfibData/R3BSfibHitData.cxx
+    sfibData/R3BSfibMappedData.cxx
+    strawtubesData/R3BStrawtubesCalData.cxx
+    strawtubesData/R3BStrawtubesHitData.cxx
+    strawtubesData/R3BStrawtubesMappedData.cxx
+    synccheckData/R3BSyncCheckData.cxx
+    tofData/R3BPaddleCalData.cxx
+    tofData/R3BPtofHit.cxx
+    tofData/R3BTof2pDigi.cxx
+    tofData/R3BTofdCalData.cxx
+    tofData/R3BTofdDigi.cxx
+    tofData/R3BTofdHitData.cxx
+    tofData/R3BTofDigi.cxx
+    tofData/R3BTofdMappedData.cxx
+    tofData/R3BTofdPoint.cxx
+    tofData/R3BTofPoint.cxx
+    tofiData/R3BTofiCalData.cxx
+    tofiData/R3BTofiDigi.cxx
+    tofiData/R3BTofiHitData.cxx
+    tofiData/R3BTofiMappedData.cxx
+    tofiData/R3BTofiPoint.cxx
+    trackerData/R3BSitrackerHit.cxx
+    trackerData/R3BTarget2pDigi.cxx
+    trackerData/R3BTargetDigi.cxx
+    trackerData/R3BTra2pDigi.cxx
+    trackerData/R3BTrackerHit.cxx
+    trackerData/R3BTraDigi.cxx
+    trackerData/R3BTraFraDigi.cxx
+    trackerData/R3BTraHit.cxx
+    trackerData/R3BTraPoint.cxx
+    trloiiData/R3BTrloiiData.cxx
+    tttxData/R3BTttxCalData.cxx
+    tttxData/R3BTttxHitData.cxx
+    tttxData/R3BTttxMappedData.cxx
+    twimData/R3BTwimCalData.cxx
+    twimData/R3BTwimHitData.cxx
+    twimData/R3BTwimMappedData.cxx
+    twimData/R3BTwimPoint.cxx
+    vetoData/R3BVetoPoint.cxx
+    wrData/R3BWRData.cxx
+    xballData/R3BXBallCrystalHit.cxx
+    xballData/R3BXBallCrystalHitSim.cxx
+    xballData/R3BXBallPoint.cxx)
 
-# fill list of header files from list of source files by exchanging the file extension
-change_file_extension(*.cxx *.h HEADERS "${SRCS}")
-set(HEADERS ${HEADERS} R3BDetectorList.h)
+set(HEADERS
+    #cmake-format: sortable
+    actarData/R3BActarPoint.h
+    alpideData/R3BAlpideCalData.h
+    alpideData/R3BAlpideHitData.h
+    alpideData/R3BAlpideMappedData.h
+    alpideData/R3BAlpidePoint.h
+    amsData/R3BAmsHitData.h
+    amsData/R3BAmsMappedData.h
+    amsData/R3BAmsStripCalData.h
+    beammonitorData/R3BBeamMonitorMappedData.h
+    califaData/R3BCalifaClusterData.h
+    califaData/R3BCalifaCrystalCalData.h
+    califaData/R3BCalifaMappedData.h
+    califaData/R3BCalifaPoint.h
+    dchData/R3BDch2pDigi.h
+    dchData/R3BDchDigi.h
+    dchData/R3BDchFullPoint.h
+    dchData/R3BDchPoint.h
+    fibData/R3BBunchedFiberCalData.h
+    fibData/R3BBunchedFiberHitData.h
+    fibData/R3BBunchedFiberMappedData.h
+    fibData/R3BFi4CalItem.h
+    fibData/R3BFi4HitItem.h
+    fibData/R3BFi4Point.h
+    fibData/R3BFibCalData.h
+    fibData/R3BFiberMAPMTCalData.h
+    fibData/R3BFiberMAPMTHitData.h
+    fibData/R3BFiberMAPMTMappedData.h
+    fibData/R3BFiberMappedData.h
+    fibData/R3BFibMappedData.h
+    fibData/R3BFibPoint.h
+    footData/R3BFootCalData.h
+    footData/R3BFootHitData.h
+    footData/R3BFootMappedData.h
+    frsData/R3BFrsData.h
+    frssciData/R3BFrsSciMappedData.h
+    frssciData/R3BFrsSciPosCalData.h
+    frssciData/R3BFrsSciTcalData.h
+    frssciData/R3BFrsSciTofCalData.h
+    gfiData/R3BGfiDigi.h
+    gfiData/R3BGfiPoint.h
+    landData/R3BLandDigi.h
+    landData/R3BLandFirstHits.h
+    landData/R3BLandHit.h
+    landData/R3BLandPoint.h
+    landData/R3BNeutronTrack.h
+    landData/R3BPaddleCrystalHit.h
+    losData/R3BLosCalData.h
+    losData/R3BLosHitData.h
+    losData/R3BLosMappedData.h
+    losData/R3BLosTCalData.h
+    lumonData/ELILuMonPoint.h
+    mfiData/R3BMfiDigi.h
+    mfiData/R3BMfiPoint.h
+    mtofData/R3BmTofDigi.h
+    mtofData/R3BmTofPoint.h
+    musicData/R3BMusicCalData.h
+    musicData/R3BMusicHitData.h
+    musicData/R3BMusicMappedData.h
+    musicData/R3BMusicPoint.h
+    musliData/R3BMusliCalData.h
+    musliData/R3BMusliHitData.h
+    musliData/R3BMusliMappedData.h
+    mwpcData/R3BMwpcCalData.h
+    mwpcData/R3BMwpcHitData.h
+    mwpcData/R3BMwpcMappedData.h
+    mwpcData/R3BMwpcPoint.h
+    neulandData/R3BNeulandCalData.h
+    neulandData/R3BNeulandCluster.h
+    neulandData/R3BNeulandHit.h
+    neulandData/R3BNeulandMultiplicity.h
+    neulandData/R3BNeulandNeutron.h
+    neulandData/R3BNeulandPoint.h
+    neulandData/R3BNeulandTacquilaMappedData.h
+    neulandData/R3BPaddleTamexMappedData.h
+    pdcData/R3BPdcCalData.h
+    pdcData/R3BPdcHitData.h
+    pdcData/R3BPdcMappedData.h
+    pspData/R3BPspDigi.h
+    pspData/R3BPspPoint.h
+    pspData/R3BPspxCalData.h
+    pspData/R3BPspxHitData.h
+    pspData/R3BPspxMappedData.h
+    pspData/R3BPspxPrecalData.h
+    R3BDouble.h
+    R3BHit.h
+    R3BMCStack.h
+    R3BMCTrack.h
+    R3BTrack.h
+    roluData/R3BRoluCalData.h
+    roluData/R3BRoluHitData.h
+    roluData/R3BRoluMappedData.h
+    rpcData/R3BRpcCalData.h
+    rpcData/R3BRpcHitData.h
+    rpcData/R3BRpcMappedData.h
+    rpcData/R3BRpcPoint.h
+    rpcData/R3BRpcPreCalData.h
+    sampData/R3BSamplerMappedData.h
+    sampData/R3BSampLosMappedData.h
+    sci2Data/R3BSci2CalData.h
+    sci2Data/R3BSci2HitData.h
+    sci2Data/R3BSci2MappedData.h
+    sci2Data/R3BSci2TcalData.h
+    sci8Data/R3BSci8CalData.h
+    sci8Data/R3BSci8HitData.h
+    sci8Data/R3BSci8MappedData.h
+    sfibData/R3BSfibCalData.h
+    sfibData/R3BSfibHitData.h
+    sfibData/R3BSfibMappedData.h
+    strawtubesData/R3BStrawtubesCalData.h
+    strawtubesData/R3BStrawtubesHitData.h
+    strawtubesData/R3BStrawtubesMappedData.h
+    synccheckData/R3BSyncCheckData.h
+    tofData/R3BPaddleCalData.h
+    tofData/R3BPtofHit.h
+    tofData/R3BTof2pDigi.h
+    tofData/R3BTofdCalData.h
+    tofData/R3BTofdDigi.h
+    tofData/R3BTofdHitData.h
+    tofData/R3BTofDigi.h
+    tofData/R3BTofdMappedData.h
+    tofData/R3BTofdPoint.h
+    tofData/R3BTofPoint.h
+    tofiData/R3BTofiCalData.h
+    tofiData/R3BTofiDigi.h
+    tofiData/R3BTofiHitData.h
+    tofiData/R3BTofiMappedData.h
+    tofiData/R3BTofiPoint.h
+    trackerData/R3BSitrackerHit.h
+    trackerData/R3BTarget2pDigi.h
+    trackerData/R3BTargetDigi.h
+    trackerData/R3BTra2pDigi.h
+    trackerData/R3BTrackerHit.h
+    trackerData/R3BTraDigi.h
+    trackerData/R3BTraFraDigi.h
+    trackerData/R3BTraHit.h
+    trackerData/R3BTraPoint.h
+    trloiiData/R3BTrloiiData.h
+    tttxData/R3BTttxCalData.h
+    tttxData/R3BTttxHitData.h
+    tttxData/R3BTttxMappedData.h
+    twimData/R3BTwimCalData.h
+    twimData/R3BTwimHitData.h
+    twimData/R3BTwimMappedData.h
+    twimData/R3BTwimPoint.h
+    vetoData/R3BVetoPoint.h
+    wrData/R3BWRData.h
+    xballData/R3BXBallCrystalHit.h
+    xballData/R3BXBallCrystalHitSim.h
+    xballData/R3BXBallPoint.h)
 
-set(LINKDEF DataLinkDef.h)
-set(LIBRARY_NAME R3BData)
-set(DEPENDENCIES Base FairTools VMCLibrary FairLogger::FairLogger)
+set(DIRS
+    actarData
+    alpideData
+    amsData
+    beammonitorData
+    califaData
+    dchData
+    fibData
+    footData
+    frsData
+    frssciData
+    gfiData
+    landData
+    losData
+    lumonData
+    mfiData
+    mtofData
+    musicData
+    musliData
+    mwpcData
+    neulandData
+    pdcData
+    pspData
+    roluData
+    rpcData
+    sampData
+    sci2Data
+    sci8Data
+    sfibData
+    strawtubesData
+    synccheckData
+    tofData
+    tofiData
+    trackerData
+    trloiiData
+    tttxData
+    twimData
+    vetoData
+    wrData
+    xballData)
 
-generate_library()
+add_library_with_dictionary(
+    LIBNAME
+    R3BData
+    LINKDEF
+    DataLinkDef.h
+    HEADERS
+    ${HEADERS}
+    SRCS
+    ${SRCS}
+    INCLUDEDIRS
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${DIRS}
+    DEPENDENCIES
+    R3BBase)

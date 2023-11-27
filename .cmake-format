@@ -6,6 +6,14 @@ line_width = 100
 # How many spaces to tab for indent
 tab_size = 4
 
+# If a candidate layout is wrapped horizontally but it exceeds this many
+# lines, then reject the layout.
+max_lines_hwrap = 4
+
+# If a positional argument group contains more than this many arguments, then
+# force it to a vertical layout.
+max_pargs_hwrap = 4
+
 # If true, separate flow control names from their parentheses with a space
 separate_ctrl_name_with_space = False
 
@@ -39,4 +47,5 @@ enable_markup = False
 
 # If true, the argument lists which are known to be sortable will be sorted
   # lexicographicall
+autosort = True
 enable_sort = True

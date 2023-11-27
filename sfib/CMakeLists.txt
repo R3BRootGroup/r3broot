@@ -11,48 +11,32 @@
 # or submit itself to any jurisdiction.                                      #
 ##############################################################################
 
-# Create a library called "libR3BSfib" which includes the source files given 
-# in the array. The extension is already found. Any number of sources could 
+# Create a library called "libR3BSfib" which includes the source files given
+# in the array. The extension is already found. Any number of sources could
 # be listed here.
 
-Set(SYSTEM_INCLUDE_DIRECTORIES 
-${SYSTEM_INCLUDE_DIRECTORIES}
-${BASE_INCLUDE_DIRECTORIES}
-)
-
-set(INCLUDE_DIRECTORIES
-${R3BROOT_SOURCE_DIR}/sfib
-${R3BROOT_SOURCE_DIR}/sfib/sim
-${R3BROOT_SOURCE_DIR}/r3bbase
-${R3BROOT_SOURCE_DIR}/r3bdata
-${R3BROOT_SOURCE_DIR}/r3bdata/sfibData
-${R3BROOT_SOURCE_DIR}/r3bdata/fibData
-${R3BROOT_SOURCE_DIR}/tcal
-)
-
-include_directories(${INCLUDE_DIRECTORIES})
-include_directories(SYSTEM ${SYSTEM_INCLUDE_DIRECTORIES})
-
-set(LINK_DIRECTORIES
-${ROOT_LIBRARY_DIR}
-${FAIRROOT_LIBRARY_DIR}
-) 
-
-link_directories(${LINK_DIRECTORIES})
-
 set(SRCS
-./sim/R3Bsfi.cxx
-./sim/R3BsfiDigitizer.cxx
-R3BSfibMapped2Cal.cxx
-R3BSfibMapped2CalPar.cxx
-R3BSfibCal2Hit.cxx
-#R3BSfibCal2HitPar.cxx
+    sim/R3Bsfi.cxx sim/R3BsfiDigitizer.cxx R3BSfibMapped2Cal.cxx R3BSfibMapped2CalPar.cxx
+    R3BSfibCal2Hit.cxx
+    #R3BSfibCal2HitPar.cxx
 )
 
-CHANGE_FILE_EXTENSION(*.cxx *.h HEADERS "${SRCS}")
-
-Set(LINKDEF SfibLinkDef.h)
-Set(LIBRARY_NAME R3BSfib)
-Set(DEPENDENCIES R3BData R3BTCal)
-
-GENERATE_LIBRARY()
+set(HEADERS
+    sim/R3Bsfi.h sim/R3BsfiDigitizer.h R3BSfibMapped2Cal.h R3BSfibMapped2CalPar.h R3BSfibCal2Hit.h
+    #R3BSfibCal2HitPar.h
+)
+add_library_with_dictionary(
+    LIBNAME
+    R3BSfib
+    LINKDEF
+    SfibLinkDef.h
+    HEADERS
+    ${HEADERS}
+    SRCS
+    ${SRCS}
+    INCLUDEDIRS
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    sim
+    DEPENDENCIES
+    R3BTCal
+    R3BData)

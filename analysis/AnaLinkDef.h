@@ -53,5 +53,9 @@
 #pragma link C++ class R3BTofDvsTttxOnlineSpectra+;
 #pragma link C++ class R3BOnlineSyncCheck+;
 #pragma link C++ class R3BScalersOnlineSpectra+;
+#pragma link C++ class R3BMSOffsetContFact+;
+#pragma link C++ class R3BMSOffsetPar+;
+#pragma link C++ class R3BMSOffsetFinder+;
+#pragma link C++ class R3BTprevTnext+;
 
 #endif

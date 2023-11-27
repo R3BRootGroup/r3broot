@@ -1,4 +1,3 @@
-
 ##############################################################################
 #   Copyright (C) 2019 GSI Helmholtzzentrum für Schwerionenforschung GmbH    #
 #   Copyright (C) 2019-2024 Members of R3B Collaboration                     #
@@ -12,65 +11,41 @@
 # or submit itself to any jurisdiction.                                      #
 ##############################################################################
 
-# Create a library called "libR3BTttx" which includes the source files given
-# in the array. The extension is already found. Any number of sources could be
-# listed here.
-
-Set(SYSTEM_INCLUDE_DIRECTORIES
-${SYSTEM_INCLUDE_DIRECTORIES}
-${BASE_INCLUDE_DIRECTORIES}
-)
-
-set(INCLUDE_DIRECTORIES
-#put here all directories where header files are located
-${R3BROOT_SOURCE_DIR}/r3bbase
-${R3BROOT_SOURCE_DIR}/tcal
-${R3BROOT_SOURCE_DIR}/tracking
-${R3BROOT_SOURCE_DIR}/r3bdata
-${R3BROOT_SOURCE_DIR}/r3bdata/califaData
-${R3BROOT_SOURCE_DIR}/r3bdata/tttxData
-${R3BROOT_SOURCE_DIR}/r3bdata/wrData
-${R3BROOT_SOURCE_DIR}/tttx
-#${R3BROOT_SOURCE_DIR}/tttx/sim
-#${R3BROOT_SOURCE_DIR}/tttx/digi
-${R3BROOT_SOURCE_DIR}/tttx/pars
-${R3BROOT_SOURCE_DIR}/tttx/calibration
-${R3BROOT_SOURCE_DIR}/tttx/online
-)
-
-include_directories( ${INCLUDE_DIRECTORIES})
-include_directories(SYSTEM ${SYSTEM_INCLUDE_DIRECTORIES})
-
-set(LINK_DIRECTORIES
-${ROOT_LIBRARY_DIR}
-${FAIRROOT_LIBRARY_DIR}
-)
-
-link_directories( ${LINK_DIRECTORIES})
-
 set(SRCS
-#Put here your sourcefiles
-#./pars/R3BTttxMappingPar.cxx
-./pars/R3BTttxStripCalPar.cxx
-./pars/R3BTttxHitPar.cxx
-./pars/R3BTttxContFact.cxx
-#./calibration/R3BTttxMapped2CalPar.cxx
-./calibration/R3BTttxMapped2Cal.cxx
-./calibration/R3BTttxCal2Hit.cxx
-./online/R3BTttxOnlineSpectra.cxx
-)
+    #Put here your sourcefiles
+    #pars/R3BTttxMappingPar.cxx
+    pars/R3BTttxStripCalPar.cxx
+    pars/R3BTttxHitPar.cxx
+    pars/R3BTttxContFact.cxx
+    #calibration/R3BTttxMapped2CalPar.cxx
+    calibration/R3BTttxMapped2Cal.cxx
+    calibration/R3BTttxCal2Hit.cxx
+    online/R3BTttxOnlineSpectra.cxx)
 
-# fill list of header files from list of source files
-# by exchanging the file extension
-CHANGE_FILE_EXTENSION(*.cxx *.h HEADERS "${SRCS}")
+set(HEADERS
+    #Put here your sourcefiles
+    #pars/R3BTttxMappingPar.h
+    pars/R3BTttxStripCalPar.h
+    pars/R3BTttxHitPar.h
+    pars/R3BTttxContFact.h
+    #calibration/R3BTttxMapped2CalPar.h
+    calibration/R3BTttxMapped2Cal.h
+    calibration/R3BTttxCal2Hit.h
+    online/R3BTttxOnlineSpectra.h)
 
-set(LINKDEF TttxLinkDef.h)
-set(LIBRARY_NAME R3BTttx)
-set(DEPENDENCIES
-  Spectrum R3BBase R3BData R3BTracking
-  #Online
-  )
-
-GENERATE_LIBRARY()
-
-#add_subdirectory(test)
+add_library_with_dictionary(
+    LIBNAME
+    R3BTttx
+    LINKDEF
+    TttxLinkDef.h
+    HEADERS
+    ${HEADERS}
+    SRCS
+    ${SRCS}
+    INCLUDEDIRS
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    calibration
+    online
+    pars
+    DEPENDENCIES
+    R3BTracking)

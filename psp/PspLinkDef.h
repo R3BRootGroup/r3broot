@@ -36,5 +36,6 @@
 #pragma link C++ class R3BPspxContFact + ;
 #pragma link C++ class R3BPspxOnlineSpectra + ;
 #pragma link C++ class R3BPspxOnlineSpectra + ;
+#pragma link C++ class R3BPspxReader+;
 
 #endif

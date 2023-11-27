@@ -11,22 +11,14 @@
 # or submit itself to any jurisdiction.                                      #
 ##############################################################################
 
-set(LIBRARY_NAME R3BNeulandSimulation)
-set(LINKDEF NeulandSimulationLinkDef.h)
+set(SRCS R3BNeuland.cxx R3BNeulandMCMon.cxx R3BNeulandPrimaryClusterFinder.cxx
+         R3BNeulandPrimaryInteractionFinder.cxx)
 
-set(DEPENDENCIES R3BNeulandShared R3BData R3BBase)
+set(HEADERS R3BNeuland.h R3BNeulandMCMon.h R3BNeulandPrimaryClusterFinder.h
+            R3BNeulandPrimaryInteractionFinder.h)
 
-set(INCLUDE_DIRECTORIES ${INCLUDE_DIRECTORIES} ${R3BROOT_SOURCE_DIR}/neuland/simulation)
-include_directories(${INCLUDE_DIRECTORIES})
-
-set(SRCS
-    R3BNeuland.cxx
-    R3BNeulandMCMon.cxx
-    R3BNeulandPrimaryClusterFinder.cxx
-    R3BNeulandPrimaryInteractionFinder.cxx)
-change_file_extension(*.cxx
-                      *.h
-                      HEADERS
-                      "${SRCS}")
-
-generate_library()
+add_library(R3BNeulandSimulation SHARED ${SRCS})
+target_include_directories(R3BNeulandSimulation PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(R3BNeulandSimulation PUBLIC R3BNeulandShared R3BPassive)
+root_generate_dictionary(R3BNeulandSimulation_dict ${HEADERS} MODULE R3BNeulandSimulation LINKDEF
+                         NeulandSimulationLinkDef.h)

@@ -3,7 +3,9 @@
 # mandatory cmake variable definition
 set(CTEST_SOURCE_DIRECTORY "${CTEST_SCRIPT_DIRECTORY}/../..")
 set(CTEST_BINARY_DIRECTORY "${CTEST_SOURCE_DIRECTORY}/build")
-set(CTEST_CMAKE_GENERATOR "Unix Makefiles")
+set(CTEST_CONFIGURE_COMMAND
+    "${CMAKE_COMMAND} -S ${CTEST_SOURCE_DIRECTORY} -B ${CTEST_BINARY_DIRECTORY}")
+set(CTEST_BUILD_COMMAND "${CMAKE_COMMAND} --build ${CTEST_BINARY_DIRECTORY}")
 
 #include macros and function definition
 include(${CTEST_SOURCE_DIRECTORY}/cmake/CI_CD/Macros.cmake)

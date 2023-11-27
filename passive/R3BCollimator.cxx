@@ -12,7 +12,6 @@
  ******************************************************************************/
 
 #include "R3BCollimator.h"
-#include "R3BTGeoPar.h"
 
 #include "TGeoManager.h"
 #include "TGeoTube.h"

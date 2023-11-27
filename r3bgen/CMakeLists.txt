@@ -27,25 +27,6 @@ endif((${fairroot_major_version} EQUAL 17 AND ${fairroot_minor_version} EQUAL 10
       OR ${fairroot_major_version} GREATER 17)
 #########################################################
 
-set(SYSTEM_INCLUDE_DIRECTORIES ${SYSTEM_INCLUDE_DIRECTORIES} ${BASE_INCLUDE_DIRECTORIES})
-
-set(INCLUDE_DIRECTORIES
-    ${R3BROOT_SOURCE_DIR}/field 
-    ${R3BROOT_SOURCE_DIR}/generators 
-    ${R3BROOT_SOURCE_DIR}/r3bgen
-    ${R3BROOT_SOURCE_DIR}/r3bdata 
-    ${R3BROOT_SOURCE_DIR}/r3bbase 
-    ${Geant4_INCLUDE_DIRS}
-)
-
-include_directories(${INCLUDE_DIRECTORIES})
-include_directories(SYSTEM ${SYSTEM_INCLUDE_DIRECTORIES})
-
-set(LINK_DIRECTORIES ${ROOT_LIBRARY_DIR} ${FairLogger_LIBDIR} ${FAIRROOT_LIBRARY_DIR}
-                     ${Geant4_LIBRARY_DIR})
-
-link_directories(${LINK_DIRECTORIES})
-
 set(SRCS
     R3BSpecificGenerator.cxx
     R3BReadKinematics.cxx
@@ -69,26 +50,48 @@ set(SRCS
     R3Bp2pevtGenerator.cxx
     R3BParticleSelector.cxx
     R3BBeamProperties.cxx
-    R3BINCLRootGenerator.cxx
-    )
+    R3BINCLRootGenerator.cxx)
 
-# fill list of header files from list of source files
-# by exchanging the file extension
-change_file_extension(*.cxx *.h HEADERS "${SRCS}")
+set(HEADERS
+    R3BSpecificGenerator.h
+    R3BReadKinematics.h
+    R3BCDGenerator.h
+    R3BBeamInfo.h
+    R3BBackTracking.h
+    R3BBackTrackingStorageState.h
+    R3BAsciiGenerator.h
+    R3BCosmicGenerator.h
+    R3BCryAsciiGenerator.h
+    R3Bp2pGenerator.h
+    R3BLandGenerator.h
+    R3BCALIFATestGenerator.h
+    R3BParticleGenerator.h
+    R3BIonGenerator.h
+    R3BGammaGenerator.h
+    R3BPhaseSpaceGenerator.h
+    R3BDistribution1D.h
+    R3BDistribution2D.h
+    R3BDistribution3D.h
+    R3Bp2pevtGenerator.h
+    R3BParticleSelector.h
+    R3BBeamProperties.h
+    R3BINCLRootGenerator.h)
 
-set(LINKDEF R3BGenLinkDef.h)
-set(LIBRARY_NAME R3BGen)
-set(DEPENDENCIES
-    FairTools
-    Field
-    Gen
-    R3BBase
+add_library_with_dictionary(
+    LIBNAME
+    R3BGen
+    LINKDEF
+    R3BGenLinkDef.h
+    HEADERS
+    ${HEADERS}
+    SRCS
+    ${SRCS}
+    INCLUDEDIRS
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    DEPENDENCIES
     R3BData
-    G4materials
-    Boost::iostreams
-    Boost::filesystem)
+    PRIVATE_DEPENDENCIES
+    Geant4::G4materials
+)
 
-generate_library()
-
-# Testing
 add_subdirectory(test)

@@ -12,52 +12,39 @@
 ##############################################################################
 
 # Create a library called "libR3BDch" which includes the source files given in
-# the array. The extension is already found. Any number of sources could be 
+# the array. The extension is already found. Any number of sources could be
 # listed here.
 
-Set(SYSTEM_INCLUDE_DIRECTORIES 
-${SYSTEM_INCLUDE_DIRECTORIES}
-${BASE_INCLUDE_DIRECTORIES}
-)
-
-set(INCLUDE_DIRECTORIES
-#put here all directories where header files are located
-${R3BROOT_SOURCE_DIR}/r3bbase
-${R3BROOT_SOURCE_DIR}/dch
-${R3BROOT_SOURCE_DIR}/r3bdata
-${R3BROOT_SOURCE_DIR}/r3bdata/dchData
-${R3BROOT_SOURCE_DIR}/r3bdata/trackerData)
-
-include_directories( ${INCLUDE_DIRECTORIES})
-include_directories(SYSTEM ${SYSTEM_INCLUDE_DIRECTORIES})
-
-set(LINK_DIRECTORIES
-${ROOT_LIBRARY_DIR}
-${FAIRROOT_LIBRARY_DIR}
-) 
-
-link_directories( ${LINK_DIRECTORIES})
-
 set(SRCS
-#Put here your sourcefiles
-R3BDch.cxx  
-R3BGeoDch.cxx   
-R3BGeoDchPar.cxx   
-R3BDchContFact.cxx   
-R3BDchDigiPar.cxx
-R3BDchDigitizer.cxx
-R3BDch2pDigiPar.cxx
-R3BDch2pDigitizer.cxx
-)
+    R3BDch.cxx
+    R3BGeoDch.cxx
+    R3BGeoDchPar.cxx
+    R3BDchContFact.cxx
+    R3BDchDigiPar.cxx
+    R3BDchDigitizer.cxx
+    R3BDch2pDigiPar.cxx
+    R3BDch2pDigitizer.cxx)
 
-# fill list of header files from list of source files
-# by exchanging the file extension
-CHANGE_FILE_EXTENSION(*.cxx *.h HEADERS "${SRCS}")
+set(HEADERS
+    R3BDch.h
+    R3BGeoDch.h
+    R3BGeoDchPar.h
+    R3BDchContFact.h
+    R3BDchDigiPar.h
+    R3BDchDigitizer.h
+    R3BDch2pDigiPar.h
+    R3BDch2pDigitizer.h)
 
-set(LINKDEF DchLinkDef.h)
-set(LIBRARY_NAME R3BDch)
-set(DEPENDENCIES
-    R3BBase R3BData)
-
-GENERATE_LIBRARY()
-
+add_library_with_dictionary(
+    LIBNAME
+    R3BDch
+    LINKDEF
+    DchLinkDef.h
+    HEADERS
+    ${HEADERS}
+    SRCS
+    ${SRCS}
+    INCLUDEDIRS
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    DEPENDENCIES
+    R3BData)

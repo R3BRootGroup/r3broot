@@ -11,67 +11,55 @@
 # or submit itself to any jurisdiction.                                      #
 ##############################################################################
 
-# Create a library called "libR3BPSP" which includes the source files
-#given in # the array .  # The extension is already found.  Any number
-#of sources could be listed here.
-
-Set(SYSTEM_INCLUDE_DIRECTORIES
-${SYSTEM_INCLUDE_DIRECTORIES}
-${BASE_INCLUDE_DIRECTORIES}
-)
-
-set(INCLUDE_DIRECTORIES
-#put here all directories where header files are located
-${R3BROOT_SOURCE_DIR}/r3bbase
-${R3BROOT_SOURCE_DIR}/psp
-${R3BROOT_SOURCE_DIR}/psp/par
-${R3BROOT_SOURCE_DIR}/r3bdata
-${R3BROOT_SOURCE_DIR}/r3bdata/calData
-# ${R3BROOT_SOURCE_DIR}/r3bdata/dchData
-${R3BROOT_SOURCE_DIR}/r3bdata/pspData
-${R3BROOT_SOURCE_DIR}/r3bdata/mtofData
-${R3BROOT_SOURCE_DIR}/r3bdata/tofData
-${R3BROOT_SOURCE_DIR}/r3bdata/landData
-${R3BROOT_SOURCE_DIR}/r3bdata/trackerData
-${R3BROOT_SOURCE_DIR}/tracking)
-
-include_directories( ${INCLUDE_DIRECTORIES})
-include_directories(SYSTEM ${SYSTEM_INCLUDE_DIRECTORIES})
-
-set(LINK_DIRECTORIES
-${ROOT_LIBRARY_DIR}
-${FAIRROOT_LIBRARY_DIR}
-)
-
-link_directories( ${LINK_DIRECTORIES})
-
 set(SRCS
-#Put here your sourcefiles
-R3BPsp.cxx
-R3BGeoPsp.cxx
-# R3BGeoPspPar.cxx
-# R3BPspContFact.cxx
-R3BPspDigiPar.cxx
-R3BPspDigitizer.cxx
-# R3BPspxMapped2Cal.cxx
-R3BPspxMapped2Precal.cxx
-R3BPspxPrecal2Cal.cxx
-R3BPspxCal2Hit.cxx
-R3BPspxOnlineSpectra.cxx
-par/R3BPspxMappedPar.cxx
-par/R3BPspxPrecalPar.cxx
-par/R3BPspxCalPar.cxx
-par/R3BPspxHitPar.cxx
-par/R3BPspxContFact.cxx
-)
+    R3BPsp.cxx
+    R3BGeoPsp.cxx
+    # R3BGeoPspPar.cxx
+    # R3BPspContFact.cxx
+    R3BPspDigiPar.cxx
+    R3BPspDigitizer.cxx
+    # R3BPspxMapped2Cal.cxx
+    R3BPspxMapped2Precal.cxx
+    R3BPspxPrecal2Cal.cxx
+    R3BPspxCal2Hit.cxx
+    R3BPspxReader.cxx
+    R3BPspxOnlineSpectra.cxx
+    par/R3BPspxMappedPar.cxx
+    par/R3BPspxPrecalPar.cxx
+    par/R3BPspxCalPar.cxx
+    par/R3BPspxHitPar.cxx
+    par/R3BPspxContFact.cxx)
 
-# fill list of header files from list of source files
-# by exchanging the file extension
-CHANGE_FILE_EXTENSION(*.cxx *.h HEADERS "${SRCS}")
+set(HEADERS
+    R3BPsp.h
+    R3BGeoPsp.h
+    # R3BGeoPspPar.h
+    # R3BPspContFact.h
+    R3BPspDigiPar.h
+    R3BPspDigitizer.h
+    # R3BPspxMapped2Cal.h
+    R3BPspxMapped2Precal.h
+    R3BPspxPrecal2Cal.h
+    R3BPspxCal2Hit.h
+    R3BPspxReader.h
+    R3BPspxOnlineSpectra.h
+    par/R3BPspxMappedPar.h
+    par/R3BPspxPrecalPar.h
+    par/R3BPspxCalPar.h
+    par/R3BPspxHitPar.h
+    par/R3BPspxContFact.h)
 
-Set(LINKDEF PspLinkDef.h)
-Set(LIBRARY_NAME R3BPsp)
-Set(DEPENDENCIES
-  R3BBase R3BData R3BTracking)
-
-GENERATE_LIBRARY()
+add_library_with_dictionary(
+    LIBNAME
+    R3BPsp
+    LINKDEF
+    PspLinkDef.h
+    HEADERS
+    ${HEADERS}
+    SRCS
+    ${SRCS}
+    INCLUDEDIRS
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    par
+    DEPENDENCIES
+    R3BTracking R3BSource)

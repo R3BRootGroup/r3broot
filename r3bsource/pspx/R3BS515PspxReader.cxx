@@ -18,7 +18,6 @@
 
 #include "R3BLogger.h"
 #include "R3BPspxMappedData.h"
-#include "R3BPspxMappedPar.h"
 #include "R3BS515PspxReader.h"
 
 #include "TClonesArray.h"

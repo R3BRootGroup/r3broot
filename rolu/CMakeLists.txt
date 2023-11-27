@@ -12,47 +12,24 @@
 ##############################################################################
 
 # Create a library called "libR3BRolu" which includes the source files given in
-# the array. The extension is already found. Any number of sources could be 
+# the array. The extension is already found. Any number of sources could be
 # listed here.
 
-Set(SYSTEM_INCLUDE_DIRECTORIES 
-${SYSTEM_INCLUDE_DIRECTORIES}
-${BASE_INCLUDE_DIRECTORIES}
-)
+set(SRCS R3BRoluMapped2Cal.cxx R3BRoluMapped2CalPar.cxx R3BRoluCal2Hit.cxx R3BRoluOnlineSpectra.cxx)
 
-set(INCLUDE_DIRECTORIES
-#put here all directories where header files are located
-${R3BROOT_SOURCE_DIR}/r3bbase
-${R3BROOT_SOURCE_DIR}/rolu
-${R3BROOT_SOURCE_DIR}/r3bdata/roluData
-${R3BROOT_SOURCE_DIR}/tcal
-)
+set(HEADERS R3BRoluMapped2Cal.h R3BRoluMapped2CalPar.h R3BRoluCal2Hit.h R3BRoluOnlineSpectra.h)
 
-include_directories( ${INCLUDE_DIRECTORIES})
-include_directories(SYSTEM ${SYSTEM_INCLUDE_DIRECTORIES})
-
-set(LINK_DIRECTORIES
-${ROOT_LIBRARY_DIR}
-${FAIRROOT_LIBRARY_DIR}
-) 
-
-link_directories( ${LINK_DIRECTORIES})
-
-set(SRCS
-R3BRoluMapped2Cal.cxx
-R3BRoluMapped2CalPar.cxx
-R3BRoluCal2Hit.cxx
-R3BRoluOnlineSpectra.cxx
-)
-
-# fill list of header files from list of source files
-# by exchanging the file extension
-CHANGE_FILE_EXTENSION(*.cxx *.h HEADERS "${SRCS}")
-
-Set(LINKDEF RoluLinkDef.h)
-Set(LIBRARY_NAME R3BRolu)
-Set(DEPENDENCIES
-    R3BBase R3BData R3BTCal)
-
-GENERATE_LIBRARY()
-
+add_library_with_dictionary(
+    LIBNAME
+    R3BRolu
+    LINKDEF
+    RoluLinkDef.h
+    HEADERS
+    ${HEADERS}
+    SRCS
+    ${SRCS}
+    INCLUDEDIRS
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    DEPENDENCIES
+    R3BData
+    R3BTCal)

@@ -1,4 +1,3 @@
-
 ##############################################################################
 #   Copyright (C) 2022 GSI Helmholtzzentrum für Schwerionenforschung GmbH    #
 #   Copyright (C) 2022-2023 Members of R3B Collaboration                     #
@@ -12,62 +11,39 @@
 # or submit itself to any jurisdiction.                                      #
 ##############################################################################
 
-# Create a library called "libR3BAlpide" which includes the source files given
-# in the array. The extension is already found. Any number of sources could be 
-# listed here.
+file(
+    GLOB
+    SRCS
+    sim/*.cxx
+    digi/*.cxx
+    geo/*.cxx
+    pars/*.cxx
+    calibration/*.cxx
+    online/*.cxx)
 
-Set(SYSTEM_INCLUDE_DIRECTORIES 
-${SYSTEM_INCLUDE_DIRECTORIES}
-${BASE_INCLUDE_DIRECTORIES}
-${Boost_INCLUDE_DIR}
-)
+change_file_extension(*.cxx *.h HEADERS "${SRCS}")
 
-set(INCLUDE_DIRECTORIES
-#put here all directories where header files are located
-${R3BROOT_SOURCE_DIR}/r3bbase
-${R3BROOT_SOURCE_DIR}/tracking
-${R3BROOT_SOURCE_DIR}/r3bdata
-${R3BROOT_SOURCE_DIR}/r3bdata/alpideData
-${R3BROOT_SOURCE_DIR}/passive
-${R3BROOT_SOURCE_DIR}/alpide
-${R3BROOT_SOURCE_DIR}/alpide/sim
-${R3BROOT_SOURCE_DIR}/alpide/digi
-${R3BROOT_SOURCE_DIR}/alpide/geo
-${R3BROOT_SOURCE_DIR}/alpide/pars
-${R3BROOT_SOURCE_DIR}/alpide/calibration
-${R3BROOT_SOURCE_DIR}/alpide/online
-)
-
-set(LINK_DIRECTORIES
-${ROOT_LIBRARY_DIR}
-${FAIRROOT_LIBRARY_DIR}
-) 
-
-include_directories( ${INCLUDE_DIRECTORIES})
-include_directories(SYSTEM ${SYSTEM_INCLUDE_DIRECTORIES})
-link_directories( ${LINK_DIRECTORIES})
-
-file(GLOB SRCS 
-./sim/*.cxx 
-./digi/*.cxx 
-./geo/*.cxx 
-./pars/*.cxx 
-./calibration/*.cxx
-./online/*.cxx
-)
-
-# fill list of header files from list of source files
-# by exchanging the file extension
-CHANGE_FILE_EXTENSION(*.cxx *.h HEADERS "${SRCS}")
-
-set(LINKDEF AlpideLinkDef.h)
-set(LIBRARY_NAME R3BAlpide)
-set(DEPENDENCIES
-     R3BBase R3BData R3BPassive R3BTracking Boost::regex)
-
-GENERATE_LIBRARY()
+add_library_with_dictionary(
+    LIBNAME
+    R3BAlpide
+    LINKDEF
+    AlpideLinkDef.h
+    HEADERS
+    ${HEADERS}
+    SRCS
+    ${SRCS}
+    INCLUDEDIRS
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    sim
+    digi
+    geo
+    pars
+    calibration
+    online
+    DEPENDENCIES
+    R3BPassive)
 
 if(BUILD_GEOMETRY)
-  add_subdirectory(geobase)
+    add_subdirectory(geobase)
 endif()
 add_subdirectory(test)

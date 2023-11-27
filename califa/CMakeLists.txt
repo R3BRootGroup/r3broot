@@ -11,64 +11,37 @@
 # or submit itself to any jurisdiction.                                      #
 ##############################################################################
 
-# Create a library called "libR3BCalifa" which includes the source files given
-# in the array. The extension is already found. Any number of sources could be
-# listed here.
+file(
+    GLOB
+    SRCS
+    ./sim/*.cxx
+    ./pars/*.cxx
+    ./online/*.cxx
+    ./calibration/*.cxx
+    ./ana/*.cxx)
 
-Set(SYSTEM_INCLUDE_DIRECTORIES
-${SYSTEM_INCLUDE_DIRECTORIES}
-${BASE_INCLUDE_DIRECTORIES}
-${Boost_INCLUDE_DIR}
-)
+change_file_extension(*.cxx *.h HEADERS "${SRCS}")
 
-set(INCLUDE_DIRECTORIES
-#put here all directories where header files are located
-${R3BROOT_SOURCE_DIR}/r3bbase
-${R3BROOT_SOURCE_DIR}/passive
-${R3BROOT_SOURCE_DIR}/tracking
-${R3BROOT_SOURCE_DIR}/califa
-${R3BROOT_SOURCE_DIR}/califa/online
-${R3BROOT_SOURCE_DIR}/califa/calibration
-${R3BROOT_SOURCE_DIR}/califa/ana
-${R3BROOT_SOURCE_DIR}/califa/pars
-${R3BROOT_SOURCE_DIR}/califa/sim
-${R3BROOT_SOURCE_DIR}/r3bdata
-${R3BROOT_SOURCE_DIR}/r3bdata/wrData
-${R3BROOT_SOURCE_DIR}/r3bdata/califaData
-${R3BROOT_SOURCE_DIR}/r3bdata/amsData
-)
-
-include_directories( ${INCLUDE_DIRECTORIES})
-include_directories(SYSTEM ${SYSTEM_INCLUDE_DIRECTORIES})
-
-set(LINK_DIRECTORIES
-${ROOT_LIBRARY_DIR}
-${FAIRROOT_LIBRARY_DIR}
-)
-
-link_directories( ${LINK_DIRECTORIES})
-
-file(GLOB SRCS 
-./sim/*.cxx
-./pars/*.cxx 
-./online/*.cxx
-./calibration/*.cxx
-./ana/*.cxx
-)
-
-# fill list of header files from list of source files
-# by exchanging the file extension
-CHANGE_FILE_EXTENSION(*.cxx *.h HEADERS "${SRCS}")
-
-set(LINKDEF CalifaLinkDef.h)
-set(LIBRARY_NAME R3BCalifa)
-
-set(DEPENDENCIES
-  Spectrum R3BBase R3BPassive R3BData R3BTracking Boost::regex)
-
-GENERATE_LIBRARY()
+add_library_with_dictionary(
+    LIBNAME
+    R3BCalifa
+    LINKDEF
+    CalifaLinkDef.h
+    HEADERS
+    ${HEADERS}
+    SRCS
+    ${SRCS}
+    INCLUDEDIRS
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    sim
+    pars
+    online
+    calibration
+    ana
+    DEPENDENCIES
+    R3BPassive)
 
 if(BUILD_GEOMETRY)
-  add_subdirectory(geobase)
+    add_subdirectory(geobase)
 endif()
 add_subdirectory(test)

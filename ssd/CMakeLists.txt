@@ -1,4 +1,3 @@
-
 ##############################################################################
 #   Copyright (C) 2019 GSI Helmholtzzentrum für Schwerionenforschung GmbH    #
 #   Copyright (C) 2019-2024 Members of R3B Collaboration                     #
@@ -12,88 +11,83 @@
 # or submit itself to any jurisdiction.                                      #
 ##############################################################################
 
-# Create a library called "libR3BSsd" which includes the source files given
-# in the array. The extension is already found. Any number of sources could be
-# listed here.
-
-Set(SYSTEM_INCLUDE_DIRECTORIES
-${SYSTEM_INCLUDE_DIRECTORIES}
-${BASE_INCLUDE_DIRECTORIES}
-)
-
-set(INCLUDE_DIRECTORIES
-#put here all directories where header files are located
-${R3BROOT_SOURCE_DIR}/r3bbase
-${R3BROOT_SOURCE_DIR}/tracking
-${R3BROOT_SOURCE_DIR}/tcal
-${R3BROOT_SOURCE_DIR}/r3bdata
-${R3BROOT_SOURCE_DIR}/r3bdata/califaData
-${R3BROOT_SOURCE_DIR}/r3bdata/trackerData
-${R3BROOT_SOURCE_DIR}/r3bdata/losData
-${R3BROOT_SOURCE_DIR}/r3bdata/amsData
-${R3BROOT_SOURCE_DIR}/r3bdata/footData
-${R3BROOT_SOURCE_DIR}/r3bdata/wrData
-${R3BROOT_SOURCE_DIR}/ssd
-${R3BROOT_SOURCE_DIR}/ssd/sim
-${R3BROOT_SOURCE_DIR}/ssd/digi
-${R3BROOT_SOURCE_DIR}/ssd/pars
-${R3BROOT_SOURCE_DIR}/ssd/calibration
-${R3BROOT_SOURCE_DIR}/ssd/online
-)
-
-include_directories( ${INCLUDE_DIRECTORIES})
-include_directories(SYSTEM ${SYSTEM_INCLUDE_DIRECTORIES})
-
-set(LINK_DIRECTORIES
-${ROOT_LIBRARY_DIR}
-${FAIRROOT_LIBRARY_DIR}
-)
-
-link_directories( ${LINK_DIRECTORIES})
-
 set(SRCS
-#Put here your sourcefiles
-./sim/R3BTra.cxx
-./sim/R3BTraHitFinder.cxx
-./pars/R3BGeoTra.cxx
-./pars/R3BGeoTraPar.cxx
-./pars/R3BAmsMappingPar.cxx
-./pars/R3BAmsStripCalPar.cxx
-./pars/R3BSsdContFact.cxx
-./digi/R3BTraDigiPar.cxx
-./digi/R3BTraDigitizer.cxx
-./digi/R3BTargetDigiPar.cxx
-./digi/R3BTargetDigitizer.cxx
-./digi/R3BAmsDigitizer.cxx
-./digi/R3BTra2pDigiPar.cxx
-./digi/R3BTra2pDigitizer.cxx
-./digi/R3BTraFraDigiPar.cxx
-./digi/R3BTraFraDigitizer.cxx
-./digi/R3BTarget2pDigiPar.cxx
-./digi/R3BTarget2pDigitizer.cxx
-./calibration/R3BAmsMapped2StripCalPar.cxx
-./calibration/R3BAmsMapped2StripCal.cxx
-./calibration/R3BAmsStripCal2Hit.cxx
-./online/R3BAmsOnlineSpectra.cxx
-./online/R3BAmsCalifaCorrelatedOnlineSpectra.cxx
-./online/R3BFootOnlineSpectra.cxx
-./pars/R3BFootMappingPar.cxx
-./pars/R3BFootCalPar.cxx
-./calibration/R3BFootMapped2StripCal.cxx
-./calibration/R3BFootStripCal2Hit.cxx
-)
+    sim/R3BTra.cxx
+    sim/R3BTraHitFinder.cxx
+    pars/R3BGeoTra.cxx
+    pars/R3BGeoTraPar.cxx
+    pars/R3BAmsMappingPar.cxx
+    pars/R3BAmsStripCalPar.cxx
+    pars/R3BSsdContFact.cxx
+    digi/R3BTraDigiPar.cxx
+    digi/R3BTraDigitizer.cxx
+    digi/R3BTargetDigiPar.cxx
+    digi/R3BTargetDigitizer.cxx
+    digi/R3BAmsDigitizer.cxx
+    digi/R3BTra2pDigiPar.cxx
+    digi/R3BTra2pDigitizer.cxx
+    digi/R3BTraFraDigiPar.cxx
+    digi/R3BTraFraDigitizer.cxx
+    digi/R3BTarget2pDigiPar.cxx
+    digi/R3BTarget2pDigitizer.cxx
+    calibration/R3BAmsMapped2StripCalPar.cxx
+    calibration/R3BAmsMapped2StripCal.cxx
+    calibration/R3BAmsStripCal2Hit.cxx
+    online/R3BAmsOnlineSpectra.cxx
+    online/R3BAmsCalifaCorrelatedOnlineSpectra.cxx
+    online/R3BFootOnlineSpectra.cxx
+    pars/R3BFootMappingPar.cxx
+    pars/R3BFootCalPar.cxx
+    calibration/R3BFootMapped2StripCal.cxx
+    calibration/R3BFootStripCal2Hit.cxx)
 
-# fill list of header files from list of source files
-# by exchanging the file extension
-CHANGE_FILE_EXTENSION(*.cxx *.h HEADERS "${SRCS}")
+set(HEADERS
+    sim/R3BTra.h
+    sim/R3BTraHitFinder.h
+    pars/R3BGeoTra.h
+    pars/R3BGeoTraPar.h
+    pars/R3BAmsMappingPar.h
+    pars/R3BAmsStripCalPar.h
+    pars/R3BSsdContFact.h
+    digi/R3BTraDigiPar.h
+    digi/R3BTraDigitizer.h
+    digi/R3BTargetDigiPar.h
+    digi/R3BTargetDigitizer.h
+    digi/R3BAmsDigitizer.h
+    digi/R3BTra2pDigiPar.h
+    digi/R3BTra2pDigitizer.h
+    digi/R3BTraFraDigiPar.h
+    digi/R3BTraFraDigitizer.h
+    digi/R3BTarget2pDigiPar.h
+    digi/R3BTarget2pDigitizer.h
+    calibration/R3BAmsMapped2StripCalPar.h
+    calibration/R3BAmsMapped2StripCal.h
+    calibration/R3BAmsStripCal2Hit.h
+    online/R3BAmsOnlineSpectra.h
+    online/R3BAmsCalifaCorrelatedOnlineSpectra.h
+    online/R3BFootOnlineSpectra.h
+    pars/R3BFootMappingPar.h
+    pars/R3BFootCalPar.h
+    calibration/R3BFootMapped2StripCal.h
+    calibration/R3BFootStripCal2Hit.h)
 
-set(LINKDEF SsdLinkDef.h)
-set(LIBRARY_NAME R3BSsd)
-set(DEPENDENCIES
-  Spectrum R3BBase R3BData R3BTracking
-  #Online
-  )
-
-GENERATE_LIBRARY()
+add_library_with_dictionary(
+    LIBNAME
+    R3BSsd
+    LINKDEF
+    SsdLinkDef.h
+    HEADERS
+    ${HEADERS}
+    SRCS
+    ${SRCS}
+    INCLUDEDIRS
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    calibration
+    digi
+    online
+    pars
+    sim
+    DEPENDENCIES
+    R3BTracking R3BTCal)
 
 add_subdirectory(test)

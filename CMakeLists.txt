@@ -51,6 +51,10 @@ if(SIMPATH)
     set(CMAKE_PREFIX_PATH ${SIMPATH} ${CMAKE_PREFIX_PATH})
 endif()
 
+# fairsoft lib path needed to be added for root dictionary detection:
+set(LD_LIBRARY_PATH ${SIMPATH}/lib ${LD_LIBRARY_PATH})
+set(GRAPHVIZ_EXTERNAL_LIBS FALSE)
+
 if(NOT DEFINED ENV{FAIRROOTPATH})
     message(
         FATAL_ERROR
@@ -63,6 +67,13 @@ string(REGEX MATCHALL "[^:]+" PATH $ENV{PATH})
 
 set(CMAKE_MODULE_PATH "${FAIRROOTPATH}/share/fairbase/cmake/modules" ${CMAKE_MODULE_PATH})
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules" ${CMAKE_MODULE_PATH})
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/scripts" ${CMAKE_MODULE_PATH})
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/utils" ${CMAKE_MODULE_PATH})
+
+# For CMakeLists that still use the old way
+set(ROOT_FOUND_VERSION 600000)
+set(LIBRARY_OUTPUT_PATH "${CMAKE_BINARY_DIR}/lib")
+set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}/bin")
 
 set(CheckSrcDir "${FAIRROOTPATH}/share/fairbase/cmake/checks")
 
@@ -84,6 +95,7 @@ if(NOT FairCMakeModules_FOUND)
     message(FATAL_ERROR "Could not find FairCMakeModules! ")
 endif()
 
+include(create_library_with_dictionary)
 include(FairFindPackage2)
 include(FairFormattedOutput)
 
@@ -118,9 +130,9 @@ list(APPEND optional_root_components gdml vmc)
 find_package2(
     PUBLIC
     ROOT
-    VERSION
-    6.16.00
-    MODULE
+    # VERSION
+    # 6.16.00
+    CONFIG
     REQUIRED
     COMPONENTS
     ${required_root_components}
@@ -137,28 +149,41 @@ endif()
 include(R3BMacros)
 include(WriteConfigFile_r3b)
 include(WriteEnvCache)
-include(Dart)
 include(CheckCompiler)
-include(ROOTMacros)
 
-find_package2(PUBLIC FairLogger VERSION 1.6.0 REQUIRED)
+find_package2(
+    PUBLIC
+    FairLogger
+    VERSION
+    1.6.0
+    REQUIRED)
 
 foreach(dep IN LISTS FairLogger_PACKAGE_DEPENDENCIES)
     if(NOT dep STREQUAL "Boost")
-        find_package2(PUBLIC ${dep} REQUIRED VERSION ${FairLogger_${dep}_VERSION})
+        find_package2(
+            PUBLIC
+            ${dep}
+            REQUIRED
+            VERSION
+            ${FairLogger_${dep}_VERSION})
     endif()
 endforeach()
 
 if("${FairRoot_VERSION}" VERSION_GREATER 18.6.4)
 
-    find_package2(PUBLIC FairMQ VERSION 1.4.0 REQUIRED)
+    find_package2(
+        PUBLIC
+        FairMQ
+        VERSION
+        1.4.0
+        REQUIRED)
     find_package2(PUBLIC DDS)
 
     if(FAIRSOFT_EXTERN)
-        set(BOOST_ROOT ${SIMPATH})
+        set(Boost_ROOT ${SIMPATH})
         set(GSL_DIR ${SIMPATH})
     else(FAIRSOFT_EXTERN)
-        set(BOOST_ROOT ${SIMPATH}/basics/boost)
+        set(Boost_ROOT ${SIMPATH}/basics/boost)
         set(GSL_DIR ${SIMPATH}/basics/gsl)
     endif(FAIRSOFT_EXTERN)
 
@@ -215,10 +240,10 @@ else()
     set(Boost_NO_BOOST_CMAKE TRUE)
 
     if(${ROOT_LIBRARY_DIR} MATCHES /lib/root)
-        set(BOOST_ROOT ${SIMPATH})
+        set(Boost_ROOT ${SIMPATH})
         set(GSL_DIR ${SIMPATH})
     else(${ROOT_LIBRARY_DIR} MATCHES /lib/root)
-        set(BOOST_ROOT ${SIMPATH}/basics/boost)
+        set(Boost_ROOT ${SIMPATH}/basics/boost)
         set(GSL_DIR ${SIMPATH}/basics/gsl)
     endif(${ROOT_LIBRARY_DIR} MATCHES /lib/root)
 
@@ -294,8 +319,8 @@ set(CMAKE_CXX_FLAGS "-D_GLIBCXX_ASSERTIONS ${CMAKE_CXX_FLAGS}")
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON) # used by clang-tidy
 
-set(LIBRARY_OUTPUT_PATH "${CMAKE_BINARY_DIR}/lib")
-set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}/bin")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 set(INCLUDE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/include")
 set(VMCWORKDIR ${CMAKE_SOURCE_DIR})
 
@@ -334,7 +359,12 @@ find_package2(PUBLIC yaml-cpp)
 # Workaround missing exported include directories
 # Upstream has fixed this in https://github.com/jbeder/yaml-cpp/commit/ab5f9259a4e67d3fe0e4832bd407a9e596e2d884 (since 0.6.3)
 if(yaml-cpp_FOUND)
-    get_filename_component(YAML_CPP_INCLUDE_DIR "${YAML_CPP_INCLUDE_DIR}" REALPATH BASE_DIR "/")
+    get_filename_component(
+        YAML_CPP_INCLUDE_DIR
+        "${YAML_CPP_INCLUDE_DIR}"
+        REALPATH
+        BASE_DIR
+        "/")
 endif()
 if(yaml-cpp_FOUND
    AND TARGET yaml-cpp
@@ -359,8 +389,12 @@ if(NOT DEFINED ROOT_FOUND_VERSION)
 endif()
 message("ROOT_FOUND_VERSION = ${ROOT_FOUND_VERSION}")
 
-set(FAIRROOT_LIBRARY_PROPERTIES ${FAIRROOT_LIBRARY_PROPERTIES} VERSION "${R3BROOT_VERSION}"
-                                SOVERSION "${R3BROOT_VERSION}")
+set(FAIRROOT_LIBRARY_PROPERTIES
+    ${FAIRROOT_LIBRARY_PROPERTIES}
+    VERSION
+    "${R3BROOT_VERSION}"
+    SOVERSION
+    "${R3BROOT_VERSION}")
 
 string(COMPARE EQUAL "${CMAKE_GENERATOR}" "Xcode" IS_XCODE)
 set(R3BLIBDIR ${CMAKE_BINARY_DIR}/lib)
@@ -473,6 +507,15 @@ r3b_generate_version_info()
 find_package(VMC QUIET)
 set(BASE_INCLUDE_DIRECTORIES ${BASE_INCLUDE_DIRECTORIES} ${VMC_INCLUDE_DIRS})
 
+find_program(
+    ROOT_CINT_EXECUTABLE
+    NAMES rootcint
+    PATHS ${ROOT_BINDIR}
+    NO_DEFAULT_PATH)
+
+include(CTest)
+include(RootCTest)
+
 if(MODULE)
     add_subdirectory(${MODULE})
 endif(MODULE)
@@ -488,16 +531,15 @@ if(NOT MODULE)
     endif()
     message(STATUS "  ${BWhite}ROOT geometries${CR}          ${unitgeo_summary}")
     add_subdirectory(r3bbase)
+    add_subdirectory(r3bdata)
+    add_subdirectory(field)
+    add_subdirectory(tracking)
+    add_subdirectory(passive)
+    add_subdirectory(tcal)
     if(WITH_UCESB)
         add_subdirectory(r3bsource)
-    endif(WITH_UCESB)
-    if(WITH_EPICS)
-        add_subdirectory(epics)
-    endif(WITH_EPICS)
-    if(Atima_FOUND)
-        add_subdirectory(atima)
-    endif(Atima_FOUND)
-    add_subdirectory(passive)
+    endif()
+    add_subdirectory(neuland)
     add_subdirectory(glad)
     add_subdirectory(xball)
     add_subdirectory(dch)
@@ -505,7 +547,6 @@ if(NOT MODULE)
     add_subdirectory(gfi)
     add_subdirectory(mfi)
     add_subdirectory(land)
-    add_subdirectory(neuland)
     add_subdirectory(los)
     add_subdirectory(rolu)
     add_subdirectory(frssci)
@@ -520,33 +561,36 @@ if(NOT MODULE)
     add_subdirectory(tttx)
     add_subdirectory(strawtubes)
     add_subdirectory(music)
-    add_subdirectory(r3bdata)
-    add_subdirectory(field)
     add_subdirectory(r3bgen)
     add_subdirectory(lumon)
+    add_subdirectory(califa)
     add_subdirectory(evtvis)
     add_subdirectory(psp)
     add_subdirectory(compilehelper)
-    add_subdirectory(tcal)
-    add_subdirectory(tracking)
-    add_subdirectory(analysis)
     add_subdirectory(tracker_rene)
     add_subdirectory(pdc)
-    add_subdirectory(califa)
     add_subdirectory(rpc)
     add_subdirectory(alpide)
     add_subdirectory(mwpc)
     add_subdirectory(twim)
     add_subdirectory(musli)
-    if(WITH_ACTAR)
-        add_subdirectory(actar)
-    endif(WITH_ACTAR)
+    add_subdirectory(analysis)
     if(WITH_SOFIA)
         add_subdirectory(sofia)
     endif(WITH_SOFIA)
-    if(WITH_NeuLAND_DNN)
-        add_subdirectory(NeuLAND_DNN)
-    endif(WITH_NeuLAND_DNN)
+
+    #================================================================================
+    # TODO: Since other dependencies still use the old cmake configurations, include(ROOTMacros) has to be used. Please change them using CMake targets ASAP.
+    include(ROOTMacros)
+    if(WITH_EPICS)
+        add_subdirectory(epics)
+    endif(WITH_EPICS)
+    if(Atima_FOUND)
+        add_subdirectory(atima)
+    endif(Atima_FOUND)
+    if(WITH_ACTAR)
+        add_subdirectory(actar)
+    endif(WITH_ACTAR)
     if(WITH_GTPC)
         add_subdirectory(glad-tpc)
     endif(WITH_GTPC)
@@ -562,6 +606,8 @@ if(NOT MODULE)
     if(EXISTS "${PROJECT_SOURCE_DIR}/macros")
         add_subdirectory(macros)
     endif(EXISTS "${PROJECT_SOURCE_DIR}/macros")
+    #================================================================================
+
 endif(NOT MODULE)
 
 # add_subdirectory(gconfig)
@@ -648,7 +694,13 @@ if(PROJECT_PACKAGE_DEPENDENCIES)
         if(DISABLE_COLOR)
             fair_pad("${version_str}${version_req_str}" 26 " " version_padded)
         else()
-            fair_pad("${version_str}${version_req_str}" 26 " " version_padded COLOR 1)
+            fair_pad(
+                "${version_str}${version_req_str}"
+                26
+                " "
+                version_padded
+                COLOR
+                1)
         endif()
         set(prefix ${${dep}_PREFIX})
         if(${dep} STREQUAL Boost)
@@ -711,7 +763,12 @@ if(PROJECT_PACKAGE_DEPENDENCIES)
         #    endif()
         if(${dep} STREQUAL Geant4)
             foreach(dataset IN LISTS Geant4_DATASETS)
-                fair_pad(${Geant4_DATASET_${dataset}_ENVVAR} 21 " " envvar_padded LEFT)
+                fair_pad(
+                    ${Geant4_DATASET_${dataset}_ENVVAR}
+                    21
+                    " "
+                    envvar_padded
+                    LEFT)
                 message(
                     STATUS
                         "                          ${envvar_padded}: ${Geant4_DATASET_${dataset}_PATH}"

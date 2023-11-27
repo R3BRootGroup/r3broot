@@ -15,53 +15,42 @@
 # the array. The extension is already found. Any number of sources could be
 # listed here.
 
-Set(SYSTEM_INCLUDE_DIRECTORIES
-${SYSTEM_INCLUDE_DIRECTORIES}
-${BASE_INCLUDE_DIRECTORIES}
-)
-
-set(INCLUDE_DIRECTORIES
-#put here all directories where header files are located
-${R3BROOT_SOURCE_DIR}/r3bbase
-${R3BROOT_SOURCE_DIR}/frssci
-${R3BROOT_SOURCE_DIR}/frssci/parameters
-${R3BROOT_SOURCE_DIR}/frssci/calibration
-${R3BROOT_SOURCE_DIR}/frssci/online
-${R3BROOT_SOURCE_DIR}/r3bdata/
-${R3BROOT_SOURCE_DIR}/r3bdata/frssciData
-${R3BROOT_SOURCE_DIR}/r3bdata/musliData
-${R3BROOT_SOURCE_DIR}/r3bdata/losData
-)
-
-include_directories( ${INCLUDE_DIRECTORIES})
-include_directories(SYSTEM ${SYSTEM_INCLUDE_DIRECTORIES})
-
-set(LINK_DIRECTORIES
-${ROOT_LIBRARY_DIR}
-${FAIRROOT_LIBRARY_DIR}
-)
-
-link_directories( ${LINK_DIRECTORIES})
-
 set(SRCS
-parameters/R3BFrsSciContFact.cxx
-parameters/R3BFrsSciTcalPar.cxx
-parameters/R3BFrsSciCalPar.cxx
-calibration/R3BFrsSciMapped2Tcal.cxx
-calibration/R3BFrsSciMapped2TcalPar.cxx
-calibration/R3BFrsSciTcal2Cal.cxx
-online/R3BOnlineSpectraFrsSci.cxx
-online/R3BOnlineSpectraFrsSciVsMusli.cxx
-online/R3BOnlineSpectraFrsSciVsLos.cxx
-)
+    parameters/R3BFrsSciContFact.cxx
+    parameters/R3BFrsSciTcalPar.cxx
+    parameters/R3BFrsSciCalPar.cxx
+    calibration/R3BFrsSciMapped2Tcal.cxx
+    calibration/R3BFrsSciMapped2TcalPar.cxx
+    calibration/R3BFrsSciTcal2Cal.cxx
+    online/R3BOnlineSpectraFrsSci.cxx
+    online/R3BOnlineSpectraFrsSciVsMusli.cxx
+    online/R3BOnlineSpectraFrsSciVsLos.cxx)
 
-# fill list of header files from list of source files
-# by exchanging the file extension
-CHANGE_FILE_EXTENSION(*.cxx *.h HEADERS "${SRCS}")
+set(HEADERS
+    parameters/R3BFrsSciContFact.h
+    parameters/R3BFrsSciTcalPar.h
+    parameters/R3BFrsSciCalPar.h
+    calibration/R3BFrsSciMapped2Tcal.h
+    calibration/R3BFrsSciMapped2TcalPar.h
+    calibration/R3BFrsSciTcal2Cal.h
+    online/R3BOnlineSpectraFrsSci.h
+    online/R3BOnlineSpectraFrsSciVsMusli.h
+    online/R3BOnlineSpectraFrsSciVsLos.h)
 
-Set(LINKDEF FrsSciLinkDef.h)
-Set(LIBRARY_NAME R3BFrsSci)
-Set(DEPENDENCIES
-    R3BBase R3BData R3BTCal)
-
-GENERATE_LIBRARY()
+add_library_with_dictionary(
+    LIBNAME
+    R3BFrsSci
+    LINKDEF
+    FrsSciLinkDef.h
+    HEADERS
+    ${HEADERS}
+    SRCS
+    ${SRCS}
+    INCLUDEDIRS
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    calibration
+    online
+    parameters
+    DEPENDENCIES
+    R3BData
+    R3BTCal)

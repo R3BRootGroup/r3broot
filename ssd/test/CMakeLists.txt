@@ -11,7 +11,6 @@
 # or submit itself to any jurisdiction.                                      #
 ##############################################################################
 
-
 generate_root_test_script(${R3BROOT_SOURCE_DIR}/ssd/test/testAmsSimulation.C)
 add_test(AmsSimulation ${R3BROOT_BINARY_DIR}/ssd/test/testAmsSimulation.sh)
 set_tests_properties(AmsSimulation PROPERTIES TIMEOUT "2000")

@@ -15,58 +15,42 @@
 # in the array. The extension is already found. Any number of sources could be
 # listed here.
 
-Set(SYSTEM_INCLUDE_DIRECTORIES
-${SYSTEM_INCLUDE_DIRECTORIES}
-${BASE_INCLUDE_DIRECTORIES}
-)
-
-set(INCLUDE_DIRECTORIES
-#put here all directories where header files are located
-${R3BROOT_SOURCE_DIR}/tracking
-${R3BROOT_SOURCE_DIR}/field
-${R3BROOT_SOURCE_DIR}/tof
-${R3BROOT_SOURCE_DIR}/r3bbase
-${R3BROOT_SOURCE_DIR}/r3bdata
-${R3BROOT_SOURCE_DIR}/r3bdata/tofData
-${R3BROOT_SOURCE_DIR}/r3bdata/pspData
-${R3BROOT_SOURCE_DIR}/r3bdata/fibData
-${R3BROOT_SOURCE_DIR}/r3bdata/mwpcData
-${R3BROOT_SOURCE_DIR}/r3bdata/frsData
-${R3BROOT_SOURCE_DIR}/r3bdata/musicData
-${R3BROOT_SOURCE_DIR}/r3bdata/losData
-)
-
-include_directories( ${INCLUDE_DIRECTORIES})
-include_directories(SYSTEM ${SYSTEM_INCLUDE_DIRECTORIES})
-
-set(LINK_DIRECTORIES
-${ROOT_LIBRARY_DIR}
-${FAIRROOT_LIBRARY_DIR}
-)
-
-link_directories( ${LINK_DIRECTORIES})
-
 set(SRCS
-R3BTPropagator.cxx
-R3BTGeoPar.cxx
-R3BFragmentTracker.cxx
-R3BFragmentFitterGeneric.cxx
-R3BFragmentFitterChi2.cxx
-R3BTrackingDetector.cxx
-R3BTrackingParticle.cxx
-R3BTrackingSetup.cxx
-R3BMDFWrapper.cxx
-R3BTrackingS515.cxx
-)
+    R3BTPropagator.cxx
+    R3BTGeoPar.cxx
+    R3BFragmentTracker.cxx
+    R3BFragmentFitterGeneric.cxx
+    R3BFragmentFitterChi2.cxx
+    R3BTrackingDetector.cxx
+    R3BTrackingParticle.cxx
+    R3BTrackingSetup.cxx
+    R3BMDFWrapper.cxx
+    R3BTrackingS515.cxx)
 
-# fill list of header files from list of source files
-# by exchanging the file extension
-CHANGE_FILE_EXTENSION(*.cxx *.h HEADERS "${SRCS}")
+set(HEADERS
+    R3BTPropagator.h
+    R3BTGeoPar.h
+    R3BFragmentTracker.h
+    R3BFragmentFitterGeneric.h
+    R3BFragmentFitterChi2.h
+    R3BTrackingDetector.h
+    R3BTrackingParticle.h
+    R3BTrackingSetup.h
+    R3BMDFWrapper.h
+    R3BTrackingS515.h)
 
-Set(LINKDEF TrackingLinkDef.h)
-Set(LIBRARY_NAME R3BTracking)
-Set(DEPENDENCIES
-  Base ParBase TrkBase R3BBase Minuit Field )
-
-GENERATE_LIBRARY()
-
+add_library_with_dictionary(
+    LIBNAME
+    R3BTracking
+    LINKDEF
+    TrackingLinkDef.h
+    HEADERS
+    ${HEADERS}
+    SRCS
+    ${SRCS}
+    INCLUDEDIRS
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    DEPENDENCIES
+    R3BData
+    Field
+    TrkBase)

@@ -15,56 +15,48 @@
 # the array. The extension is already found. Any number of sources could be
 # listed here.
 
-Set(SYSTEM_INCLUDE_DIRECTORIES
-${SYSTEM_INCLUDE_DIRECTORIES}
-${BASE_INCLUDE_DIRECTORIES}
-)
-
-set(INCLUDE_DIRECTORIES
-#put here all directories where header files are located
-${R3BROOT_SOURCE_DIR}/r3bbase
-${R3BROOT_SOURCE_DIR}/tracking
-${R3BROOT_SOURCE_DIR}/los
-${R3BROOT_SOURCE_DIR}/los/calib
-${R3BROOT_SOURCE_DIR}/los/params
-${R3BROOT_SOURCE_DIR}/los/online
-${R3BROOT_SOURCE_DIR}/r3bdata
-${R3BROOT_SOURCE_DIR}/r3bdata/tofData
-${R3BROOT_SOURCE_DIR}/r3bdata/losData
-${R3BROOT_SOURCE_DIR}/r3bdata/trackerData
-${R3BROOT_SOURCE_DIR}/tcal
-${R3BROOT_SOURCE_DIR}/neuland/shared
-)
-
-include_directories( ${INCLUDE_DIRECTORIES})
-include_directories(SYSTEM ${SYSTEM_INCLUDE_DIRECTORIES})
-
-set(LINK_DIRECTORIES
-${ROOT_LIBRARY_DIR}
-${FAIRROOT_LIBRARY_DIR}
-)
-
-link_directories( ${LINK_DIRECTORIES})
-
 set(SRCS
-calib/R3BLosMapped2Cal.cxx
-calib/R3BLosMapped2TCal.cxx
-params/R3BLosMapped2CalPar.cxx
-calib/R3BLosCal2Hit.cxx
-calib/R3BLosTCal2Hit.cxx
-R3BLosProvideTStart.cxx
-params/R3BLosHitPar.cxx
-params/R3BLosContFact.cxx
-online/R3BLosOnlineSpectra.cxx
-)
+    calib/R3BLosMapped2Cal.cxx
+    calib/R3BLosMapped2TCal.cxx
+    params/R3BLosMapped2CalPar.cxx
+    calib/R3BLosCal2Hit.cxx
+    calib/R3BLosTCal2Hit.cxx
+    R3BLosProvideTStart.cxx
+    params/R3BLosHitPar.cxx
+    params/R3BLosContFact.cxx
+    online/R3BLosOnlineSpectra.cxx)
 
-# fill list of header files from list of source files
-# by exchanging the file extension
-CHANGE_FILE_EXTENSION(*.cxx *.h HEADERS "${SRCS}")
+set(HEADERS
+    calib/R3BLosMapped2Cal.h
+    calib/R3BLosMapped2TCal.h
+    params/R3BLosMapped2CalPar.h
+    calib/R3BLosCal2Hit.h
+    calib/R3BLosTCal2Hit.h
+    R3BLosProvideTStart.h
+    params/R3BLosHitPar.h
+    params/R3BLosContFact.h
+    online/R3BLosOnlineSpectra.h)
 
-Set(LINKDEF LosLinkDef.h)
-Set(LIBRARY_NAME R3BLos)
-Set(DEPENDENCIES
-    R3BBase R3BData R3BTracking R3BTCal)
+set(LINKDEF LosLinkDef.h)
+set(LIBRARY_NAME R3BLos)
+set(DEPENDENCIES R3BBase R3BData R3BTracking R3BTCal)
 
-GENERATE_LIBRARY()
+add_library_with_dictionary(
+    LIBNAME
+    R3BLos
+    LINKDEF
+    LosLinkDef.h
+    HEADERS
+    ${HEADERS}
+    SRCS
+    ${SRCS}
+    INCLUDEDIRS
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    calib
+    online
+    params
+    DEPENDENCIES
+    R3BTracking
+    R3BTCal
+    # TODO: only due to TCAConnector.
+    R3BNeulandShared)

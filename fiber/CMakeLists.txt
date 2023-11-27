@@ -12,70 +12,68 @@
 ##############################################################################
 
 # Create a library called "R3BBunchedFiber" which includes the source files
-# given in the array. The extension is already found. Any number of 
+# given in the array. The extension is already found. Any number of
 # sources could be listed here.
 
-Set(SYSTEM_INCLUDE_DIRECTORIES 
-${SYSTEM_INCLUDE_DIRECTORIES}
-${BASE_INCLUDE_DIRECTORIES}
-)
-
-set(INCLUDE_DIRECTORIES
-${R3BROOT_SOURCE_DIR}/r3bdata
-${R3BROOT_SOURCE_DIR}/r3bdata/fibData
-${R3BROOT_SOURCE_DIR}/r3bdata/tofData
-${R3BROOT_SOURCE_DIR}/r3bbase
-${R3BROOT_SOURCE_DIR}/fiber
-${R3BROOT_SOURCE_DIR}/fiber/online
-${R3BROOT_SOURCE_DIR}/fiber/sim
-${R3BROOT_SOURCE_DIR}/fiber/digi
-${R3BROOT_SOURCE_DIR}/fiber/pars
-${R3BROOT_SOURCE_DIR}/fiber/mapmt
-${R3BROOT_SOURCE_DIR}/fiber/bunched
-${R3BROOT_SOURCE_DIR}/tcal
-${R3BROOT_SOURCE_DIR}/tracking
-)
-
-include_directories(${INCLUDE_DIRECTORIES})
-include_directories(SYSTEM ${SYSTEM_INCLUDE_DIRECTORIES})
-
-set(LINK_DIRECTORIES
-${ROOT_LIBRARY_DIR}
-${FAIRROOT_LIBRARY_DIR}
-) 
-
-link_directories(${LINK_DIRECTORIES})
-
 set(SRCS
-./sim/R3BFiber.cxx
-./digi/R3BFiberDigitizer.cxx
-./bunched/R3BBunchedFiberMapped2CalPar.cxx
-./bunched/R3BBunchedFiberMapped2Cal.cxx
-./bunched/R3BBunchedFiberCal2Hit.cxx
-./bunched/R3BBunchedFiberCal2Hit_s494.cxx
-./bunched/R3BBunchedFiberSPMTTrigMapped2CalPar.cxx
-./bunched/R3BBunchedFiberSPMTTrigMapped2Cal.cxx
-./mapmt/R3BFiberMAPMTMapped2Cal.cxx
-./mapmt/R3BFiberMAPMTCal2Hit.cxx
-./mapmt/R3BFiberMAPMTMapped2CalPar.cxx
-./pars/R3BFiberContFact.cxx
-./pars/R3BBunchedFiberHitModulePar.cxx
-./pars/R3BBunchedFiberHitPar.cxx
-./pars/R3BFiberMAPMTHitPar.cxx
-./pars/R3BFiberMAPMTHitModulePar.cxx
-./pars/R3BFiberMappingPar.cxx
-./online/R3BFiberMAPMTOnlineSpectra.cxx
-./online/R3BFiberMAPMTCorrelationOnlineSpectra.cxx
-)
+    sim/R3BFiber.cxx
+    digi/R3BFiberDigitizer.cxx
+    bunched/R3BBunchedFiberMapped2CalPar.cxx
+    bunched/R3BBunchedFiberMapped2Cal.cxx
+    bunched/R3BBunchedFiberCal2Hit.cxx
+    bunched/R3BBunchedFiberCal2Hit_s494.cxx
+    bunched/R3BBunchedFiberSPMTTrigMapped2CalPar.cxx
+    bunched/R3BBunchedFiberSPMTTrigMapped2Cal.cxx
+    mapmt/R3BFiberMAPMTMapped2Cal.cxx
+    mapmt/R3BFiberMAPMTCal2Hit.cxx
+    mapmt/R3BFiberMAPMTMapped2CalPar.cxx
+    pars/R3BFiberContFact.cxx
+    pars/R3BBunchedFiberHitModulePar.cxx
+    pars/R3BBunchedFiberHitPar.cxx
+    pars/R3BFiberMAPMTHitPar.cxx
+    pars/R3BFiberMAPMTHitModulePar.cxx
+    pars/R3BFiberMappingPar.cxx
+    online/R3BFiberMAPMTOnlineSpectra.cxx
+    online/R3BFiberMAPMTCorrelationOnlineSpectra.cxx)
 
-CHANGE_FILE_EXTENSION(*.cxx *.h HEADERS "${SRCS}")
+set(HEADERS
+    sim/R3BFiber.h
+    digi/R3BFiberDigitizer.h
+    bunched/R3BBunchedFiberMapped2CalPar.h
+    bunched/R3BBunchedFiberMapped2Cal.h
+    bunched/R3BBunchedFiberCal2Hit.h
+    bunched/R3BBunchedFiberCal2Hit_s494.h
+    bunched/R3BBunchedFiberSPMTTrigMapped2CalPar.h
+    bunched/R3BBunchedFiberSPMTTrigMapped2Cal.h
+    mapmt/R3BFiberMAPMTMapped2Cal.h
+    mapmt/R3BFiberMAPMTCal2Hit.h
+    mapmt/R3BFiberMAPMTMapped2CalPar.h
+    pars/R3BFiberContFact.h
+    pars/R3BBunchedFiberHitModulePar.h
+    pars/R3BBunchedFiberHitPar.h
+    pars/R3BFiberMAPMTHitPar.h
+    pars/R3BFiberMAPMTHitModulePar.h
+    pars/R3BFiberMappingPar.h
+    online/R3BFiberMAPMTOnlineSpectra.h
+    online/R3BFiberMAPMTCorrelationOnlineSpectra.h)
 
-Set(LINKDEF FiberLinkDef.h)
-
-Set(LIBRARY_NAME R3BBunchedFiber)
-
-set(DEPENDENCIES
-R3BData R3BTCal R3BTracking R3BBase
-)
-
-GENERATE_LIBRARY()
+add_library_with_dictionary(
+    LIBNAME
+    R3BBunchedFiber
+    LINKDEF
+    FiberLinkDef.h
+    HEADERS
+    ${HEADERS}
+    SRCS
+    ${SRCS}
+    INCLUDEDIRS
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    bunched
+    digi
+    mapmt
+    online
+    pars
+    sim
+    DEPENDENCIES
+    R3BTCal
+    R3BTracking)

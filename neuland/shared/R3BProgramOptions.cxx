@@ -2,7 +2,7 @@
 
 namespace R3B
 {
-    bool ProgramOptions::Verify(int argc, const char** argv)
+    auto ProgramOptions::Verify(int argc, const char** argv) -> bool
     {
 
         try

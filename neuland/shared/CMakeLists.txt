@@ -11,13 +11,6 @@
 # or submit itself to any jurisdiction.                                      #
 ##############################################################################
 
-set(LIBRARY_NAME R3BNeulandShared)
-set(LINKDEF NeulandSharedLinkDef.h)
-
-set(DEPENDENCIES R3BData R3BBase ParBase Boost::program_options)
-
-include_directories(${INCLUDE_DIRECTORIES})
-
 set(SRCS ElasticScattering.cxx IsElastic.cxx R3BNeulandGeoPar.cxx R3BNeulandContFact.cxx
          R3BProgramOptions.cxx R3BNeulandVisualizer.cxx)
 
@@ -34,9 +27,13 @@ set(HEADERS
     R3BNeulandVisualizer.h
     R3BNeulandCommon.h)
 
-generate_library()
-
 # find_package(Protobuf REQUIRED) protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS neuland.proto)
 # protobuf_generate_python(PROTO_PY neuland.proto) set(SRCS ${SRCS} ${PROTO_SRCS}) set(HEADERS
 # ${HEADERS} ${PROTO_HDRS}) Include directory such that protoc generated headers are found
 # include_directories(${CMAKE_CURRENT_BINARY_DIR}) ${PROTOBUF_LIBRARY}
+
+add_library(R3BNeulandShared SHARED ${SRCS})
+target_include_directories(R3BNeulandShared PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(R3BNeulandShared PUBLIC R3BData Boost::program_options)
+root_generate_dictionary(R3BNeulandShared_dict ${HEADERS} MODULE R3BNeulandShared LINKDEF
+                         NeulandSharedLinkDef.h)

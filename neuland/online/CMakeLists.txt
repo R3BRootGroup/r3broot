@@ -10,18 +10,11 @@
 # granted to it by virtue of its status as an Intergovernmental Organization #
 # or submit itself to any jurisdiction.                                      #
 ##############################################################################
-
-set(LIBRARY_NAME R3BNeulandOnline)
-set(LINKDEF NeulandOnlineLinkDef.h)
-
-set(DEPENDENCIES R3BData R3BBase)
-
-set(INCLUDE_DIRECTORIES ${INCLUDE_DIRECTORIES} 
-${R3BROOT_SOURCE_DIR}/neuland/online)
-include_directories(${INCLUDE_DIRECTORIES})
-
 set(SRCS R3BNeulandOnlineReconstruction.cxx R3BNeulandOnlineSpectra.cxx)
-
 set(HEADERS R3BNeulandOnlineReconstruction.h R3BNeulandOnlineSpectra.h)
 
-generate_library()
+add_library(R3BNeulandOnline SHARED ${SRCS})
+target_include_directories(R3BNeulandOnline PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(R3BNeulandOnline PUBLIC R3BTCal R3BNeulandShared)
+root_generate_dictionary(R3BNeulandOnline_dict ${HEADERS} MODULE R3BNeulandOnline LINKDEF
+                         NeulandOnlineLinkDef.h)

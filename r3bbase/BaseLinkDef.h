@@ -31,8 +31,4 @@
 #pragma link C++ class R3BTcutPar+;
 #pragma link C++ class R3BTsplinePar+;
 #pragma link C++ class R3BCoarseTimeStitch+;
-#pragma link C++ class R3BMSOffsetContFact+;
-#pragma link C++ class R3BMSOffsetPar+;
-#pragma link C++ class R3BMSOffsetFinder+;
-#pragma link C++ class R3BTprevTnext+;
 #endif

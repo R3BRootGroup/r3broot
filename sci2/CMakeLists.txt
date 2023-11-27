@@ -15,51 +15,38 @@
 # the array. The extension is already found. Any number of sources could be
 # listed here.
 
-Set(SYSTEM_INCLUDE_DIRECTORIES
-${SYSTEM_INCLUDE_DIRECTORIES}
-${BASE_INCLUDE_DIRECTORIES}
-)
-
-set(INCLUDE_DIRECTORIES
-#put here all directories where header files are located
-${R3BROOT_SOURCE_DIR}/r3bbase
-${R3BROOT_SOURCE_DIR}/sci2
-${R3BROOT_SOURCE_DIR}/sci2/params
-${R3BROOT_SOURCE_DIR}/sci2/calib
-${R3BROOT_SOURCE_DIR}/sci2/online
-${R3BROOT_SOURCE_DIR}/r3bdata/
-${R3BROOT_SOURCE_DIR}/r3bdata/losData
-${R3BROOT_SOURCE_DIR}/r3bdata/sci2Data
-${R3BROOT_SOURCE_DIR}/tcal
-)
-
-include_directories( ${INCLUDE_DIRECTORIES})
-include_directories(SYSTEM ${SYSTEM_INCLUDE_DIRECTORIES})
-
-set(LINK_DIRECTORIES
-${ROOT_LIBRARY_DIR}
-${FAIRROOT_LIBRARY_DIR}
-)
-
-link_directories( ${LINK_DIRECTORIES})
-
 set(SRCS
-calib/R3BSci2Mapped2Tcal.cxx
-calib/R3BSci2Mapped2Cal.cxx
-params/R3BSci2Mapped2CalPar.cxx
-calib/R3BSci2Tcal2Hit.cxx
-params/R3BSci2HitPar.cxx
-params/R3BSci2ContFact.cxx
-online/R3BOnlineSpectraSci2.cxx
-)
+    calib/R3BSci2Mapped2Tcal.cxx
+    calib/R3BSci2Mapped2Cal.cxx
+    params/R3BSci2Mapped2CalPar.cxx
+    calib/R3BSci2Tcal2Hit.cxx
+    params/R3BSci2HitPar.cxx
+    params/R3BSci2ContFact.cxx
+    online/R3BOnlineSpectraSci2.cxx)
 
-# fill list of header files from list of source files
-# by exchanging the file extension
-CHANGE_FILE_EXTENSION(*.cxx *.h HEADERS "${SRCS}")
+set(HEADERS
+    calib/R3BSci2Mapped2Tcal.h
+    calib/R3BSci2Mapped2Cal.h
+    params/R3BSci2Mapped2CalPar.h
+    calib/R3BSci2Tcal2Hit.h
+    params/R3BSci2HitPar.h
+    params/R3BSci2ContFact.h
+    online/R3BOnlineSpectraSci2.h)
 
-Set(LINKDEF Sci2LinkDef.h)
-Set(LIBRARY_NAME R3BSci2)
-Set(DEPENDENCIES
-    R3BBase R3BData R3BTCal)
-
-GENERATE_LIBRARY()
+add_library_with_dictionary(
+    LIBNAME
+    R3BSci2
+    LINKDEF
+    Sci2LinkDef.h
+    HEADERS
+    ${HEADERS}
+    SRCS
+    ${SRCS}
+    INCLUDEDIRS
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    calib
+    online
+    params
+    DEPENDENCIES
+    R3BData
+    R3BTCal)

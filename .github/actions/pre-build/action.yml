@@ -25,7 +25,8 @@ runs:
 
     - name: mount cvmfs
       run: |
-        apt-get install -y ccache
+        apt-get update
+        apt-get install --fix-missing -y ccache sudo
         wget https://cernbox.cern.ch/remote.php/dav/public-files/RmnTeeOZpYjCJQb/masterkey.gsi.de.pub
         mv masterkey.gsi.de.pub /etc/cvmfs/keys
         cp .githubfiles/fairsoft.gsi.de.conf /etc/cvmfs/config.d

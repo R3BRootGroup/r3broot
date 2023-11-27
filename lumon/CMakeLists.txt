@@ -11,51 +11,20 @@
 # or submit itself to any jurisdiction.                                      #
 ##############################################################################
 
-# Create a library called "libELILuMon" which includes the source files given in
-# the array. The extension is already found. Any number of sources could be 
-# listed here.
+set(SRCS ELILuMon.cxx ELIGeoLuMon.cxx ELIGeoLuMonPar.cxx ELILuMonContFact.cxx)
 
-Set(SYSTEM_INCLUDE_DIRECTORIES 
-${SYSTEM_INCLUDE_DIRECTORIES}
-${BASE_INCLUDE_DIRECTORIES}
-)
+set(HEADERS ELILuMon.h ELIGeoLuMon.h ELIGeoLuMonPar.h ELILuMonContFact.h)
 
-set(INCLUDE_DIRECTORIES
-#put here all directories where header files are located
-${R3BROOT_SOURCE_DIR}/r3bbase
-${R3BROOT_SOURCE_DIR}/tof
-${R3BROOT_SOURCE_DIR}/lumon
-${R3BROOT_SOURCE_DIR}/r3bdata
-${R3BROOT_SOURCE_DIR}/r3bdata/lumonData
- )
-
-include_directories( ${INCLUDE_DIRECTORIES})
-include_directories(SYSTEM ${SYSTEM_INCLUDE_DIRECTORIES})
-
-set(LINK_DIRECTORIES
-${ROOT_LIBRARY_DIR}
-${FAIRROOT_LIBRARY_DIR}
-) 
-
-link_directories( ${LINK_DIRECTORIES})
-
-set(SRCS
-#Put here your sourcefiles
-ELILuMon.cxx  
-ELIGeoLuMon.cxx   
-ELIGeoLuMonPar.cxx   
-ELILuMonContFact.cxx   
-)
-
-# fill list of header files from list of source files
-# by exchanging the file extension
-CHANGE_FILE_EXTENSION(*.cxx *.h HEADERS "${SRCS}")
-
-set(LINKDEF LuMonLinkDef.h)
-set(LIBRARY_NAME ELILuMon)
-set(DEPENDENCIES
-    R3BBase R3BData)
-
-GENERATE_LIBRARY()
-
-
+add_library_with_dictionary(
+    LIBNAME
+    ELILuMon
+    LINKDEF
+    LuMonLinkDef.h
+    HEADERS
+    ${HEADERS}
+    SRCS
+    ${SRCS}
+    INCLUDEDIRS
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    DEPENDENCIES
+    R3BData)

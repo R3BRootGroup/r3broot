@@ -11,22 +11,11 @@
 # or submit itself to any jurisdiction.                                      #
 ##############################################################################
 
-set(LIBRARY_NAME R3BNeulandPreexp)
-set(LINKDEF NeulandPreexpLinkDef.h)
-
-set(DEPENDENCIES R3BData R3BBase R3BChannelAccess)
-
-set(INCLUDE_DIRECTORIES
-    ${INCLUDE_DIRECTORIES}
-    ${EPICS_INCLUDE_DIR}
-    ${EPICS_OS_INCLUDE_DIR}
-    ${R3BROOT_SOURCE_DIR}/epics
-    ${R3BROOT_SOURCE_DIR}/neuland/preexp)
-include_directories(${INCLUDE_DIRECTORIES})
-
-link_directories(${EPICS_LIBRARY_DIR})
-
 set(SRCS R3BNeulandCheckMapping.cxx R3BNeulandGainMatching.cxx R3BNeulandTimeRes.cxx)
-change_file_extension(*.cxx *.h HEADERS "${SRCS}")
+set(HEADERS R3BNeulandCheckMapping.h R3BNeulandGainMatching.h R3BNeulandTimeRes.h)
 
-generate_library()
+add_library(R3BNeulandPreexp SHARED ${SRCS})
+target_include_directories(R3BNeulandPreexp PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(R3BNeulandPreexp PUBLIC R3BData R3BChannelAccess)
+root_generate_dictionary(R3BNeulandPreexp_dict ${HEADERS} MODULE R3BNeulandPreexp LINKDEF
+                         R3BNeulandPreexpLinkDef.h)

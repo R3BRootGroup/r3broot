@@ -11,58 +11,36 @@
 # or submit itself to any jurisdiction.                                      #
 ##############################################################################
 
-# Create a library called "libR3BMusic" which includes the source files given
-# in the array. The extension is already found. Any number of sources could be
-# listed here.
+file(
+    GLOB
+    SRCS
+    ./sim/*.cxx
+    ./digi/*.cxx
+    ./pars/*.cxx
+    ./calibration/*.cxx
+    ./online/*.cxx)
+change_file_extension(*.cxx *.h HEADERS "${SRCS}")
 
-Set(SYSTEM_INCLUDE_DIRECTORIES
-${SYSTEM_INCLUDE_DIRECTORIES}
-${BASE_INCLUDE_DIRECTORIES}
-)
-
-set(INCLUDE_DIRECTORIES
-#put here all directories where header files are located
-${R3BROOT_SOURCE_DIR}/r3bbase
-${R3BROOT_SOURCE_DIR}/music
-${R3BROOT_SOURCE_DIR}/music/online
-${R3BROOT_SOURCE_DIR}/music/pars
-${R3BROOT_SOURCE_DIR}/music/calibration
-${R3BROOT_SOURCE_DIR}/music/sim
-${R3BROOT_SOURCE_DIR}/music/digi
-${R3BROOT_SOURCE_DIR}/tracking
-${R3BROOT_SOURCE_DIR}/r3bdata
-${R3BROOT_SOURCE_DIR}/r3bdata/musicData
-${R3BROOT_SOURCE_DIR}/r3bdata/mwpcData
-${R3BROOT_SOURCE_DIR}/r3bdata/losData
-)
-
-include_directories( ${INCLUDE_DIRECTORIES})
-include_directories(SYSTEM ${SYSTEM_INCLUDE_DIRECTORIES})
-
-set(LINK_DIRECTORIES ${ROOT_LIBRARY_DIR} ${FAIRROOT_LIBRARY_DIR} )
-
-link_directories( ${LINK_DIRECTORIES})
-
-file(GLOB SRCS
-./sim/*.cxx
-./digi/*.cxx
-./pars/*.cxx
-./calibration/*.cxx
-./online/*.cxx
-)
-
-# fill list of header files from list of source files
-# by exchanging the file extension
-CHANGE_FILE_EXTENSION(*.cxx *.h HEADERS "${SRCS}")
-
-set(LINKDEF MusicLinkDef.h)
-set(LIBRARY_NAME R3BMusic)
-set(DEPENDENCIES
-          R3BBase R3BData R3BTracking)
-
-GENERATE_LIBRARY()
+add_library_with_dictionary(
+    LIBNAME
+    R3BMusic
+    LINKDEF
+    MusicLinkDef.h
+    HEADERS
+    ${HEADERS}
+    SRCS
+    ${SRCS}
+    INCLUDEDIRS
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    sim
+    digi
+    pars
+    calibration
+    online
+    DEPENDENCIES
+    R3BTracking)
 
 if(BUILD_GEOMETRY)
-  add_subdirectory(geobase)
+    add_subdirectory(geobase)
 endif()
 add_subdirectory(test)

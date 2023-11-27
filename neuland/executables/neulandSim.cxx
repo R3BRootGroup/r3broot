@@ -52,7 +52,7 @@ int main(int argc, const char** argv)
     }
 
     // Logging
-    FairLogger::GetLogger()->SetLogVerbosityLevel("LOW");
+    // FairLogger::GetLogger()->SetLogVerbosityLevel("LOW");
     FairLogger::GetLogger()->SetLogScreenLevel(logLevel->value().c_str());
 
     // System paths

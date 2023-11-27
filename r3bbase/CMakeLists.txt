@@ -11,23 +11,6 @@
 # or submit itself to any jurisdiction.                                      #
 ##############################################################################
 
-# Create a library called "libR3BBase" which includes the source files given in
-# the array. The extension is already found. Any number of sources could be
-# listed here.
-
-set(SYSTEM_INCLUDE_DIRECTORIES ${SYSTEM_INCLUDE_DIRECTORIES} ${BASE_INCLUDE_DIRECTORIES})
-
-set(INCLUDE_DIRECTORIES
-    #put here all directories where header files are located
-    ${R3BROOT_SOURCE_DIR}/r3bbase ${R3BROOT_SOURCE_DIR}/tcal ${R3BROOT_SOURCE_DIR}/r3bdata
-    ${R3BROOT_SOURCE_DIR}/r3bdata/sampData ${R3BROOT_SOURCE_DIR}/r3bdata/wrData
-    ${R3BROOT_SOURCE_DIR}/r3bbase/pars)
-
-include_directories(${INCLUDE_DIRECTORIES})
-include_directories(SYSTEM ${SYSTEM_INCLUDE_DIRECTORIES})
-
-link_directories(${FAIRROOT_LIBRARY_DIR} ${ROOT_LIBRARY_DIR})
-
 set(SRCS
     R3BCoarseTimeStitch.cxx
     R3BDataPropagator.cxx
@@ -41,11 +24,7 @@ set(SRCS
     R3BModule.cxx
     R3BTcutPar.cxx
     R3BTsplinePar.cxx
-    R3BWhiterabbitPropagator.cxx
-    R3BTprevTnext.cxx
-    ./pars/R3BMSOffsetPar.cxx
-    ./pars/R3BMSOffsetContFact.cxx
-    ./pars/R3BMSOffsetFinder.cxx)
+    R3BWhiterabbitPropagator.cxx)
 
 set(HEADERS
     R3BCoarseTimeStitch.h
@@ -62,43 +41,48 @@ set(HEADERS
     R3BShared.h
     R3BTcutPar.h
     R3BTsplinePar.h
-    R3BWhiterabbitPropagator.h
-    R3BTprevTnext.h
-    ./pars/R3BMSOffsetPar.h
-    ./pars/R3BMSOffsetContFact.h
-    ./pars/R3BMSOffsetFinder.h)
-
-set(LINKDEF BaseLinkDef.h)
+    R3BWhiterabbitPropagator.h)
 
 set(DEPENDENCIES
     GeoBase
     ParBase
     Base
+    Gen
+    Online
     FairTools
-    R3BData
-    Core
-    Geom
-    GenVector
-    Physics
-    Matrix
-    MathCore
-    Hist
-    Graf
-    Gpad
-    Net
-    Imt
-    RIO
-    RHTTP
-    Spectrum)
+    ROOT::Geom
+    ROOT::Physics
+    ROOT::Matrix
+    ROOT::Hist
+    ROOT::Graf
+    ROOT::Gpad
+    ROOT::Net
+    ROOT::Imt
+    VMCLibrary
+    ROOT::Core
+    ROOT::MathCore
+    ROOT::RIO
+    ROOT::RHTTP
+    ROOT::Spectrum
+    FairLogger::FairLogger
+    fmt::fmt)
+
+add_library_with_dictionary(
+    LIBNAME
+    R3BBase
+    LINKDEF
+    BaseLinkDef.h
+    HEADERS
+    ${HEADERS}
+    SRCS
+    ${SRCS}
+    INCLUDEDIRS
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    DEPENDENCIES
+    ${DEPENDENCIES})
+
+target_link_directories(R3BBase PUBLIC ${FAIRROOTPATH}/lib)
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9)
-    set(DEPENDENCIES ${DEPENDENCIES} -lstdc++fs)
+    target_link_libraries(R3BBase PRIVATE -lstdc++fs)
 endif()
-
-if("${FairRoot_VERSION}" VERSION_GREATER_EQUAL 18.8.0)
-    set(DEPENDENCIES ${DEPENDENCIES} Online)
-endif()
-
-set(LIBRARY_NAME R3BBase)
-
-generate_library()

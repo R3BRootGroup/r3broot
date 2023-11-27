@@ -10,17 +10,11 @@
 # granted to it by virtue of its status as an Intergovernmental Organization #
 # or submit itself to any jurisdiction.                                      #
 ##############################################################################
-
-set(LIBRARY_NAME R3BNeulandClustering)
-set(LINKDEF NeulandClusteringLinkDef.h)
-
-set(DEPENDENCIES R3BNeulandShared R3BData)
-
-set(INCLUDE_DIRECTORIES ${INCLUDE_DIRECTORIES} ${R3BROOT_SOURCE_DIR}/neuland/clustering)
-include_directories(${INCLUDE_DIRECTORIES})
-
 set(SRCS R3BNeulandClusterMon.cxx R3BNeulandClusterFinder.cxx)
-change_file_extension(*.cxx *.h HEADERS "${SRCS}")
+set(HEADERS R3BNeulandClusterMon.h R3BNeulandClusterFinder.h)
 
-generate_library()
-target_include_directories(R3BNeulandClustering PUBLIC .)
+add_library(R3BNeulandClustering SHARED ${SRCS})
+target_include_directories(R3BNeulandClustering PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(R3BNeulandClustering PUBLIC R3BNeulandShared)
+root_generate_dictionary(R3BNeulandClustering_dict ${HEADERS} MODULE R3BNeulandClustering LINKDEF
+                         NeulandClusteringLinkDef.h)

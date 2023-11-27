@@ -11,21 +11,6 @@
 # or submit itself to any jurisdiction.                                      #
 ##############################################################################
 
-set(LIBRARY_NAME R3BNeulandCalibration)
-set(LINKDEF NeulandCalibrationLinkDef.h)
-
-#set(CMAKE_CXX_STANDARD 14)
-
-set(DEPENDENCIES R3BBase R3BData R3BTCal R3BNeulandShared)
-
-set(INCLUDE_DIRECTORIES
-    ${INCLUDE_DIRECTORIES}
-    ${R3BROOT_SOURCE_DIR}/neuland/calibration
-    ${R3BROOT_SOURCE_DIR}/neuland/shared
-    ${R3BROOT_SOURCE_DIR}/r3bdata/losData
-    ${R3BROOT_SOURCE_DIR}/tcal)
-include_directories(${INCLUDE_DIRECTORIES})
-
 set(SRCS
     R3BNeulandMappedHist.cxx
     R3BNeulandMapped2Cal.cxx
@@ -49,6 +34,33 @@ set(SRCS
     R3BNeulandQCalFiller.cxx
     R3BNeulandProvideTStart.cxx
     R3BNeulandMappingPar.cxx)
-  change_file_extension(*.cxx *.h HEADERS "${SRCS}")
-  
-generate_library()
+
+set(HEADERS
+    R3BNeulandMappedHist.h
+    R3BNeulandMapped2Cal.h
+    R3BNeulandMapped2CalPar.h
+    R3BNeulandTacquilaMapped2Cal.h
+    R3BNeulandTacquilaMapped2CalPar.h
+    R3BNeulandTacquilaMapped2QCalPar.h
+    R3BNeulandHitHist.h
+    # R3BNeulandCalTest.h
+    R3BNeulandHitPar.h
+    R3BNeulandCosmicTracker.h
+    R3BNeulandHitCalibrationEngine.h
+    R3BNeulandHitCalibrationBar.h
+    R3BNeulandTSyncer.h
+    LSQR.h
+    R3BNeulandCal2HitPar.h
+    R3BNeulandParFact.h
+    R3BNeulandCal2Hit.h
+    R3BNeulandHitModulePar.h
+    R3BNeulandQCalPar.h
+    R3BNeulandQCalFiller.h
+    R3BNeulandProvideTStart.h
+    R3BNeulandMappingPar.h)
+
+add_library(R3BNeulandCalibration SHARED ${SRCS})
+target_include_directories(R3BNeulandCalibration PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(R3BNeulandCalibration PUBLIC R3BTCal R3BNeulandShared)
+root_generate_dictionary(R3BNeulandCalibration_dict ${HEADERS} MODULE R3BNeulandCalibration LINKDEF
+                         NeulandCalibrationLinkDef.h)
