@@ -151,6 +151,7 @@ namespace R3B
         }
 
         [[nodiscard]] inline auto get() -> RawDataType& { return data_; }
+        [[nodiscard]] inline auto get_constref() const -> const RawDataType& { return data_; }
 
         inline void clear() { data_.clear(); }
 

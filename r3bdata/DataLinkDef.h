@@ -115,6 +115,7 @@
 #pragma link C++ class R3BPspDigi+;
 #pragma link C++ class R3BNeulandTacquilaMappedData+;
 #pragma link C++ class R3BNeulandPoint+;
+#pragma link C++ class std::vector<R3BNeulandPoint>+;
 #pragma link C++ class R3BNeulandHit+;
 #pragma link C++ class R3BNeulandMultiplicity+;
 #pragma link C++ class R3BNeulandCluster+;

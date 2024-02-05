@@ -27,9 +27,9 @@ void testNeulandDigitizer()
     run.GetRuntimeDb()->setFirstInput(io);
 
     run.AddTask(new R3BNeulandDigitizer(R3BNeulandDigitizer::Options::neulandTamex));
-    run.AddTask(new R3BNeulandClusterFinder());
-    run.AddTask(new R3BNeulandPrimaryInteractionFinder());
-    run.AddTask(new R3BNeulandPrimaryClusterFinder());
+    // run.AddTask(new R3BNeulandClusterFinder());
+    // run.AddTask(new R3BNeulandPrimaryInteractionFinder());
+    // run.AddTask(new R3BNeulandPrimaryClusterFinder());
 
     run.Init();
     run.Run(0, 0);

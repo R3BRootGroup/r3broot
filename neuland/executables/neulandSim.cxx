@@ -22,7 +22,6 @@ constexpr int DEFAULT_RUNID = 999;
 int main(int argc, const char** argv)
 {
     auto timer = TStopwatch{};
-    auto const PID = 2112;
     auto const defaultEventNum = 10;
     timer.Start();
 
