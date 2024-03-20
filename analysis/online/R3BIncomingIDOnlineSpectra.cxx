@@ -50,6 +50,7 @@ R3BIncomingIDOnlineSpectra::R3BIncomingIDOnlineSpectra(const TString& name, Int_
     , fHitLos(NULL)
     , fMwpc0HitDataCA(NULL)
     , fMwpc1HitDataCA(NULL)
+    , header(nullptr)
     , fNEvents(0)
     , fTpat(-1)
     , fStaId(1)
@@ -57,11 +58,16 @@ R3BIncomingIDOnlineSpectra::R3BIncomingIDOnlineSpectra(const TString& name, Int_
     , fMax_Z(20.)
     , fMin_Aq(1.6)
     , fMax_Aq(3.9)
+    , fMin_Brho(6)
+    , fMax_Brho(10)
+    , fMin_RawTof(-50000)
+    , fMax_RawTof(50000)
+    , fMin_Beta(0.)
+    , fMax_Beta(1.)
     , fMin_Z_gate(0.)
     , fMax_Z_gate(20.)
     , fMin_Aq_gate(1.6)
     , fMax_Aq_gate(3.9)
-    , header(nullptr)
 {
 }
 
@@ -124,7 +130,7 @@ InitStatus R3BIncomingIDOnlineSpectra::Init()
     // Hit data, beta
     Name1 = "fh1_beta_frs";
     Name2 = "FRS: Beta";
-    fh1_beta = new TH1F(Name1, Name2, 1000, 0.45, 0.99);
+    fh1_beta = new TH1F(Name1, Name2, 1000, fMin_Beta, fMax_Beta);
     fh1_beta->GetXaxis()->SetTitle("Beta");
     fh1_beta->GetYaxis()->SetTitle("Counts");
     fh1_beta->GetYaxis()->SetTitleOffset(1.15);
@@ -142,7 +148,7 @@ InitStatus R3BIncomingIDOnlineSpectra::Init()
 
     Name1 = "fh1_tofraw_frs";
     Name2 = "FRS: Raw Tof";
-    fh1_tof = new TH1F(Name1, Name2, 20000, -50000, 50000);
+    fh1_tof = new TH1F(Name1, Name2, 20000, fMin_RawTof, fMax_RawTof);
     fh1_tof->GetXaxis()->SetTitle("ToF [ns]");
     fh1_tof->GetYaxis()->SetTitle("Counts");
     fh1_tof->GetYaxis()->SetTitleOffset(1.15);
@@ -161,7 +167,7 @@ InitStatus R3BIncomingIDOnlineSpectra::Init()
 
     Name1 = "fh1_brho_frs";
     Name2 = "FRS: Brho S2-Cave";
-    fh1_brho = new TH1F(Name1, Name2, 1500, 8., 19.);
+    fh1_brho = new TH1F(Name1, Name2, 1500, fMin_Brho, fMax_Brho);
     fh1_brho->GetXaxis()->SetTitle("Brho [Tm]");
     fh1_brho->GetYaxis()->SetTitle("Counts");
     fh1_brho->GetYaxis()->SetTitleOffset(1.15);

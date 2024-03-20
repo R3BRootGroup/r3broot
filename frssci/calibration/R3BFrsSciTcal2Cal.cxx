@@ -141,14 +141,14 @@ void R3BFrsSciTcal2Cal::Exec(Option_t* option)
     // Reset entries in output arrays, local arrays
     Reset();
     // Variables to read the Tcal data
-    // UShort_t nDets = (UShort_t)fCalPar->GetNumDets();
-    // UShort_t nPmts = (UShort_t)fCalPar->GetNumPmts();
-    UShort_t nDets = 2;
-    UShort_t nPmts = 3;
-    UShort_t iDet;
-    UShort_t iPmt;
-    Double_t iTraw[6][64]; // 64 hits max per VFTX channel
-    UShort_t mult[6];
+    UShort_t nDets = (UShort_t)fCalPar->GetNumDets();
+    UShort_t nPmts = (UShort_t)fCalPar->GetNumPmts();
+    // UShort_t nDets = 2;
+    // UShort_t nPmts = 3;
+    UShort_t iDet = 0;
+    UShort_t iPmt = 0;
+    Double_t iTraw[nDets * nPmts][64]; // 64 hits max per VFTX channel
+    UShort_t mult[nDets * nPmts];
     // ULong64_t maskR[nDets];
     // ULong64_t maskL[nDets];
     for (UShort_t i = 0; i < nDets * nPmts; i++)
@@ -182,9 +182,10 @@ void R3BFrsSciTcal2Cal::Exec(Option_t* option)
     if (nDets == 1 && mult[0] > 0 && mult[1] > 0)
     {
         // Variables to fill PosCal and TofCal data
-        Double_t iRawTime = -1.;
-        Float_t iRawPos = -10000.;
-        Float_t iCalPos = -10000.;
+        Double_t iRawTime = NAN;
+        Double_t iRawTime_wtref = NAN;
+        Float_t iRawPos = NAN;
+        Float_t iCalPos = NAN;
         // maskL[0] = 0x0;
         // maskR[0] = 0x0;
         for (UShort_t multR = 0; multR < mult[0]; multR++)
@@ -201,24 +202,28 @@ void R3BFrsSciTcal2Cal::Exec(Option_t* option)
                 // if the left or right hit has already been used, continue
                 // if ((((maskR[0] >> multR) & (0x1)) == 1) || (((maskL[0] > multL) & (0x1)) == 1))
                 //    continue;
-                iRawTime = 0.5 * (iTraw[0][multL] + iTraw[1][multR]);
+                iRawTime = 0.5 * (iTraw[0][multR] + iTraw[1][multL]);
+
+                // Since the searching window is set to wait for the time reference (LOS) to be arrived, the last hit
+                // will be the correct one for the most cases. VFTX seems to be LIFO module?
+                iRawTime_wtref = iRawTime - iTraw[2][0];
                 // tag which hit is used
                 // maskR[0] |= (0x1) << multR;
                 // maskL[0] |= (0x1) << multL;
 
                 iCalPos = fCalPar->GetPosCalGainAtRank(0) * iRawPos + fCalPar->GetPosCalOffsetAtRank(0);
-                AddPosCalData(1, iRawTime, iRawPos, iCalPos);
+                AddPosCalData(1, iRawTime, iRawTime_wtref, iRawPos, iCalPos);
             } // end of loop over the hits of the left PMTs
         }     // end of loop over the hits of the right PMTs
     }         // end of if (nDets==1)
     else if (nDets > 1)
     {
         // Variables to fill PosCal and TofCal data
-        Double_t iRawTimeSta = -1., iRawTimeSto = -1.;
-        Float_t iRawPosSta = -10000.;
-        Float_t iRawPosSto = -10000.;
-        Double_t iRawTof = -1., iCalTof = -1, iCalVelo = -1.;
-        Double_t iBeta = -1, iGamma = -1., iBRho = -1., iAoQ = -1.;
+        Double_t iRawTimeSta = NAN, iRawTimeSto = NAN;
+        Float_t iRawPosSta = NAN;
+        Float_t iRawPosSto = NAN;
+        Double_t iRawTof = NAN, iCalTof = -1, iCalVelo = NAN;
+        Double_t iBeta = NAN, iGamma = NAN, iBRho = NAN, iAoQ = NAN;
         Int_t selectLeftHit[nDets];
         Int_t selectRightHit[nDets];
         for (UShort_t det = 0; det < nDets; det++)
@@ -307,19 +312,17 @@ void R3BFrsSciTcal2Cal::Exec(Option_t* option)
             }                     // end of loop over the right stop mult
         }                         // end of if data in Left and Right of Sto detector
 
-        // no hit found
-        if (selectHit == kFALSE)
-            return;
-
         // Fill CalData levels
         Double_t iRawTime[nDets];
+        Double_t iRawTime_wtref[nDets];
         Float_t iRawPos[nDets];
         Float_t iCalPos[nDets];
         for (UShort_t det = 0; det < nDets; det++)
         {
-            iRawTime[det] = -1000;
-            iRawPos[det] = -1000;
-            iCalPos[det] = -1000;
+            iRawTime[det] = NAN;
+            iRawTime_wtref[det] = NAN;
+            iRawPos[det] = NAN;
+            iCalPos[det] = NAN;
         }
         // if hit at stop detector is the same for all Sta detector
         if (selectSameHit == kTRUE)
@@ -328,10 +331,14 @@ void R3BFrsSciTcal2Cal::Exec(Option_t* option)
             {
                 iRawTime[det] =
                     0.5 * (iTraw[det * nPmts][selectRightHit[det]] + iTraw[det * nPmts + 1][selectLeftHit[det]]);
-                iRawPos[det] =
-                    (Float_t)(iTraw[det * nPmts][selectRightHit[det]] - iTraw[det * nPmts + 1][selectLeftHit[det]]);
+                if (nPmts >= 3 && mult[det * nPmts + 2] == 1)
+                {
+                    iRawTime_wtref[det] = static_cast<Float_t>(iRawTime[det] - iTraw[det * nPmts + 2][0]);
+                }
+                iRawPos[det] = static_cast<Float_t>(iTraw[det * nPmts][selectRightHit[det]] -
+                                                    iTraw[det * nPmts + 1][selectLeftHit[det]]);
                 iCalPos[det] = fCalPar->GetPosCalGainAtRank(det) * iRawPos[det] + fCalPar->GetPosCalOffsetAtRank(det);
-                AddPosCalData(det + 1, iRawTime[det], iRawPos[det], iCalPos[det]);
+                AddPosCalData(det + 1, iRawTime[det], iRawTime_wtref[det], iRawPos[det], iCalPos[det]);
             }
         }
         else // use the hit selection from the very first to the very last FrsSci)
@@ -340,19 +347,34 @@ void R3BFrsSciTcal2Cal::Exec(Option_t* option)
             {
                 iRawTime[det] =
                     0.5 * (iTraw[det * nPmts][selectRightHit[det]] + iTraw[det * nPmts + 1][selectLeftHit[det]]);
-                iRawPos[det] =
-                    (Float_t)(iTraw[det * nPmts][selectRightHit[det]] - iTraw[det * nPmts + 1][selectLeftHit[det]]);
+                if (nPmts >= 3 && mult[det * nPmts + 2] == 1)
+                {
+                    iRawTime_wtref[det] = static_cast<Float_t>(iRawTime[det] - iTraw[det * nPmts + 2][0]);
+                }
+                iRawPos[det] = static_cast<Float_t>(iTraw[det * nPmts][selectRightHit[det]] -
+                                                    iTraw[det * nPmts + 1][selectLeftHit[det]]);
                 iCalPos[det] = fCalPar->GetPosCalGainAtRank(det) * iRawPos[det] + fCalPar->GetPosCalOffsetAtRank(det);
-                AddPosCalData(det + 1, iRawTime[det], iRawPos[det], iCalPos[det]);
+                AddPosCalData(det + 1, iRawTime[det], iRawTime_wtref[det], iRawPos[det], iCalPos[det]);
             }
             iRawTime[nDets - 1] = 0.5 * (iTraw[(nDets - 1) * nPmts][selectRightHit_dSto[0]] +
                                          iTraw[(nDets - 1) * nPmts + 1][selectLeftHit_dSto[0]]);
-            iRawPos[nDets - 1] = (Float_t)(iTraw[(nDets - 1) * nPmts][selectLeftHit_dSto[0]] -
-                                           iTraw[(nDets - 1) * nPmts + 1][selectLeftHit_dSto[0]]);
+            if (nPmts >= 3 && mult[(nDets - 1) * nPmts + 2] == 1)
+            {
+                iRawTime_wtref[nDets - 1] =
+                    static_cast<Float_t>(iRawTime[nDets - 1] - iTraw[(nDets - 1) * nPmts + 2][0]);
+            }
+            iRawPos[nDets - 1] = static_cast<Float_t>(iTraw[(nDets - 1) * nPmts][selectLeftHit_dSto[0]] -
+                                                      iTraw[(nDets - 1) * nPmts + 1][selectLeftHit_dSto[0]]);
             iCalPos[nDets - 1] = fCalPar->GetPosCalGainAtRank(nDets - 1) * iRawPos[nDets - 1] +
                                  fCalPar->GetPosCalOffsetAtRank(nDets - 1);
-            AddPosCalData(nDets, iRawTime[nDets - 1], iRawPos[nDets - 1], iCalPos[nDets - 1]);
+            AddPosCalData(
+                nDets, iRawTime[nDets - 1], iRawTime_wtref[nDets - 1], iRawPos[nDets - 1], iCalPos[nDets - 1]);
         }
+
+        // no hit found
+        if (selectHit == kFALSE)
+            return;
+
         UShort_t rank = 0;
         for (UShort_t dSta = 0; dSta < nDets - 1; dSta++)
         {
@@ -403,12 +425,16 @@ void R3BFrsSciTcal2Cal::Reset()
 }
 
 // -----   Private method AddPosCalData  --------------------------------------------
-R3BFrsSciPosCalData* R3BFrsSciTcal2Cal::AddPosCalData(UShort_t det, Double_t traw, Float_t rawpos, Float_t calpos)
+R3BFrsSciPosCalData* R3BFrsSciTcal2Cal::AddPosCalData(UShort_t det,
+                                                      Double_t traw,
+                                                      Double_t traw_wtref,
+                                                      Float_t rawpos,
+                                                      Float_t calpos)
 {
     // It fills the R3BFrsSciTcalData
     TClonesArray& clref = *fPosCal;
     Int_t size = clref.GetEntriesFast();
-    return new (clref[size]) R3BFrsSciPosCalData(det, traw, rawpos, calpos);
+    return new (clref[size]) R3BFrsSciPosCalData(det, traw, traw_wtref, rawpos, calpos);
 }
 
 // -----   Private method AddTofCalData  --------------------------------------------

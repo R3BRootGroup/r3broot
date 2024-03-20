@@ -94,6 +94,18 @@ class R3BIncomingIDOnlineSpectra : public FairTask
 
     // Setting parameters
     void SetStartPlaId(Int_t id) { fStaId = id; };
+    void SetRangeRawTof(Double_t min, Double_t max)
+    {
+        fMin_RawTof = min;
+        fMax_RawTof = max;
+    }
+
+    void SetRangeBeta(Double_t min, Double_t max)
+    {
+        fMin_Beta = min;
+        fMax_Beta = max;
+    }
+
     void SetRangeZ(Double_t min, Double_t max)
     {
         fMin_Z = min;
@@ -104,6 +116,12 @@ class R3BIncomingIDOnlineSpectra : public FairTask
     {
         fMin_Aq = min;
         fMax_Aq = max;
+    }
+
+    void SetRangeBrho(Double_t min, Double_t max)
+    {
+        fMin_Brho = min;
+        fMax_Brho = max;
     }
 
     void SetIsoGate(Double_t minz, Double_t maxz, Double_t minaq, Double_t maxaq)
@@ -120,13 +138,6 @@ class R3BIncomingIDOnlineSpectra : public FairTask
     TClonesArray* fMwpc0HitDataCA;
     TClonesArray* fMwpc1HitDataCA;
 
-    // Start Plastic ID
-    Int_t fStaId;
-
-    // Ranges for the histograms;
-    Double_t fMin_Z, fMax_Z, fMin_Aq, fMax_Aq;
-    Double_t fMin_Z_gate, fMax_Z_gate, fMin_Aq_gate, fMax_Aq_gate;
-
     // Parameters
     R3BTGeoPar* fMw0GeoPar;
     R3BTGeoPar* fMw1GeoPar;
@@ -135,6 +146,13 @@ class R3BIncomingIDOnlineSpectra : public FairTask
     R3BEventHeader* header; /**< Event header.      */
     Int_t fNEvents;         /**< Event counter.     */
     Int_t fTpat;
+
+    // Start Plastic ID
+    Int_t fStaId;
+
+    // Ranges for the histograms;
+    Double_t fMin_Z, fMax_Z, fMin_Aq, fMax_Aq, fMin_Brho, fMax_Brho, fMin_RawTof, fMax_RawTof, fMin_Beta, fMax_Beta;
+    Double_t fMin_Z_gate, fMax_Z_gate, fMin_Aq_gate, fMax_Aq_gate;
 
     // Canvas
     TCanvas* cBeta;

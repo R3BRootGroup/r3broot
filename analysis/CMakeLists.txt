@@ -66,6 +66,7 @@ ${R3BROOT_SOURCE_DIR}/r3bdata/tofiData
 ${R3BROOT_SOURCE_DIR}/r3bdata/pdcData
 ${R3BROOT_SOURCE_DIR}/r3bdata/pspData
 ${R3BROOT_SOURCE_DIR}/r3bdata/fibData
+${R3BROOT_SOURCE_DIR}/r3bdata/frssciData
 ${R3BROOT_SOURCE_DIR}/r3bdata/ptofData
 ${R3BROOT_SOURCE_DIR}/r3bdata/sampData
 ${R3BROOT_SOURCE_DIR}/r3bdata/sfibData

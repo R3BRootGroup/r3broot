@@ -66,7 +66,11 @@ class R3BFrsSciTcal2Cal : public FairTask
 
     TRandom3 rand;
 
-    R3BFrsSciPosCalData* AddPosCalData(UShort_t det, Double_t traw, Float_t rawpos, Float_t calpos);
+    R3BFrsSciPosCalData* AddPosCalData(UShort_t det,
+                                       Double_t traw,
+                                       Double_t traw_wtref,
+                                       Float_t rawpos,
+                                       Float_t calpos);
     R3BFrsSciTofCalData* AddTofCalData(UShort_t rank,
                                        UShort_t detsta,
                                        UShort_t detsto,

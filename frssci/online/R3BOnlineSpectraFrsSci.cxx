@@ -45,6 +45,10 @@ R3BOnlineSpectraFrsSci::R3BOnlineSpectraFrsSci(const char* name, Int_t iVerbose)
     , fNbDets(3)
     , fNbPmts(3)
     , fNbTofs(3)
+    , fpos_range_min(-5.)
+    , fpos_range_max(5.)
+    , ftof_range_min(0.)
+    , ftof_range_max(2500)
 {
 }
 
@@ -207,8 +211,12 @@ InitStatus R3BOnlineSpectraFrsSci::Init()
         {
             // === TH1F: Raw Position in Ns if mult1 RIGHT and LEFT === //
             sprintf(Name1, "FrsSci%i_PosRaw_MULT1", i + 1);
-            fh1_Tcal1Hit_PosRaw[i] = new TH1D(Name1, Name1, 10000, -5, 5);
-            fh1_Tcal1Hit_PosRaw[i]->GetXaxis()->SetTitle("Raw Positon [ns] if mult1 at L and R");
+            fh1_Tcal1Hit_PosRaw[i] = new TH1D(Name1,
+                                              Name1,
+                                              static_cast<int>(20. * (fpos_range_max - fpos_range_min)),
+                                              fpos_range_min,
+                                              fpos_range_max);
+            fh1_Tcal1Hit_PosRaw[i]->GetXaxis()->SetTitle("Raw Positon [ns] if mult1 at L and R. 50 ps per bin");
             fh1_Tcal1Hit_PosRaw[i]->GetYaxis()->SetTitle("number of counts with mult1");
             fh1_Tcal1Hit_PosRaw[i]->GetXaxis()->CenterTitle(true);
             fh1_Tcal1Hit_PosRaw[i]->GetYaxis()->CenterTitle(true);
@@ -228,8 +236,13 @@ InitStatus R3BOnlineSpectraFrsSci::Init()
                 for (UShort_t sto = sta + 1; sto <= fNbDets; sto++)
                 {
                     sprintf(Name1, "TofRaw_FrsSci%i_to_FrsSci%i_MULT1", sta, sto);
-                    fh1_Tcal1Hit_TofRaw[cpt] = new TH1D(Name1, Name1, 150000, 200, 2500);
-                    fh1_Tcal1Hit_TofRaw[cpt]->GetXaxis()->SetTitle("Raw Tof [ns] if mult1 at L, R and Tref");
+                    fh1_Tcal1Hit_TofRaw[cpt] = new TH1D(Name1,
+                                                        Name1,
+                                                        static_cast<int>(10. * (ftof_range_max - ftof_range_min)),
+                                                        ftof_range_min,
+                                                        fpos_range_max);
+                    fh1_Tcal1Hit_TofRaw[cpt]->GetXaxis()->SetTitle(
+                        "Raw Tof [ns] if mult1 at L, R and Tref. 100 ps per bin.");
                     fh1_Tcal1Hit_TofRaw[cpt]->GetYaxis()->SetTitle("number of counts with mult1");
                     fh1_Tcal1Hit_TofRaw[cpt]->GetXaxis()->CenterTitle(true);
                     fh1_Tcal1Hit_TofRaw[cpt]->GetYaxis()->CenterTitle(true);
@@ -284,7 +297,11 @@ InitStatus R3BOnlineSpectraFrsSci::Init()
                              fh1_Tcal1Hit_PosRaw[i]->GetBinLowEdge(nbins) + fh1_Tcal1Hit_PosRaw[i]->GetBinWidth(nbins));
             }
             else
-                fh1_Cal_PosRaw[i] = new TH1D(Name1, Name1, 1000, -250, 250);
+                fh1_Cal_PosRaw[i] = new TH1D(Name1,
+                                             Name1,
+                                             static_cast<int>(2. * (fpos_range_max - fpos_range_min)),
+                                             fpos_range_min,
+                                             fpos_range_max);
             fh1_Cal_PosRaw[i]->GetXaxis()->SetTitle("Raw Positon [ns] in red CAL level, in blue TCAL-MULT1");
             fh1_Cal_PosRaw[i]->GetYaxis()->SetTitle("number of counts with mult1");
             fh1_Cal_PosRaw[i]->GetXaxis()->CenterTitle(true);

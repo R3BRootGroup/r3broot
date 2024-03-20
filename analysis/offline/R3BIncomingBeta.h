@@ -23,6 +23,7 @@
 // R3B headers
 #include "R3BEventHeader.h"
 #include "R3BFrsData.h"
+#include "R3BFrsSciPosCalData.h"
 #include "R3BMusicHitData.h"
 
 // FAIR headers
@@ -87,19 +88,20 @@ class R3BIncomingBeta : public FairTask
 
     virtual void Reset();
 
-    void SetBetaCorrectionForZ(Double_t p0, Double_t p1, Double_t p2, Double_t Zprimary, Double_t Zoffset)
-    {
-        fP0 = p0;
-        fP1 = p1;
-        fP2 = p2;
-        fZprimary = Zprimary;
-        fZoffset = Zoffset;
-    }
-
     // Accessor to select online mode
     void SetOnline(Bool_t option) { fOnline = option; }
     void SetUseTref() { fUseTref = kTRUE; }
     void SetUseMultHit() { fUseMultHit = kTRUE; }
+    void SetNumDets(int val) { fNumDet = val; }
+    void SetStaId(int val) { fStaId = val; }
+    void SetStoId(int val) { fStoId = val; } // if id == 0 and bFrsSci = true, then LOS will be used
+    void SetLosRefCh(int val) { fLosRefCh = val; }
+    void UseFrsSci(bool val) { fUseFrsSci = val; } // If false, sci2 will be used
+    void SetLosCalRange(Double_t low, Double_t high)
+    {
+        fLosCalTrig_Low = low;
+        fLosCalTrig_High = high;
+    } // Only for S118/S091
 
   protected:
     R3BEventHeader* fHeader{}; // Event header
@@ -111,14 +113,18 @@ class R3BIncomingBeta : public FairTask
     TClonesArray* fFrsDataCA;          /**< Array with FRS-output data. >*/
 
     TClonesArray* fHitSci2;
+    TClonesArray* fPosCalFrsSci;
     TClonesArray* fHitLos;
+    TClonesArray* fCalLos;
+    TClonesArray* fCalLosTrig;
     TClonesArray* fTcalSci2; /**< Array with Tcal items. */
 
-    Bool_t fOnline; // Don't store data for online
-    Double_t fP0, fP1, fP2, fZprimary, fZoffset;
+    int fStaId;
+    int fStoId;
+    int fLosRefCh;
+    Double_t fLosCalTrig_Low, fLosCalTrig_High;
 
-    Double_t fPos_p0;
-    Double_t fPos_p1;
+    Bool_t fOnline; // Don't store data for online
 
     UInt_t fNumDet;
     TArrayF* fToFoffset;
@@ -127,6 +133,7 @@ class R3BIncomingBeta : public FairTask
     Float_t fBeta_max, fBeta_min;
     Bool_t fUseTref;
     Bool_t fUseMultHit;
+    bool fUseFrsSci;
 
     /** Private method FrsData **/
     //** Adds a FrsData to the analysis

@@ -434,7 +434,6 @@ void R3BLosCal2Hit::Exec(Option_t* option)
     }
 
     Int_t nHits = fCalItems->GetEntries();
-
     if (nHits == 0)
         return;
 
@@ -547,7 +546,6 @@ void R3BLosCal2Hit::Exec(Option_t* option)
                    return (lhs[0] < rhs[0]) ? -1 : ((rhs[0] < lhs[0]) ? 1 : 0);
                });
     // End sorting
-
     for (Int_t ihit = 0; ihit < nHits; ihit++)
     {
         Bool_t iLOSTypeMCFD = false;
@@ -628,11 +626,11 @@ void R3BLosCal2Hit::Exec(Option_t* option)
                 }
             }
 
-            timeLosM[ihit] = timeLosM[ihit] / nPMV;
-            timeLosT[ihit] = timeLosT[ihit] / nPMT;
+            timeLosM[ihit] = timeLosM[ihit] / static_cast<double>(nPMV);
+            timeLosT[ihit] = timeLosT[ihit] / static_cast<double>(nPMT);
 
-            totsum[ihit] = totsum[ihit] / nPMT;
-            totsum_corr[ihit] = totsum_corr[ihit] / nPMT;
+            totsum[ihit] = totsum[ihit] / static_cast<double>(nPMT);
+            totsum_corr[ihit] = totsum_corr[ihit] / static_cast<double>(nPMT);
 
             // Time resolution TAMEX
             LosTresT[ihit] = ((time_L[ihit][0] + time_L[ihit][2] + time_L[ihit][4] + time_L[ihit][6]) -
@@ -683,13 +681,13 @@ void R3BLosCal2Hit::Exec(Option_t* option)
                 ((time_L_corr[ihit][0] + time_L_corr[ihit][2] + time_L_corr[ihit][4] + time_L_corr[ihit][6]) -
                  (time_L_corr[ihit][1] + time_L_corr[ihit][3] + time_L_corr[ihit][5] + time_L_corr[ihit][7])) /
                 4.;
-            timeLosT_corr[ihit] = timeLosT_corr[ihit] / nPMT;
+            timeLosT_corr[ihit] = timeLosT_corr[ihit] / static_cast<double>(nPMT);
 
             // MCFD
             LosTresM_corr[ihit] = ((time_V_corr[ihit][0] + time_V[ihit][2] + time_V[ihit][4] + time_V[ihit][6]) -
                                    (time_V_corr[ihit][1] + time_V[ihit][3] + time_V[ihit][5] + time_V[ihit][7])) /
                                   4.;
-            timeLosM_corr[ihit] = timeLosM_corr[ihit] / nPMV;
+            timeLosM_corr[ihit] = timeLosM_corr[ihit] / static_cast<double>(nPMV);
 
             // Position from ToT:
             xToT_cm[ihit] = (((tot[ihit][5] + tot[ihit][6]) / 2. - (tot[ihit][1] + tot[ihit][2]) / 2.) /
@@ -809,7 +807,6 @@ void R3BLosCal2Hit::Exec(Option_t* option)
             }
 
         } // end of LOSTYPE = true
-
         new ((*fHitItems)[fHitItems->GetEntriesFast()])
             R3BLosHitData(nDet, t_hit[ihit], x_cm[ihit], y_cm[ihit], Z[ihit]);
 

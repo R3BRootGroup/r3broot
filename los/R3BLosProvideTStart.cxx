@@ -90,12 +90,6 @@ Double_t R3BLosProvideTStart::GetTStart() const
     const auto losCalData = fLosCalData.Retrieve();
     const auto losTriggerCalData = fLosTriggerCalData.Retrieve();
     Float_t diff;
-    auto T1 = 10240; // TAMEX, range is 2048*5ns
-    auto T2 = 40960; // VFTX, range is 40960*5ns
-
-    const int c1 = std::min(T1, T2);
-    const int c2 = std::max(T1, T2);
-
     if (losCalData.empty())
     {
         return std::numeric_limits<Double_t>::quiet_NaN();
@@ -110,6 +104,7 @@ Double_t R3BLosProvideTStart::GetTStart() const
         if (losTriggerCalData.back()->GetTimeV_ns(0) > 0.)
         {
             R3BLOG(debug1, "CalData with VFTX trigger info for LOS");
+
             return fTimeStitch->GetTime(
                 losCalData.back()->GetMeanTimeVFTX() - losTriggerCalData.back()->GetTimeV_ns(0), "vftx", "vftx");
         }
@@ -140,6 +135,7 @@ Double_t R3BLosProvideTStart::GetTStartTrigHit() const
         {
             Double_t tref_t =
                 fTimeStitch->GetTime((*it)->GetTime() - losTriggerData.front()->GetRawTimeNs(), "vftx", "vftx");
+
             if (tref_t > edgeL && tref_t < edgeR)
                 return tref_t;
         }

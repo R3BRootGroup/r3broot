@@ -106,6 +106,17 @@ class R3BOnlineSpectraFrsSci : public FairTask
         }
     }
 
+    void SetPosRange(float min, float max)
+    {
+        fpos_range_min = min;
+        fpos_range_max = max;
+    }
+    void SetTofRange(float min, float max)
+    {
+        ftof_range_min = min;
+        ftof_range_max = max;
+    }
+
   private:
     R3BEventHeader* fEventHeader; /**< Event header.      */
 
@@ -159,6 +170,12 @@ class R3BOnlineSpectraFrsSci : public FairTask
     TH2D** fh2_Cal_BRhoVsPosSto; // [fNbTofs]
     TH2D** fh2_Cal_AoQVsPosSta;  // [fNbTofs]
     TH2D** fh2_Cal_AoQVsPosSto;  // [fNbTofs]
+
+    // Define ranges
+    float fpos_range_min;
+    float fpos_range_max;
+    float ftof_range_min;
+    float ftof_range_max;
 
   public:
     ClassDef(R3BOnlineSpectraFrsSci, 1)
