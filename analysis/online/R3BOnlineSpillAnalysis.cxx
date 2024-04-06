@@ -34,7 +34,6 @@
 #include "TH1.h"
 #include "TH1F.h"
 #include "TH2F.h"
-#include "THistPainter.h"
 #include "TStyle.h"
 
 #include "THttpServer.h"

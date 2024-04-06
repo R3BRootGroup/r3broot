@@ -19,13 +19,7 @@
 #include "TClonesArray.h"
 
 // includes for modeling
-#include "TGeoBBox.h"
-#include "TGeoCompositeShape.h"
 #include "TGeoManager.h"
-#include "TGeoMaterial.h"
-#include "TGeoMatrix.h"
-#include "TGeoMedium.h"
-#include "TGeoShapeAssembly.h"
 #include "TParticle.h"
 #include "TVirtualMC.h"
 

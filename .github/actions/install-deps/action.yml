@@ -17,7 +17,7 @@ runs:
     - name: cache ucesb
       if: github.event_name == 'pull_request'
       id: cache-ucesb
-      uses: actions/cache/restore@v3
+      uses: actions/cache/restore@v4
       with:
         path: |
           ${{ env.UCESB_DIR }}
@@ -27,7 +27,7 @@ runs:
     - name: cache r3b
       if: inputs.cache-name != 'false' && github.event_name == 'pull_request'
       id: cache-r3b
-      uses: actions/cache/restore@v3
+      uses: actions/cache/restore@v4
       with:
         path: .ccache
         key: r3b-build-${{ inputs.cache-name }}-${{ inputs.r3b-dev-key }}

@@ -1,8 +1,8 @@
-name: Cleanup Old Caches
+name: Cleanup old caches
 
 on:
   schedule:
-    - cron: '0 0 * * 0'
+    - cron: '0 0 1 */2 *'
 
 jobs:
   cleanup:
