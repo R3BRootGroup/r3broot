@@ -244,7 +244,7 @@ void R3BAsciiGenerator::OpenOrRewindFile()
     {
         LOG(info) << "R3BAsciiGenerator: Reading input file " << fFileName;
         fFile.open(fFileName);
-        const std::string extension = boost::filesystem::extension(fFileName);
+        const std::string extension = boost::filesystem::path(fFileName).extension().string();
         if (extension == ".gz")
         {
             LOG(debug) << "R3BAsciiGenerator: Using gzip";

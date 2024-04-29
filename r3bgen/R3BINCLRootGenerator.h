@@ -11,13 +11,12 @@
  * or submit itself to any jurisdiction.                                      *
  ******************************************************************************/
 
-#ifndef R3BINCLRootGenerator_H
-#define R3BINCLRootGenerator_H 1
+#pragma once
 
-#include "FairGenerator.h"
-#include "TFile.h"
-#include "TString.h"
-#include "TTree.h"
+#include <FairGenerator.h>
+#include <TFile.h>
+#include <TString.h>
+#include <TTree.h>
 #include <fstream>
 #include <iostream>
 #include <map>
@@ -107,5 +106,3 @@ class R3BINCLRootGenerator : public FairGenerator
 
     ClassDefOverride(R3BINCLRootGenerator, 0);
 };
-
-#endif /* R3BINCLRootGenerator_H */

@@ -19,15 +19,14 @@
 
 /** Include beam spot size **/
 
-#ifndef R3BIONGENERATOR_H
-#define R3BIONGENERATOR_H
+#pragma once
 
 #include "R3BBeamProperties.h"
 
-#include "FairGenerator.h"
-#include "FairIon.h"
+#include <FairGenerator.h>
+#include <FairIon.h>
 
-#include "TRandom3.h"
+#include <TRandom3.h>
 
 #include <iostream>
 
@@ -93,5 +92,3 @@ class R3BIonGenerator : public FairGenerator
     TRandom3 fRNG; // the RNG
     ClassDefOverride(R3BIonGenerator, 1)
 };
-
-#endif

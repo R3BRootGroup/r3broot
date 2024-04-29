@@ -11,8 +11,7 @@
  * or submit itself to any jurisdiction.                                      *
  ******************************************************************************/
 
-#ifndef R3BASCIIGENERATOR_H
-#define R3BASCIIGENERATOR_H 1
+#pragma once
 
 #include "FairGenerator.h"
 #include "TString.h"
@@ -69,5 +68,3 @@ class R3BAsciiGenerator : public FairGenerator
 
     ClassDefOverride(R3BAsciiGenerator, 0);
 };
-
-#endif /* R3BASCIIGENERATOR_H */
