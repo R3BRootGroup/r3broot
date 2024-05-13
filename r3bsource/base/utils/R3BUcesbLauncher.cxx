@@ -183,7 +183,7 @@ namespace R3B
         auto err_code = std::error_code{};
         if (not ucesb_server_->wait_for(CHILD_CLOSE_WAITING_TIME, err_code))
         {
-            R3BLOG(warn, fmt::format("Failed to close Ucesb server! Error code: {}", err_code));
+            R3BLOG(warn, fmt::format("Failed to close Ucesb server! Error code: {}", err_code.value()));
             ucesb_server_->terminate(err_code);
             R3BLOG(warn, "Killing Ucesb server");
         }
