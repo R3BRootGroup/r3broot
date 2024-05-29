@@ -12,10 +12,11 @@
 ##############################################################################
 
 set(SRCS R3BNeuland.cxx R3BNeulandMCMon.cxx R3BNeulandPrimaryClusterFinder.cxx
-         R3BNeulandPrimaryInteractionFinder.cxx)
+         R3BNeulandPrimaryInteractionFinder.cxx generator.cxx)
 
 set(HEADERS R3BNeuland.h R3BNeulandMCMon.h R3BNeulandPrimaryClusterFinder.h
-            R3BNeulandPrimaryInteractionFinder.h)
+            R3BNeulandPrimaryInteractionFinder.h generator.h)
+
 
 add_library(R3BNeulandSimulation SHARED ${SRCS})
 target_include_directories(R3BNeulandSimulation PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
