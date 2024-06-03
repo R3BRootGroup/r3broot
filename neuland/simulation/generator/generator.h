@@ -12,7 +12,7 @@ template <typename ADist, typename EDist>
 class TrackGenerator
 {
   public:
-    TrackGenerator(ADist AngleDist, EDist EnergyDist)
+    TrackGenerator(const ADist& AngleDist,const EDist& EnergyDist)
         : AngleDist_{ AngleDist }
         , EnergyDist_{ EnergyDist }
     {
@@ -27,19 +27,19 @@ class TrackGenerator
     double detector_height{};
 
     double particle_mass{};
-    const double speed_of_light { 299792458 };
+    static constexpr double speed_of_light{ 299792458 };
 
     ROOT::Math::Cartesian3D<double> position{};
 
-    ADist AngleDist_;
-    EDist EnergyDist_;
+    const ADist& AngleDist_;
+    const EDist& EnergyDist_;
     TRandom rd_engine_;
 
     // std::random_device rd{};
     // std::mt19937 gen{ rd() };
 
     auto rd_num_gen_point() -> ROOT::Math::Cartesian3D<double>;
-    auto rd_num_gen_angles() -> ROOT::Math::Polar3D<double>;
+    auto rd_num_gen_angles()  ->  ROOT::Math::Polar3D<double>;
     auto rd_num_gen_energy() -> double;
     auto calculate_abs_momentum(double kinetic_energy) -> double;
     auto calculate_momentum_energy(double kinetic_energy, double Theta, double Phi) -> ROOT::Math::PxPyPzE4D<double>;
@@ -48,7 +48,7 @@ class TrackGenerator
 };
 
 template <typename ADist, typename EDist>
-ROOT::Math::Polar3D<double> TrackGenerator<ADist, EDist>::rd_num_gen_angles()
+ ROOT::Math::Polar3D<double> TrackGenerator<ADist, EDist>::rd_num_gen_angles()
 {
     ROOT::Math::Polar3D<double> angles{};
     angles.SetPhi(rd_engine_.Uniform(0.,M_PI));
