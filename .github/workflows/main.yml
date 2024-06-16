@@ -110,9 +110,9 @@ jobs:
             # to be a space separated list of urls using the operator ">-". Append
             # more urls to this list if more repos need to be added.
             # The R3BFileSource repo is used for testing unpacking.
+            # FRS excluded on 17.06.2024 https://github.com/R3BRootGroup/frs.git
             url: >-
               https://github.com/R3BRootGroup/sofia.git
-              https://github.com/R3BRootGroup/frs.git
               https://github.com/R3BRootGroup/asyeos.git
               https://github.com/R3BRootGroup/R3BFileSource.git
             # Using own cache file
