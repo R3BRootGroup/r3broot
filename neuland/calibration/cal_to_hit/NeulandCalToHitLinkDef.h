@@ -22,6 +22,6 @@
 #pragma link off all functions;
 
 #pragma link C++ class R3B::Neuland::HitModulePar+;
-#pragma link C++ class unordered_map<unsigned int, R3B::Neuland::Cal2HitPar>+;
+#pragma link C++ class unordered_map<unsigned int, R3B::Neuland::HitModulePar>+;
 #pragma link C++ class R3B::Neuland::Cal2HitPar+;
 #endif

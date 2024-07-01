@@ -21,6 +21,7 @@
 namespace R3B::Neuland
 {
 
+    // TODO: Provide both flattened data and the composite
     struct CalDataSignal
     {
         ValueError<double> leading_time;        // ns
@@ -37,6 +38,7 @@ namespace R3B::Neuland
             : module_num{ mod_num }
         {
         }
+        // TODO: change to int
         unsigned int module_num = 0; // 1 based bar num
         std::vector<CalDataSignal> left;
         std::vector<CalDataSignal> right;

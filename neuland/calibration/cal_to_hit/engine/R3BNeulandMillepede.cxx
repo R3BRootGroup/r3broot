@@ -68,21 +68,21 @@ namespace R3B::Neuland::Calibration
 
         switch (factor)
         {
-            case 0:
-                res.second = GlobalLabel::tsync;
-                break;
-            case 1:
-                res.second = GlobalLabel::offset_effective_c;
-                break;
-            case 2:
-                res.second = GlobalLabel::effective_c;
-                break;
             // case 0:
-            //     res.second = GlobalLabel::offset_effective_c;
+            //     res.second = GlobalLabel::tsync;
             //     break;
             // case 1:
+            //     res.second = GlobalLabel::offset_effective_c;
+            //     break;
+            // case 2:
             //     res.second = GlobalLabel::effective_c;
             //     break;
+            case 0:
+                res.second = GlobalLabel::offset_effective_c;
+                break;
+            case 1:
+                res.second = GlobalLabel::effective_c;
+                break;
             default:
                 throw R3B::logic_error(fmt::format("An error occured with unrecognized global par id: {}", par_num));
         }
@@ -95,16 +95,18 @@ namespace R3B::Neuland::Calibration
         const auto num_of_module = GetModuleSize();
         switch (label)
         {
-            case GlobalLabel::tsync:
-                return module_num;
-            case GlobalLabel::offset_effective_c:
-                return module_num + num_of_module;
-            case GlobalLabel::effective_c:
-                return module_num + 2 * num_of_module;
-            // case GlobalLabel::offset_effective_c:
+            // case GlobalLabel::tsync:
             //     return module_num;
-            // case GlobalLabel::effective_c:
+            // case GlobalLabel::offset_effective_c:
             //     return module_num + num_of_module;
+            // case GlobalLabel::effective_c:
+            //     return module_num + 2 * num_of_module;
+            case GlobalLabel::offset_effective_c:
+                return module_num;
+            case GlobalLabel::effective_c:
+                return module_num + num_of_module;
+            case GlobalLabel::tsync:
+                return 0;
             default:
                 throw std::runtime_error("An error occured with unrecognized global tag");
         }
@@ -180,12 +182,25 @@ namespace R3B::Neuland::Calibration
             return false;
         }
 
-        // select out vertical cosmic rays
-        if (rng::all_of(signals |
-                            rng::views::transform([](const auto& bar_signal)
-                                                  { return ModuleID2PlaneID(bar_signal.module_num - 1); }) |
-                            rng::views::sliding(2),
-                        [](const auto& pair) { return pair.front() == pair.back(); }))
+        // // select out vertical cosmic rays
+        // if (rng::all_of(signals |
+        //                     rng::views::transform([](const auto& bar_signal)
+        //                                           { return ModuleID2PlaneID(bar_signal.module_num - 1); }) |
+        //                     rng::views::sliding(2),
+        //                 [](const auto& pair) { return pair.front() == pair.back(); }))
+        // {
+        //     return false;
+        // }
+
+        // Make sure the track has large zenith angle
+        for (const auto& bar_signal : signals)
+        {
+            auto plane_id = ModuleID2PlaneID(static_cast<int>(bar_signal.module_num) - 1);
+            ++bar_signal_counter_[plane_id];
+        }
+        auto is_too_vertical = rng::any_of(bar_signal_counter_, [this](auto count) { return count > plane_max_hit_; });
+        rng::fill(bar_signal_counter_, 0);
+        if (is_too_vertical)
         {
             return false;
         }
@@ -195,6 +210,8 @@ namespace R3B::Neuland::Calibration
             return false;
         }
 
+        // // testing:
+        // fmt::print("new event--------------------\n");
         return true;
     }
 
@@ -231,14 +248,17 @@ namespace R3B::Neuland::Calibration
         const auto pos_z = PlaneID2ZPos<float>(plane_id);
         const auto is_horizontal = IsPlaneIDHorizontal(plane_id);
         const auto pos_bar_vert_disp = GetBarVerticalDisplacement(module_num);
-        // const auto local_derivs = is_horizontal ? std::array{ 0.F, pos_z / SCALE_FACTOR, 0.F, 1.F }
-        //                                         : std::array{ pos_z / SCALE_FACTOR, 0.F, 1.F, 0.F };
-        const auto local_derivs = is_horizontal ? std::array{ 0.F, pos_z / SCALE_FACTOR, 0.F, 0.F, 1.F, 0.F }
-                                                : std::array{ pos_z / SCALE_FACTOR, 0.F, 0.F, 1.F, 0.F, 0.F };
+        const auto local_derivs = is_horizontal ? std::array{ 0.F, pos_z / SCALE_FACTOR, 0.F, 1.F }
+                                                : std::array{ pos_z / SCALE_FACTOR, 0.F, 1.F, 0.F };
+        // const auto local_derivs = is_horizontal ? std::array{ 0.F, pos_z / SCALE_FACTOR, 0.F, 0.F, 1.F, 0.F }
+        //                                         : std::array{ pos_z / SCALE_FACTOR, 0.F, 0.F, 1.F, 0.F, 0.F };
 
         input_data_buffer_.measurement = static_cast<float>(pos_bar_vert_disp / SCALE_FACTOR);
         input_data_buffer_.sigma = static_cast<float>(BarSize_XY / SQRT_12 / SCALE_FACTOR * error_scale_factor_);
 
+        // // testing:
+        // fmt::print("add signal: bar position: {}\n", pos_z / SCALE_FACTOR);
+        // // testing end
         std::copy(local_derivs.begin(), local_derivs.end(), std::back_inserter(input_data_buffer_.locals));
         write_to_buffer();
     }
@@ -260,14 +280,21 @@ namespace R3B::Neuland::Calibration
         input_data_buffer_.measurement = 0.F;
         input_data_buffer_.sigma =
             static_cast<float>(t_diff.error / SCALE_FACTOR / 2. * std::abs(init_effective_c) * error_scale_factor_);
-        // const auto local_derivs = is_horizontal ? std::array{ pos_z / SCALE_FACTOR, 0.F, 1.F, 0.F }
-        //                                         : std::array{ 0.F, pos_z / SCALE_FACTOR, 0.F, 1.F };
-        const auto local_derivs = is_horizontal ? std::array{ pos_z / SCALE_FACTOR, 0.F, 0.F, 1.F, 0.F, 0.F }
-                                                : std::array{ 0.F, pos_z / SCALE_FACTOR, 0.F, 0.F, 1.F, 0.F };
+        const auto local_derivs = is_horizontal ? std::array{ pos_z / SCALE_FACTOR, 0.F, 1.F, 0.F }
+                                                : std::array{ 0.F, pos_z / SCALE_FACTOR, 0.F, 1.F };
+        // const auto local_derivs = is_horizontal ? std::array{ pos_z / SCALE_FACTOR, 0.F, 0.F, 1.F, 0.F, 0.F }
+        //                                         : std::array{ 0.F, pos_z / SCALE_FACTOR, 0.F, 0.F, 1.F, 0.F };
         std::copy(local_derivs.begin(), local_derivs.end(), std::back_inserter(input_data_buffer_.locals));
         input_data_buffer_.globals.emplace_back(get_global_label_id(module_num, GlobalLabel::offset_effective_c), 0.5F);
         input_data_buffer_.globals.emplace_back(get_global_label_id(module_num, GlobalLabel::effective_c),
                                                 static_cast<float>(t_diff.value / SCALE_FACTOR / 2.));
+        // // testing:
+        // fmt::print("add signal: module_num: {}, z: {}, t_diff: {}, plane_id: {}\n",
+        //            module_num,
+        //            pos_z / SCALE_FACTOR,
+        //            static_cast<float>(t_diff.value / SCALE_FACTOR / 2.),
+        //            plane_id);
+        // // testing end
         write_to_buffer();
         R3BLOG(
             debug,
@@ -283,7 +310,7 @@ namespace R3B::Neuland::Calibration
             return;
         }
 
-        add_signal_t_sum(signal);
+        // add_signal_t_sum(signal);
         add_signal_t_diff(signal);
         add_spacial_local_constraint(static_cast<int>(signal.module_num));
     }
@@ -306,12 +333,22 @@ namespace R3B::Neuland::Calibration
         const auto& pars = hit_par.GetListOfModulePar();
         for (const auto& [module_num, par] : pars)
         {
-            graph_time_offset_->SetPoint(static_cast<int>(module_num), module_num, par.tDiff.value);
-            graph_time_offset_->SetPointError(static_cast<int>(module_num), 0., par.tDiff.error);
-            graph_time_sync_->SetPoint(static_cast<int>(module_num), module_num, par.tSync.value);
-            graph_time_sync_->SetPointError(static_cast<int>(module_num), 0., par.tSync.error);
-            graph_effective_c_->SetPoint(static_cast<int>(module_num), module_num, par.effectiveSpeed.value);
-            graph_effective_c_->SetPointError(static_cast<int>(module_num), 0., par.effectiveSpeed.error);
+            if (graph_time_offset_ != nullptr)
+            {
+                graph_time_offset_->SetPoint(static_cast<int>(module_num), module_num, par.tDiff.value);
+                graph_time_offset_->SetPointError(static_cast<int>(module_num), 0., par.tDiff.error);
+            }
+            if (graph_time_sync_ != nullptr)
+            {
+                graph_time_sync_->SetPoint(static_cast<int>(module_num), module_num, par.tSync.value);
+                graph_time_sync_->SetPointError(static_cast<int>(module_num), 0., par.tSync.error);
+            }
+
+            if (graph_effective_c_ != nullptr)
+            {
+                graph_effective_c_->SetPoint(static_cast<int>(module_num), module_num, par.effectiveSpeed.value);
+                graph_effective_c_->SetPointError(static_cast<int>(module_num), 0., par.effectiveSpeed.error);
+            }
         }
     }
 
@@ -330,8 +367,8 @@ namespace R3B::Neuland::Calibration
         graph_time_offset_ = histograms.add_graph("time_offset", std::make_unique<TGraphErrors>(module_size));
         graph_time_offset_->SetTitle("Time offset vs BarNum");
 
-        graph_time_sync_ = histograms.add_graph("time_sync", std::make_unique<TGraphErrors>(module_size));
-        graph_time_sync_->SetTitle("Time sync vs BarNum");
+        // graph_time_sync_ = histograms.add_graph("time_sync", std::make_unique<TGraphErrors>(module_size));
+        // graph_time_sync_->SetTitle("Time sync vs BarNum");
 
         graph_effective_c_ = histograms.add_graph("effective_c", std::make_unique<TGraphErrors>(module_size));
         graph_effective_c_->SetTitle("Effective c vs BarNum");
@@ -388,8 +425,8 @@ namespace R3B::Neuland::Calibration
             steer_writer.add_parameter_default(get_global_label_id(module_num, GlobalLabel::effective_c),
                                                std::make_pair(static_cast<float>(init_effective_c_), 0.F));
         }
-        steer_writer.add_parameter_default(get_global_label_id(REFERENCE_BAR_NUM, GlobalLabel::tsync),
-                                           std::make_pair(0.F, -1.F));
+        // steer_writer.add_parameter_default(get_global_label_id(REFERENCE_BAR_NUM, GlobalLabel::tsync),
+        //                                    std::make_pair(0.F, -1.F));
         steer_writer.write();
     }
 } // namespace R3B::Neuland::Calibration

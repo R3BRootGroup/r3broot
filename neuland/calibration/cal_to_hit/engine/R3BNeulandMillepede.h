@@ -40,6 +40,7 @@ namespace R3B::Neuland::Calibration
       private:
         bool has_rank_check_ = false;
         int minimum_hit_ = 1;
+        int plane_max_hit_ = 3;
         float error_scale_factor_ = 1000.F;
         // float minimum_pos_z_ = 0;
         // float smallest_time_sum_ = 0.;
@@ -52,6 +53,8 @@ namespace R3B::Neuland::Calibration
         Mille binary_data_writer_{ input_data_filename_ };
         Millepede::ResultReader par_result_;
         Millepede::Launcher pede_launcher_;
+        // TODO: use plane cal data
+        std::vector<int> bar_signal_counter_ = std::vector(MaxNumberOfPlanes, 0);
 
         // histograms:
         TGraphErrors* graph_time_offset_ = nullptr;

@@ -74,7 +74,10 @@ namespace R3B::Neuland
         auto GetNumModulePar() const { return module_pars_.size(); }
         auto GetModuleParAt(unsigned int module_num) const -> const auto& { return module_pars_.at(module_num); }
         auto GetModulePars() const -> const auto& { return module_pars_; }
-        auto GetListOfModulePar() const -> const auto& { return module_pars_; }
+        auto GetListOfModulePar() const -> const std::unordered_map<unsigned int, R3B::Neuland::HitModulePar>&
+        {
+            return module_pars_;
+        }
         auto GetListOfModuleParRef() -> auto& { return module_pars_; }
 
       private:
@@ -82,7 +85,7 @@ namespace R3B::Neuland
         double distance_to_target_ = 0.; // in cm
         double energy_cut_ = 0.;         // in MeV
         std::vector<double> distances_to_first_plane_;
-        std::unordered_map<unsigned int, HitModulePar> module_pars_;
+        std::unordered_map<unsigned int, R3B::Neuland::HitModulePar> module_pars_;
         void clear() override
         {
             global_time_offset_ = 0.;
