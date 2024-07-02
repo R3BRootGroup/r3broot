@@ -45,6 +45,12 @@ namespace R3B
         }
 
         template <typename OtherType, typename = std::enable_if_t<std::is_arithmetic_v<OtherType>>>
+        auto operator*(OtherType other) const -> ValueError<DataType>
+        {
+            return { value * other, error * other };
+        }
+
+        template <typename OtherType, typename = std::enable_if_t<std::is_arithmetic_v<OtherType>>>
         auto operator/(OtherType other) const -> ValueError<DataType>
         {
             return { value / other, error / other };

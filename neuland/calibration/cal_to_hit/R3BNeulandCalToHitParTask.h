@@ -38,8 +38,10 @@ namespace R3B::Neuland
         void SetMinStat(int min) { engine_->SetMinStat(min); }
         void SetErrorScale(float scale) { engine_->SetErrorScale(scale); }
         auto GetCal2HitPar() -> auto* { return hit_par_; }
+        void SetMaxModuleNum(int max_num);
 
       private:
+        int max_module_num_ = MaxNumberOfBars;
         InputVectorConnector<BarCalData> cal_data_{ "NeulandCalData" };
 
         CalibrationBasePar* base_par_ = InputPar<CalibrationBasePar>("NeulandCalibrationBasePar");

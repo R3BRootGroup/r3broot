@@ -47,6 +47,7 @@ namespace R3B
             has_special_done_ = false;
         }
         void end();
+        void close() { output_file_.close(); }
 
       private:
         bool has_special_done_ = false; // if true, special(..) already called for this record

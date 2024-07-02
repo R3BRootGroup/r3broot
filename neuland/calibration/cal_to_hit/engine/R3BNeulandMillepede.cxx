@@ -12,9 +12,11 @@
  ******************************************************************************/
 
 #include "R3BNeulandMillepede.h"
+#include <R3BException.h>
 #include <R3BNeulandCalToHitParTask.h>
 #include <R3BNeulandCommon.h>
 #include <SteerWriter.h>
+#include <TFitResult.h>
 #include <TGraphErrors.h>
 #include <optional>
 #include <range/v3/algorithm.hpp>
@@ -41,6 +43,15 @@ namespace
             }
         }
     }
+
+    auto calculate_time_difference(const R3B::Neuland::BarCalData& bar_cal_data) -> R3B::ValueError<double>
+    {
+        const auto& left_signal = bar_cal_data.left.front();
+        const auto& right_signal = bar_cal_data.right.front();
+        const auto t_diff = (right_signal.leading_time - right_signal.trigger_time) -
+                            (left_signal.leading_time - left_signal.trigger_time);
+        return t_diff;
+    }
 } // namespace
 
 namespace R3B::Neuland::Calibration
@@ -55,13 +66,13 @@ namespace R3B::Neuland::Calibration
         binary_data_writer_.set_buffer_size(MILLE_BUFFER_SIZE);
 
         init_steer_writer();
-        init_parameter();
+        // init_parameter();
     }
 
     // output: module_num & global label
     inline auto MillepedeEngine::to_module_num_label(int par_num) -> std::pair<int, GlobalLabel>
     {
-        const auto num_of_module = GetModuleSize();
+        const auto num_of_module = std::min(GetMaxModuleNum(), GetModuleSize());
         auto res = std::pair<int, GlobalLabel>{};
         const auto factor = (par_num - 1) / num_of_module;
         res.first = (par_num - 1) % num_of_module + 1;
@@ -90,9 +101,9 @@ namespace R3B::Neuland::Calibration
         return res;
     }
 
-    inline auto MillepedeEngine::get_global_label_id(int module_num, GlobalLabel label) -> int
+    inline auto MillepedeEngine::to_global_label_id(int module_num, GlobalLabel label) -> int
     {
-        const auto num_of_module = GetModuleSize();
+        const auto num_of_module = std::min(GetMaxModuleNum(), GetModuleSize());
         switch (label)
         {
             // case GlobalLabel::tsync:
@@ -230,12 +241,12 @@ namespace R3B::Neuland::Calibration
 
         input_data_buffer_.measurement =
             static_cast<float>(t_sum.value / SCALE_FACTOR / 2.F - BarLength / SCALE_FACTOR / init_effective_c);
-        input_data_buffer_.sigma = static_cast<float>(t_sum.error / SCALE_FACTOR / 2. * error_scale_factor_);
+        input_data_buffer_.sigma = static_cast<float>(t_sum.error / SCALE_FACTOR / 2.);
         // input_data_buffer_.sigma = static_cast<float>(DEFAULT_MEAS_ERROR);
         const auto local_derivs_t = std::array{ 0.F, 0.F, pos_z / SCALE_FACTOR, 0.F, 0.F, 1.F };
         std::copy(local_derivs_t.begin(), local_derivs_t.end(), std::back_inserter(input_data_buffer_.locals));
-        input_data_buffer_.globals.emplace_back(get_global_label_id(module_num, GlobalLabel::tsync), 1.F);
-        input_data_buffer_.globals.emplace_back(get_global_label_id(module_num, GlobalLabel::effective_c),
+        input_data_buffer_.globals.emplace_back(to_global_label_id(module_num, GlobalLabel::tsync), 1.F);
+        input_data_buffer_.globals.emplace_back(to_global_label_id(module_num, GlobalLabel::effective_c),
                                                 -BarLength / SCALE_FACTOR / 2.F / init_effective_c / init_effective_c);
 
         write_to_buffer();
@@ -254,7 +265,7 @@ namespace R3B::Neuland::Calibration
         //                                         : std::array{ pos_z / SCALE_FACTOR, 0.F, 0.F, 1.F, 0.F, 0.F };
 
         input_data_buffer_.measurement = static_cast<float>(pos_bar_vert_disp / SCALE_FACTOR);
-        input_data_buffer_.sigma = static_cast<float>(BarSize_XY / SQRT_12 / SCALE_FACTOR * error_scale_factor_);
+        input_data_buffer_.sigma = static_cast<float>(BarSize_XY / SQRT_12 / SCALE_FACTOR);
 
         // // testing:
         // fmt::print("add signal: bar position: {}\n", pos_z / SCALE_FACTOR);
@@ -277,23 +288,27 @@ namespace R3B::Neuland::Calibration
         const auto t_diff = (right_signal.leading_time - right_signal.trigger_time) -
                             (left_signal.leading_time - left_signal.trigger_time);
 
+        // input_data_buffer_.measurement = 4 * static_cast<float>(t_diff.value / SCALE_FACTOR);
         input_data_buffer_.measurement = 0.F;
-        input_data_buffer_.sigma =
-            static_cast<float>(t_diff.error / SCALE_FACTOR / 2. * std::abs(init_effective_c) * error_scale_factor_);
+        input_data_buffer_.sigma = static_cast<float>(t_diff.error / SCALE_FACTOR / 2. * std::abs(init_effective_c));
         const auto local_derivs = is_horizontal ? std::array{ pos_z / SCALE_FACTOR, 0.F, 1.F, 0.F }
                                                 : std::array{ 0.F, pos_z / SCALE_FACTOR, 0.F, 1.F };
         // const auto local_derivs = is_horizontal ? std::array{ pos_z / SCALE_FACTOR, 0.F, 0.F, 1.F, 0.F, 0.F }
         //                                         : std::array{ 0.F, pos_z / SCALE_FACTOR, 0.F, 0.F, 1.F, 0.F };
         std::copy(local_derivs.begin(), local_derivs.end(), std::back_inserter(input_data_buffer_.locals));
-        input_data_buffer_.globals.emplace_back(get_global_label_id(module_num, GlobalLabel::offset_effective_c), 0.5F);
-        input_data_buffer_.globals.emplace_back(get_global_label_id(module_num, GlobalLabel::effective_c),
+        input_data_buffer_.globals.emplace_back(to_global_label_id(module_num, GlobalLabel::offset_effective_c), 0.5F);
+        input_data_buffer_.globals.emplace_back(to_global_label_id(module_num, GlobalLabel::effective_c),
                                                 static_cast<float>(t_diff.value / SCALE_FACTOR / 2.));
+
         // // testing:
-        // fmt::print("add signal: module_num: {}, z: {}, t_diff: {}, plane_id: {}\n",
-        //            module_num,
-        //            pos_z / SCALE_FACTOR,
-        //            static_cast<float>(t_diff.value / SCALE_FACTOR / 2.),
-        //            plane_id);
+        // if (module_num > 1010 and module_num < 1060)
+        // {
+        //     fmt::print("add signal: module_num: {}, z: {}, t_diff: {}, plane_id: {}\n",
+        //                module_num,
+        //                pos_z / SCALE_FACTOR,
+        //                static_cast<float>(t_diff.value / SCALE_FACTOR / 2.),
+        //                plane_id);
+        // }
         // // testing end
         write_to_buffer();
         R3BLOG(
@@ -310,27 +325,71 @@ namespace R3B::Neuland::Calibration
             return;
         }
 
-        // add_signal_t_sum(signal);
-        add_signal_t_diff(signal);
-        add_spacial_local_constraint(static_cast<int>(signal.module_num));
+        switch (current_state_)
+        {
+            case State::histogram_calibration:
+                fill_time_differences(signal);
+                break;
+            case State::millepede_calibration:
+                // add_signal_t_sum(signal);
+                add_signal_t_diff(signal);
+                add_spacial_local_constraint(static_cast<int>(signal.module_num));
+                break;
+        }
     }
 
     void MillepedeEngine::Calibrate(Cal2HitPar& hit_par)
     {
-        hit_par.Reset();
+        switch (current_state_)
+        {
+            case State::histogram_calibration:
+                histogram_calibrate(hit_par);
+                break;
+            case State::millepede_calibration:
+                millepede_calibrate(hit_par);
+                break;
+        }
+    }
 
-        R3BLOG(info, "Launching pede algorithm..");
+    void MillepedeEngine::histogram_calibrate(Cal2HitPar& cal_to_hit_par)
+    {
+        R3BLOG(info, "Begin histogram calibration");
+        auto max_module_num = std::min(GetModuleSize(), GetMaxModuleNum());
+        auto& module_pars = cal_to_hit_par.GetListOfModuleParRef();
+        for (int module_num{ 1 }; module_num <= max_module_num; ++module_num)
+        {
+            const auto [time_offset, effective_c] = calculate_time_offset_effective_speed(module_num);
+
+            auto& par_ref = module_pars.emplace(module_num, HitModulePar{}).first->second;
+            par_ref.tDiff.value = time_offset.value;
+            par_ref.tDiff.error = time_offset.error;
+            par_ref.effectiveSpeed.value = effective_c.value;
+            par_ref.effectiveSpeed.error = effective_c.error;
+        }
+
+        R3BLOG(info, "Histogram calibration finished. Ready for millepede calibration!");
+        current_state_ = State::millepede_calibration;
+    }
+
+    void MillepedeEngine::millepede_calibrate(Cal2HitPar& cal_to_hit_par)
+    {
+        R3BLOG(info, "Starting millepede calibration...");
+        cal_to_hit_par.Reset();
+        binary_data_writer_.close();
+
+        R3BLOG(info, "Launching pede algorithm...");
         pede_launcher_.sync_launch();
         pede_launcher_.end();
 
         par_result_.read();
-        fill_module_parameters(par_result_, hit_par);
-        fill_data_to_figure(hit_par);
+        fill_module_parameters(par_result_, cal_to_hit_par);
+        fill_data_to_figure(cal_to_hit_par);
+        R3BLOG(info, "Millepede calibration finished.");
     }
 
-    void MillepedeEngine::fill_data_to_figure(Cal2HitPar& hit_par)
+    void MillepedeEngine::fill_data_to_figure(Cal2HitPar& cal_to_hit_par)
     {
-        const auto& pars = hit_par.GetListOfModulePar();
+        const auto& pars = cal_to_hit_par.GetListOfModulePar();
         for (const auto& [module_num, par] : pars)
         {
             if (graph_time_offset_ != nullptr)
@@ -372,6 +431,9 @@ namespace R3B::Neuland::Calibration
 
         graph_effective_c_ = histograms.add_graph("effective_c", std::make_unique<TGraphErrors>(module_size));
         graph_effective_c_->SetTitle("Effective c vs BarNum");
+
+        hist_time_offsets_ = histograms.add_hist<TH2I>(
+            "hist_time_offsets", "hist_time_offsets", module_size, 0.5, module_size + 0.5, 1000, -500, 500);
     }
 
     void MillepedeEngine::buffer_clear()
@@ -415,18 +477,64 @@ namespace R3B::Neuland::Calibration
         steer_writer.set_filepath(pede_steer_filename_);
         steer_writer.set_parameter_file(parameter_filename_);
         steer_writer.set_data_filepath(input_data_filename_);
-        steer_writer.add_method(SteerWriter::Method::inversion, std::make_pair(3.F, 0.001F));
-        steer_writer.add_other_options(std::vector<std::string>{ "hugecut", "50000" });
+        steer_writer.add_method(SteerWriter::Method::inversion, std::make_pair(3.F, 0.1F));
+        // steer_writer.add_other_options(std::vector<std::string>{ "hugecut", "50000" });
         steer_writer.add_other_options(std::vector<std::string>{ "outlierdownweighting", "4" });
+        steer_writer.add_other_options(
+            std::vector<std::string>{ "scaleerrors", fmt::format("{}", error_scale_factor_) });
 
-        const auto module_size = GetModuleSize();
+        const auto module_size = std::min(GetMaxModuleNum(), GetModuleSize());
         for (int module_num{ 1 }; module_num <= module_size; ++module_num)
         {
-            steer_writer.add_parameter_default(get_global_label_id(module_num, GlobalLabel::effective_c),
+            steer_writer.add_parameter_default(to_global_label_id(module_num, GlobalLabel::effective_c),
                                                std::make_pair(static_cast<float>(init_effective_c_), 0.F));
         }
         // steer_writer.add_parameter_default(get_global_label_id(REFERENCE_BAR_NUM, GlobalLabel::tsync),
         //                                    std::make_pair(0.F, -1.F));
         steer_writer.write();
+    }
+
+    void MillepedeEngine::fill_time_differences(const BarCalData& bar_cal_data)
+    {
+        auto time_difference = calculate_time_difference(bar_cal_data);
+        hist_time_offsets_->Fill(bar_cal_data.module_num, time_difference.value);
+    }
+
+    auto MillepedeEngine::calculate_time_offset_effective_speed(int module_num) -> std::pair<ValueErrorD, ValueErrorD>
+    {
+        auto bin_num = hist_time_offsets_->GetXaxis()->FindBin(module_num);
+        auto* bar_dist_time_diff = hist_time_offsets_->ProjectionY("_y", bin_num, bin_num);
+        if (bar_dist_time_diff == nullptr)
+        {
+            throw R3B::runtime_error(
+                fmt::format("Cannot project histogram in y direction at module num {}", module_num));
+        }
+        // Normalization:
+        bar_dist_time_diff->Scale(1. / bar_dist_time_diff->GetEntries());
+
+        auto* bar_dist_time_diff_CDF = bar_dist_time_diff->GetCumulative();
+
+        // Range determination
+        constexpr auto low_value_cut = 0.05;
+        constexpr auto high_value_cut = 0.95;
+
+        auto low_thres = bar_dist_time_diff_CDF->GetBinCenter(bar_dist_time_diff_CDF->FindFirstBinAbove(low_value_cut));
+        auto high_thres =
+            bar_dist_time_diff_CDF->GetBinCenter(bar_dist_time_diff_CDF->FindFirstBinAbove(high_value_cut));
+
+        // fit
+        // options: S: return the result Q: quite mode 0: not canvas drawing
+        auto fit_result = bar_dist_time_diff_CDF->Fit("pol1", "SQ0", "", low_thres, high_thres);
+
+        // TODO: error analysis better needed here
+        auto offset = ValueErrorD{ fit_result->Parameter(0), fit_result->Error(0) };
+        auto slope = ValueErrorD{ fit_result->Parameter(1), fit_result->Error(1) };
+
+        auto effective_speed = slope * BarLength;
+
+        // TODO: the error calculation here is wrong as two values are not independent
+        auto time_offset = (ValueErrorD{ 0.5, 0 } - offset) / slope;
+
+        return std::make_pair(time_offset, effective_speed);
     }
 } // namespace R3B::Neuland::Calibration

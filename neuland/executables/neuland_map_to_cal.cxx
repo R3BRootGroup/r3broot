@@ -38,6 +38,7 @@ namespace fs = std::filesystem;
 constexpr int DEFAULT_EVENT_NUM = 10;
 constexpr int DEFAULT_RUN_ID = 999;
 constexpr int DEFAULT_MIN_STAT = 20;
+constexpr auto ERROR_SCALE = 10.F;
 
 using namespace std::string_literals;
 auto main(int argc, const char** argv) -> int
@@ -53,6 +54,8 @@ auto main(int argc, const char** argv) -> int
     auto input_par = programOptions.create_option<std::string>("in-par,p", "set the input parameter");
     auto output_file = programOptions.create_option<std::string>("out,o", "set the output file");
     auto event_num = programOptions.create_option<int>("eventNum,n", "set the event number", DEFAULT_EVENT_NUM);
+    auto error_scale = programOptions.create_option<float>(
+        "event_scale,e", "set the error scale for global parameter measurements", ERROR_SCALE);
     auto min_stat =
         programOptions.create_option<int>("min-stat,m", "set minimun statistics for calibration", DEFAULT_MIN_STAT);
     auto run_num = programOptions.create_option<int>("runNum,r", "set the number of runs", 1);
@@ -106,9 +109,10 @@ auto main(int argc, const char** argv) -> int
         auto cal2hit_method =
             (enable_mille.value()) ? R3B::Neuland::Cal2HitParMethod::Millipede : R3B::Neuland::Cal2HitParMethod::LSQT;
         auto cal2hitParTask = std::make_unique<R3B::Neuland::Cal2HitParTask>(cal2hit_method);
-        auto* cal2hitParTaskPtr = cal2hitParTask.get();
-        cal2hitParTaskPtr->SetTrigger(R3B::Neuland::CalTrigger::offspill);
-        cal2hitParTaskPtr->SetMinStat(min_stat.value());
+        cal2hitParTask->SetTrigger(R3B::Neuland::CalTrigger::offspill);
+        cal2hitParTask->SetMinStat(min_stat.value());
+        cal2hitParTask->SetErrorScale(error_scale.value());
+        cal2hitParTask->SetMaxModuleNum(1000);
         run->AddTask(cal2hitParTask.release());
 
         // set par input/output--------------------------------------------------------
@@ -124,9 +128,6 @@ auto main(int argc, const char** argv) -> int
 
         run->Init();
 
-        constexpr auto error_scale = 10.F;
-        cal2hitParTaskPtr->SetErrorScale(error_scale);
-        fmt::print("\nStarting run with error_scale {} ...\n\n", error_scale);
         run->Run(0, event_num.value() <= 0 ? 0 : event_num.value());
 
         timer.Stop();

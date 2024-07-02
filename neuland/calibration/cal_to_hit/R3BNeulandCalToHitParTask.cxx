@@ -31,10 +31,18 @@ namespace R3B::Neuland
                 R3BLOG(info, "Cal2HitPar method: Millepede.");
                 engine_ = std::make_unique<Calibration::MillepedeEngine>();
                 break;
+            default:
+                throw R3B::logic_error("Unrecgonized calibration method!");
         }
     }
 
     void Cal2HitParTask::HistogramInit(DataMonitor& histograms) { engine_->HistInit(histograms); }
+
+    void Cal2HitParTask::SetMaxModuleNum(int max_num)
+    {
+        max_module_num_ = max_num;
+        engine_->SetMaxModuleNum(max_module_num_);
+    }
 
     void Cal2HitParTask::ExtraInit(FairRootManager* /*rootMan*/)
     {
@@ -57,9 +65,13 @@ namespace R3B::Neuland
         engine_->EventReset();
         for (const auto& bar_signal : cal_data_)
         {
+            if (bar_signal.module_num > max_module_num_)
+            {
+                continue;
+            }
             engine_->AddSignal(bar_signal);
         }
-        auto* eventHeader = GetEventHeader();
+        const auto* eventHeader = GetEventHeader();
         engine_->EndOfEvent(eventHeader->GetEventno());
     }
 

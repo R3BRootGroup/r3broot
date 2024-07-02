@@ -16,6 +16,7 @@
 #include <R3BDataMonitor.h>
 #include <R3BNeulandCalData2.h>
 #include <R3BNeulandCalToHitPar.h>
+#include <R3BNeulandCommon.h>
 #include <R3BShared.h>
 
 namespace R3B::Neuland
@@ -36,8 +37,11 @@ namespace R3B::Neuland::Calibration
         auto operator=(const CosmicEngineInterface&) -> CosmicEngineInterface& = default;
         auto operator=(CosmicEngineInterface&&) -> CosmicEngineInterface& = delete;
 
+        void SetMaxModuleNum(int max_num) { max_module_num_ = max_num; }
         void SetModuleSize(int module_size) { module_size_ = module_size; }
         void SetTask(Cal2HitParTask* task) { mother_task_ = task; };
+
+        [[nodiscard]] auto GetMaxModuleNum() const -> int { return max_module_num_; }
         [[nodiscard]] auto GetModuleSize() const -> auto { return module_size_; }
         auto GetTask() -> Cal2HitParTask* { return mother_task_; }
 
@@ -46,15 +50,16 @@ namespace R3B::Neuland::Calibration
         virtual void AddSignal(const BarCalData& signal) = 0;
         virtual void Calibrate(Cal2HitPar& hit_par) = 0;
         virtual void SetMinStat(int min) {}
-        virtual void BeginOfEvent(unsigned int event_num){};
-        virtual void EndOfEvent(unsigned int event_num){};
-        virtual void EventReset(){};
-        virtual void EndOfTask(){};
-        virtual void HistInit(DataMonitor& histograms){};
+        virtual void BeginOfEvent(unsigned int event_num) {};
+        virtual void EndOfEvent(unsigned int event_num) {};
+        virtual void EventReset() {};
+        virtual void EndOfTask() {};
+        virtual void HistInit(DataMonitor& histograms) {};
         virtual void SetErrorScale(float scale) {}
 
       private:
         int module_size_ = 0;
+        int max_module_num_ = MaxNumberOfBars;
         Cal2HitParTask* mother_task_ = nullptr;
     };
 
