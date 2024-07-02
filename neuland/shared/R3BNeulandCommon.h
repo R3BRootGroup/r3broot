@@ -36,7 +36,7 @@ namespace R3B::Neuland
     }
 
     // Miscellaneous defaults:
-    constexpr auto DEFAULT_EFFECTIVE_C = 1.; // cm/ns
+    constexpr auto DEFAULT_EFFECTIVE_C = 8.; // cm/ns
 
     // Initialize variables from Birk' s Law
 
