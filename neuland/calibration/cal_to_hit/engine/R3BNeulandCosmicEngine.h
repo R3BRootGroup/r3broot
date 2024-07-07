@@ -46,8 +46,8 @@ namespace R3B::Neuland::Calibration
         auto GetTask() -> Cal2HitParTask* { return mother_task_; }
 
         virtual void Init() {}
-        virtual auto SignalFilter(const std::vector<BarCalData>& /*signals*/) -> bool { return true; }
-        virtual void AddSignal(const BarCalData& signal) = 0;
+        virtual auto SignalFilter(const CalData& /*signals*/) -> bool { return true; }
+        virtual void AddSignals(const CalData& signals) = 0;
         virtual void Calibrate(Cal2HitPar& hit_par) = 0;
         virtual void SetMinStat(int min) {}
         virtual void BeginOfEvent(unsigned int event_num) {};

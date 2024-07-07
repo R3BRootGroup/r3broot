@@ -12,12 +12,14 @@
  ******************************************************************************/
 
 #include "R3BNeulandMillepede.h"
+#include <Math/WrappedMultiTF1.h>
 #include <R3BException.h>
 #include <R3BNeulandCalToHitParTask.h>
 #include <R3BNeulandCommon.h>
 #include <SteerWriter.h>
 #include <TFitResult.h>
 #include <TGraphErrors.h>
+#include <fmt/ranges.h>
 #include <optional>
 #include <range/v3/algorithm.hpp>
 #include <range/v3/numeric.hpp>
@@ -26,36 +28,97 @@
 namespace rng = ranges;
 
 constexpr auto DEFAULT_RES_FILENAME = "millepede.res";
-constexpr auto SCALE_FACTOR = 100.F;
+constexpr auto SCALE_FACTOR = 10.F;
 constexpr auto REFERENCE_BAR_NUM = 25;
 constexpr auto MILLE_BUFFER_SIZE = std::size_t{ 100000 };
+constexpr auto DEFAULT_ERROR_NS = 1.F;
 
-namespace
+namespace R3B::Neuland::Calibration
 {
-    void calculate_time_offset(R3B::Neuland::Cal2HitPar& cal_to_hit_par)
+    namespace
     {
-        auto& module_pars = cal_to_hit_par.GetListOfModuleParRef();
-        for (auto& [module_num, module_par] : module_pars)
+        void calculate_time_offset(R3B::Neuland::Cal2HitPar& cal_to_hit_par)
         {
-            if (module_par.effectiveSpeed.value != 0)
+            auto& module_pars = cal_to_hit_par.GetListOfModuleParRef();
+            for (auto& [module_num, module_par] : module_pars)
             {
-                module_par.tDiff = module_par.tDiff / module_par.effectiveSpeed;
+                if (module_par.effectiveSpeed.value != 0)
+                {
+                    module_par.tDiff = module_par.offset_effective_c / module_par.effectiveSpeed;
+                }
+            }
+        }
+
+        auto calculate_time_difference(const R3B::Neuland::BarCalData& bar_cal_data) -> R3B::ValueError<double>
+        {
+            const auto& left_signal = bar_cal_data.left.front();
+            const auto& right_signal = bar_cal_data.right.front();
+            const auto t_diff = (right_signal.leading_time - right_signal.trigger_time) -
+                                (left_signal.leading_time - left_signal.trigger_time);
+            return t_diff;
+        }
+
+        inline auto has_only_one_signal(const BarCalData& bar_signal) -> bool
+        {
+            return bar_signal.left.size() == 1 and bar_signal.right.size() == 1;
+        }
+
+    } // namespace
+
+    BarPositionFitter::BarPositionFitter()
+    {
+        static constexpr auto init_values = std::array{ 1., 0. };
+        fitter_.Config().SetParamsSettings(static_cast<int>(init_values.size()), init_values.data());
+        fitter_.Config().SetUpdateAfterFit(false);
+    }
+    auto BarPositionFitter::fit_positions() -> bool
+    {
+        return fit_with(horizontal_bars_, y_pos_fitting_function_) and
+               fit_with(vertical_bars_, x_pos_fitting_function_);
+    }
+
+    auto BarPositionFitter::fit_with(const BarPositions& positions, TF1& func) -> bool
+    {
+        if (positions.size() < 2)
+        {
+            return false;
+        }
+        auto fit_data = ROOT::Fit::BinData{ positions.size(),
+                                            positions.pos_z.data(),
+                                            positions.displacements.data(),
+                                            nullptr,
+                                            positions.displacement_errors.data() };
+        fitter_.SetFunction(ROOT::Math::WrappedMultiTF1{ func, static_cast<unsigned int>(func.GetNdim()) }, false);
+        const auto is_success = fitter_.Fit(fit_data);
+        if (not is_success)
+        {
+            R3BLOG(error, "Fitting failed!");
+        }
+        return true;
+    }
+
+    auto BarPositionFitter::get_prediction(bool is_horizontal, double pos_z) -> double
+    {
+        return is_horizontal ? x_pos_fitting_function_(pos_z) : y_pos_fitting_function_(pos_z);
+    }
+
+    void MillepedeEngine::fill_time_differences(const CalData& cal_data, TH2I* hist_time_offsets)
+    {
+        auto max_module_num = std::min(GetMaxModuleNum(), GetModuleSize());
+        for (const auto& [plane_num, plane_cal_data] : cal_data)
+        {
+            for (const auto& [bar_num, bar_signal] : plane_cal_data.bar_cal_data)
+            {
+                if (bar_signal.module_num > max_module_num or not has_only_one_signal(bar_signal))
+                {
+                    continue;
+                }
+                auto time_difference = calculate_time_difference(bar_signal);
+                hist_time_offsets->Fill(bar_signal.module_num, time_difference.value);
             }
         }
     }
 
-    auto calculate_time_difference(const R3B::Neuland::BarCalData& bar_cal_data) -> R3B::ValueError<double>
-    {
-        const auto& left_signal = bar_cal_data.left.front();
-        const auto& right_signal = bar_cal_data.right.front();
-        const auto t_diff = (right_signal.leading_time - right_signal.trigger_time) -
-                            (left_signal.leading_time - left_signal.trigger_time);
-        return t_diff;
-    }
-} // namespace
-
-namespace R3B::Neuland::Calibration
-{
     void MillepedeEngine::Init()
     {
         cal_to_hit_par_ = GetTask()->GetCal2HitPar();
@@ -64,9 +127,6 @@ namespace R3B::Neuland::Calibration
         pede_launcher_.set_steer_filename(pede_steer_filename_);
         pede_launcher_.set_parameter_filename(parameter_filename_);
         binary_data_writer_.set_buffer_size(MILLE_BUFFER_SIZE);
-
-        init_steer_writer();
-        // init_parameter();
     }
 
     // output: module_num & global label
@@ -136,17 +196,14 @@ namespace R3B::Neuland::Calibration
             switch (global_label)
             {
                 case GlobalLabel::tsync:
-                    par_ref.tSync.value = par.value * SCALE_FACTOR;
-                    par_ref.tSync.error = par.error * SCALE_FACTOR;
+                    par_ref.tSync -= ValueErrorD{ par.value, par.error } * SCALE_FACTOR;
                     break;
                 case GlobalLabel::offset_effective_c:
                     // The value here is the product of tDiff and effectiveSped. Real tDiff will be calculated later
-                    par_ref.tDiff.value = par.value * SCALE_FACTOR;
-                    par_ref.tDiff.error = par.error * SCALE_FACTOR;
+                    par_ref.offset_effective_c -= (ValueErrorD{ par.value, par.error } * SCALE_FACTOR);
                     break;
                 case GlobalLabel::effective_c:
-                    par_ref.effectiveSpeed.value = par.value;
-                    par_ref.effectiveSpeed.error = par.error;
+                    par_ref.effectiveSpeed -= ValueErrorD{ par.value, par.error };
                     break;
                 default:
                     throw std::runtime_error("An error occured with unrecognized global tag");
@@ -156,39 +213,34 @@ namespace R3B::Neuland::Calibration
         calculate_time_offset(cal_to_hit_par);
     }
 
-    auto MillepedeEngine::set_minimum_values(const std::vector<R3B::Neuland::BarCalData>& signals) -> bool
+    void MillepedeEngine::set_minimum_values(const CalData& signals)
     {
         // make sure only one hit exists in one bar
-        auto filtered_signals = rng::filter_view(
-            signals | rng::views::all,
-            [](const auto& bar_signal) { return bar_signal.left.size() == 1 and bar_signal.right.size() == 1; });
-        if (filtered_signals.empty())
+        auto t_sum = 0.;
+        for (const auto& [plane_num, plane_cal_data] : signals)
         {
-            return false;
+            for (const auto& [bar_num, bar_signal] : plane_cal_data.bar_cal_data)
+            {
+                if (not has_only_one_signal(bar_signal))
+                {
+                    continue;
+                }
+                const auto& left_signal = bar_signal.left.front();
+                const auto& right_signal = bar_signal.right.front();
+                t_sum += (left_signal.leading_time - left_signal.trigger_time + right_signal.leading_time -
+                          right_signal.trigger_time)
+                             .value;
+            }
         }
 
-        if (not average_t_sum_.has_value())
-        {
-            auto t_sum_view = filtered_signals | rng::views::transform(
-                                                     [](const auto& bar_signal)
-                                                     {
-                                                         const auto& left_signal = bar_signal.left.front();
-                                                         const auto& right_signal = bar_signal.right.front();
-                                                         return (left_signal.leading_time - left_signal.trigger_time +
-                                                                 right_signal.leading_time - right_signal.trigger_time)
-                                                             .value;
-                                                     });
-            auto sum = rng::accumulate(t_sum_view, 0.F);
-            average_t_sum_ = sum / static_cast<float>(rng::distance(t_sum_view.begin(), t_sum_view.end()));
-            R3BLOG(info, fmt::format("Average t_sum is calculated to be {}", average_t_sum_.value()));
-        }
-        return true;
+        average_t_sum_ = t_sum / GetBarCalDataSize(signals);
+        R3BLOG(debug, fmt::format("Average t_sum is calculated to be {}", average_t_sum_.value()));
     }
 
-    auto MillepedeEngine::SignalFilter(const std::vector<BarCalData>& signals) -> bool
+    auto MillepedeEngine::SignalFilter(const CalData& signals) -> bool
     {
         // select out rays with few hits
-        if (signals.size() < minimum_hit_)
+        if (GetBarCalDataSize(signals) < minimum_hit_)
         {
             return false;
         }
@@ -204,22 +256,14 @@ namespace R3B::Neuland::Calibration
         // }
 
         // Make sure the track has large zenith angle
-        for (const auto& bar_signal : signals)
-        {
-            auto plane_id = ModuleID2PlaneID(static_cast<int>(bar_signal.module_num) - 1);
-            ++bar_signal_counter_[plane_id];
-        }
-        auto is_too_vertical = rng::any_of(bar_signal_counter_, [this](auto count) { return count > plane_max_hit_; });
-        rng::fill(bar_signal_counter_, 0);
+        auto is_too_vertical = rng::any_of(
+            signals, [this](const auto& plane_cal) { return plane_cal.second.bar_cal_data.size() > plane_max_hit_; });
         if (is_too_vertical)
         {
             return false;
         }
 
-        if (not set_minimum_values(signals))
-        {
-            return false;
-        }
+        set_minimum_values(signals);
 
         // // testing:
         // fmt::print("new event--------------------\n");
@@ -252,26 +296,33 @@ namespace R3B::Neuland::Calibration
         write_to_buffer();
     }
 
-    void MillepedeEngine::add_spacial_local_constraint(int module_num)
+    auto MillepedeEngine::calculate_position(const BarCalData& signal) -> double
     {
-        buffer_clear();
-        const auto plane_id = ModuleID2PlaneID(module_num - 1);
-        const auto pos_z = PlaneID2ZPos<float>(plane_id);
-        const auto is_horizontal = IsPlaneIDHorizontal(plane_id);
-        const auto pos_bar_vert_disp = GetBarVerticalDisplacement(module_num);
-        const auto local_derivs = is_horizontal ? std::array{ 0.F, pos_z / SCALE_FACTOR, 0.F, 1.F }
-                                                : std::array{ pos_z / SCALE_FACTOR, 0.F, 1.F, 0.F };
-        // const auto local_derivs = is_horizontal ? std::array{ 0.F, pos_z / SCALE_FACTOR, 0.F, 0.F, 1.F, 0.F }
-        //                                         : std::array{ pos_z / SCALE_FACTOR, 0.F, 0.F, 1.F, 0.F, 0.F };
+        const auto module_num = static_cast<int>(signal.module_num);
+        auto effective_c = cal_to_hit_par_->GetModuleParAt(module_num).effectiveSpeed.value;
+        auto time_offset = cal_to_hit_par_->GetModuleParAt(module_num).tDiff.value;
+        auto offset_effective_c = effective_c * time_offset;
 
-        input_data_buffer_.measurement = static_cast<float>(pos_bar_vert_disp / SCALE_FACTOR);
-        input_data_buffer_.sigma = static_cast<float>(BarSize_XY / SQRT_12 / SCALE_FACTOR);
+        const auto& left_signal = signal.left.front();
+        const auto& right_signal = signal.right.front();
+        const auto t_diff = (right_signal.leading_time - right_signal.trigger_time) -
+                            (left_signal.leading_time - left_signal.trigger_time);
 
-        // // testing:
-        // fmt::print("add signal: bar position: {}\n", pos_z / SCALE_FACTOR);
-        // // testing end
-        std::copy(local_derivs.begin(), local_derivs.end(), std::back_inserter(input_data_buffer_.locals));
-        write_to_buffer();
+        // fmt::print(
+        //     "effective_c: {}, offset_effective_c: {}, t_diff: {}\n", effective_c, offset_effective_c, t_diff.value);
+
+        return (offset_effective_c - t_diff.value * effective_c) / 2.;
+    }
+
+    auto MillepedeEngine::get_bar_cal_residual(const BarCalData& signal, double pred) -> double
+    {
+        const auto position = calculate_position(signal);
+        // fmt::print("bar number: {}, cal: {}, pred: {}, res: {}\n",
+        //            signal.module_num,
+        //            position,
+        //            pred,
+        //            std::abs(pred - position));
+        return std::abs(pred - position);
     }
 
     void MillepedeEngine::add_signal_t_diff(const BarCalData& signal)
@@ -280,7 +331,7 @@ namespace R3B::Neuland::Calibration
         const auto module_num = static_cast<int>(signal.module_num);
         const auto plane_id = ModuleID2PlaneID(static_cast<int>(module_num) - 1);
         const auto is_horizontal = IsPlaneIDHorizontal(plane_id);
-        auto init_effective_c = cal_to_hit_par_->GetModuleParAt(module_num).effectiveSpeed.value;
+
         const auto pos_z = static_cast<float>(PlaneID2ZPos(plane_id));
 
         const auto& left_signal = signal.left.front();
@@ -288,28 +339,19 @@ namespace R3B::Neuland::Calibration
         const auto t_diff = (right_signal.leading_time - right_signal.trigger_time) -
                             (left_signal.leading_time - left_signal.trigger_time);
 
+        const auto measurement = calculate_position(signal);
         // input_data_buffer_.measurement = 4 * static_cast<float>(t_diff.value / SCALE_FACTOR);
-        input_data_buffer_.measurement = 0.F;
-        input_data_buffer_.sigma = static_cast<float>(t_diff.error / SCALE_FACTOR / 2. * std::abs(init_effective_c));
+        input_data_buffer_.measurement = static_cast<float>(measurement) / SCALE_FACTOR;
+        input_data_buffer_.sigma = static_cast<float>(DEFAULT_ERROR_NS / SCALE_FACTOR);
         const auto local_derivs = is_horizontal ? std::array{ pos_z / SCALE_FACTOR, 0.F, 1.F, 0.F }
                                                 : std::array{ 0.F, pos_z / SCALE_FACTOR, 0.F, 1.F };
         // const auto local_derivs = is_horizontal ? std::array{ pos_z / SCALE_FACTOR, 0.F, 0.F, 1.F, 0.F, 0.F }
         //                                         : std::array{ 0.F, pos_z / SCALE_FACTOR, 0.F, 0.F, 1.F, 0.F };
         std::copy(local_derivs.begin(), local_derivs.end(), std::back_inserter(input_data_buffer_.locals));
-        input_data_buffer_.globals.emplace_back(to_global_label_id(module_num, GlobalLabel::offset_effective_c), 0.5F);
+        input_data_buffer_.globals.emplace_back(to_global_label_id(module_num, GlobalLabel::offset_effective_c), -0.5F);
         input_data_buffer_.globals.emplace_back(to_global_label_id(module_num, GlobalLabel::effective_c),
                                                 static_cast<float>(t_diff.value / SCALE_FACTOR / 2.));
 
-        // // testing:
-        // if (module_num > 1010 and module_num < 1060)
-        // {
-        //     fmt::print("add signal: module_num: {}, z: {}, t_diff: {}, plane_id: {}\n",
-        //                module_num,
-        //                pos_z / SCALE_FACTOR,
-        //                static_cast<float>(t_diff.value / SCALE_FACTOR / 2.),
-        //                plane_id);
-        // }
-        // // testing end
         write_to_buffer();
         R3BLOG(
             debug,
@@ -317,25 +359,146 @@ namespace R3B::Neuland::Calibration
                 "Writting Mille data to binary file with meas = {} and z = {}", input_data_buffer_.measurement, pos_z));
     }
 
-    void MillepedeEngine::AddSignal(const BarCalData& signal)
+    void MillepedeEngine::AddSignals(const CalData& signals)
     {
         // all bar signal must have one signal on both sides
-        if (signal.left.size() != 1 or signal.right.size() != 1)
-        {
-            return;
-        }
 
         switch (current_state_)
         {
             case State::histogram_calibration:
-                fill_time_differences(signal);
+                fill_time_differences(signals, hist_time_offsets_);
                 break;
             case State::millepede_calibration:
-                // add_signal_t_sum(signal);
-                add_signal_t_diff(signal);
-                add_spacial_local_constraint(static_cast<int>(signal.module_num));
+                fill_data_to_mille(signals);
                 break;
         }
+    }
+
+    template <typename FillAction>
+    void MillepedeEngine::fill_filtered_bar_cal_data(const CalData& signals, FillAction&& fill_action)
+    {
+        auto max_module_num = std::min(GetMaxModuleNum(), GetModuleSize());
+        for (const auto& [_, plane_cal_data] : signals)
+        {
+            auto plane_num = plane_cal_data.plane_num;
+
+            // only look for the bar data with 1 signal from the left and 1 from the right
+            auto filtered_signals = rng::filter_view(
+                plane_cal_data.bar_cal_data | rng::views::all,
+                [max_module_num](const auto& bar_signal)
+                { return has_only_one_signal(bar_signal.second) and bar_signal.second.module_num <= max_module_num; });
+
+            if (filtered_signals.empty())
+            {
+                return;
+            }
+
+            // check if bar signals are together
+            const auto min_bar_num = rng::min(filtered_signals | rng::views::keys);
+            const auto max_bar_num = rng::max(filtered_signals | rng::views::keys);
+            const auto filtered_size =
+                static_cast<int>(rng::distance(filtered_signals.begin(), filtered_signals.end()));
+            auto is_together = (max_bar_num - min_bar_num + 1 == filtered_size);
+            if (not is_together)
+            {
+                // fmt::print("Plane signals has seperate bar signals: {}\n", plane_cal_data);
+                return;
+            }
+
+            fill_action(plane_num, filtered_signals);
+        }
+    }
+
+    void MillepedeEngine::fill_data_to_mille(const CalData& signals)
+    {
+        auto fill_bar_position_action = [this](auto plane_num, auto& filtered_bar_signals)
+        {
+            const auto filtered_size =
+                static_cast<double>(rng::distance(filtered_bar_signals.begin(), filtered_bar_signals.end()));
+            auto displacement = std::accumulate(filtered_bar_signals.begin(),
+                                                filtered_bar_signals.end(),
+                                                double{},
+                                                [](double init, const auto& bar_signal)
+                                                { return init + GetBarVerticalDisplacement(bar_signal.first); }) /
+                                filtered_size;
+            add_spacial_local_constraint(plane_num, displacement, BarSize_XY * filtered_size / 2.);
+        };
+
+        fill_filtered_bar_cal_data(signals, fill_bar_position_action);
+        if (not bar_positions_.fit_positions())
+        {
+            return;
+        }
+
+        auto fill_time_action = [this](auto plane_num, auto& filtered_bar_signals)
+        {
+            const auto filtered_size =
+                static_cast<int>(rng::distance(filtered_bar_signals.begin(), filtered_bar_signals.end()));
+            if (filtered_size == 1)
+            {
+                add_signal_t(filtered_bar_signals.begin()->second);
+                return;
+            }
+            const auto is_horizontal = IsPlaneIDHorizontal(plane_num - 1);
+            const auto pos_z = PlaneID2ZPos<double>(plane_num - 1);
+            const auto pred = bar_positions_.get_prediction(is_horizontal, pos_z);
+
+            // fmt::print("[{}, {}, [{}]],",
+            //            pos_z,
+            //            pred,
+            //            fmt::join(filtered_bar_signals | rng::views::values |
+            //                          rng::views::transform([this](const auto& bar_signal)
+            //                                                { return calculate_position(bar_signal); }),
+            //                      ", "));
+            // TODO: need to optimized here. get_bar_cal_residual get called too many times
+
+            // choose the bar signal closest to the regression line
+            auto bar_iter = rng::min_element(filtered_bar_signals,
+                                             [this, pred](const auto& first_bar, const auto& second_bar) {
+                                                 return get_bar_cal_residual(second_bar.second, pred) >
+                                                        get_bar_cal_residual(first_bar.second, pred);
+                                             });
+            // fmt::print("selected bar num: {}\n", bar_iter->second.module_num);
+            if (get_bar_cal_residual(bar_iter->second, pred) < pos_residual_threshold)
+            {
+                add_signal_t(bar_iter->second);
+            }
+            return;
+        };
+
+        fill_filtered_bar_cal_data(signals, fill_time_action);
+        write_local_constraint(bar_positions_);
+    }
+
+    void MillepedeEngine::add_spacial_local_constraint(int plane_num, double displacement, double error)
+    {
+        auto bar_position = BarPositionFitter::BarPosition{};
+        bar_position.is_horizontal = IsPlaneIDHorizontal(plane_num - 1);
+        bar_position.pos_z = PlaneID2ZPos<float>(plane_num - 1);
+        bar_position.displacement = displacement;
+        bar_position.displacement_error = error;
+        bar_positions_.add_one_bar_signal(bar_position);
+    }
+
+    void MillepedeEngine::write_local_constraint(const BarPositionFitter& bar_positions)
+    {
+        auto fill_action = [this](const auto& bar_position)
+        {
+            buffer_clear();
+            // fmt::print("writting local constrants: pos_z : {}, disp: {} error: {}\n",
+            //            bar_position.pos_z,
+            //            bar_position.displacement,
+            //            bar_position.displacement_error);
+            const auto local_derivs =
+                bar_position.is_horizontal
+                    ? std::array{ 0.F, static_cast<float>(bar_position.pos_z) / SCALE_FACTOR, 0.F, 1.F }
+                    : std::array{ static_cast<float>(bar_position.pos_z) / SCALE_FACTOR, 0.F, 1.F, 0.F };
+            input_data_buffer_.measurement = static_cast<float>(bar_position.displacement / SCALE_FACTOR);
+            input_data_buffer_.sigma = static_cast<float>(bar_position.displacement_error / SCALE_FACTOR);
+            std::copy(local_derivs.begin(), local_derivs.end(), std::back_inserter(input_data_buffer_.locals));
+            write_to_buffer();
+        };
+        bar_positions.fill_to_mille_writer(fill_action);
     }
 
     void MillepedeEngine::Calibrate(Cal2HitPar& hit_par)
@@ -365,16 +528,20 @@ namespace R3B::Neuland::Calibration
             par_ref.tDiff.error = time_offset.error;
             par_ref.effectiveSpeed.value = effective_c.value;
             par_ref.effectiveSpeed.error = effective_c.error;
+
+            const auto offset_effective_c = time_offset * effective_c;
+            par_ref.offset_effective_c.value = offset_effective_c.value;
+            par_ref.offset_effective_c.error = offset_effective_c.error;
         }
 
-        R3BLOG(info, "Histogram calibration finished. Ready for millepede calibration!");
         current_state_ = State::millepede_calibration;
+        init_steer_writer(cal_to_hit_par);
+        R3BLOG(info, "Histogram calibration finished. Ready for millepede calibration!");
     }
 
     void MillepedeEngine::millepede_calibrate(Cal2HitPar& cal_to_hit_par)
     {
         R3BLOG(info, "Starting millepede calibration...");
-        cal_to_hit_par.Reset();
         binary_data_writer_.close();
 
         R3BLOG(info, "Launching pede algorithm...");
@@ -383,7 +550,7 @@ namespace R3B::Neuland::Calibration
 
         par_result_.read();
         fill_module_parameters(par_result_, cal_to_hit_par);
-        fill_data_to_figure(cal_to_hit_par);
+        // // fill_data_to_figure(cal_to_hit_par);
         R3BLOG(info, "Millepede calibration finished.");
     }
 
@@ -415,6 +582,7 @@ namespace R3B::Neuland::Calibration
     {
         // TODO: could be an empty event
         binary_data_writer_.end();
+        bar_positions_.clear();
     }
 
     void MillepedeEngine::EventReset() {}
@@ -452,26 +620,26 @@ namespace R3B::Neuland::Calibration
         buffer_clear();
     }
 
-    void MillepedeEngine::init_parameter()
-    {
-        auto num_of_modules = GetModuleSize();
+    // void MillepedeEngine::init_parameter()
+    // {
+    //     auto num_of_modules = GetModuleSize();
 
-        if (cal_to_hit_par_ == nullptr)
-        {
-            throw R3B::runtime_error("Pointer to cal_to_hit_par is nullptr!");
-        }
+    //     if (cal_to_hit_par_ == nullptr)
+    //     {
+    //         throw R3B::runtime_error("Pointer to cal_to_hit_par is nullptr!");
+    //     }
 
-        auto& module_pars = cal_to_hit_par_->GetListOfModuleParRef();
-        module_pars.clear();
+    //     auto& module_pars = cal_to_hit_par_->GetListOfModuleParRef();
+    //     module_pars.clear();
 
-        for (unsigned int module_num{ 1 }; module_num <= num_of_modules; ++module_num)
-        {
-            auto module_par_iter = module_pars.try_emplace(module_num).first;
-            module_par_iter->second.effectiveSpeed.value = init_effective_c_;
-        }
-    }
+    //     for (unsigned int module_num{ 1 }; module_num <= num_of_modules; ++module_num)
+    //     {
+    //         auto module_par_iter = module_pars.try_emplace(module_num).first;
+    //         module_par_iter->second.effectiveSpeed.value = init_effective_c_;
+    //     }
+    // }
 
-    void MillepedeEngine::init_steer_writer()
+    void MillepedeEngine::init_steer_writer(const Cal2HitPar& cal_to_hit_par)
     {
         auto steer_writer = SteerWriter{};
         steer_writer.set_filepath(pede_steer_filename_);
@@ -480,24 +648,22 @@ namespace R3B::Neuland::Calibration
         steer_writer.add_method(SteerWriter::Method::inversion, std::make_pair(3.F, 0.1F));
         // steer_writer.add_other_options(std::vector<std::string>{ "hugecut", "50000" });
         steer_writer.add_other_options(std::vector<std::string>{ "outlierdownweighting", "4" });
-        steer_writer.add_other_options(
-            std::vector<std::string>{ "scaleerrors", fmt::format("{}", error_scale_factor_) });
+        // steer_writer.add_other_options(
+        //     std::vector<std::string>{ "scaleerrors", fmt::format("{}", error_scale_factor_) });
 
-        const auto module_size = std::min(GetMaxModuleNum(), GetModuleSize());
-        for (int module_num{ 1 }; module_num <= module_size; ++module_num)
-        {
-            steer_writer.add_parameter_default(to_global_label_id(module_num, GlobalLabel::effective_c),
-                                               std::make_pair(static_cast<float>(init_effective_c_), 0.F));
-        }
-        // steer_writer.add_parameter_default(get_global_label_id(REFERENCE_BAR_NUM, GlobalLabel::tsync),
-        //                                    std::make_pair(0.F, -1.F));
+        // const auto& module_pars = cal_to_hit_par.GetModulePars();
+        // for (const auto& [module_num, module_par] : module_pars)
+        // {
+        //     steer_writer.add_parameter_default(
+        //         to_global_label_id(static_cast<int>(module_num), GlobalLabel::effective_c),
+        //         std::make_pair(static_cast<float>(module_par.effectiveSpeed.value), 0.F));
+        //     steer_writer.add_parameter_default(
+        //         to_global_label_id(static_cast<int>(module_num), GlobalLabel::offset_effective_c),
+        //         std::make_pair(
+        //             static_cast<float>(module_par.effectiveSpeed.value * module_par.tDiff.value / SCALE_FACTOR),
+        //             0.F));
+        // }
         steer_writer.write();
-    }
-
-    void MillepedeEngine::fill_time_differences(const BarCalData& bar_cal_data)
-    {
-        auto time_difference = calculate_time_difference(bar_cal_data);
-        hist_time_offsets_->Fill(bar_cal_data.module_num, time_difference.value);
     }
 
     auto MillepedeEngine::calculate_time_offset_effective_speed(int module_num) -> std::pair<ValueErrorD, ValueErrorD>
@@ -530,7 +696,7 @@ namespace R3B::Neuland::Calibration
         auto offset = ValueErrorD{ fit_result->Parameter(0), fit_result->Error(0) };
         auto slope = ValueErrorD{ fit_result->Parameter(1), fit_result->Error(1) };
 
-        auto effective_speed = slope * BarLength;
+        auto effective_speed = slope * BarLength * 2.;
 
         // TODO: the error calculation here is wrong as two values are not independent
         auto time_offset = (ValueErrorD{ 0.5, 0 } - offset) / slope;

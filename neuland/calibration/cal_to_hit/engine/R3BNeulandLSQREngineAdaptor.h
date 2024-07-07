@@ -17,6 +17,7 @@
 #include <R3BNeulandCosmicTracker.h>
 #include <R3BNeulandHitCalibrationEngine.h>
 #include <R3BShared.h>
+#include <numeric>
 
 namespace R3B::Neuland::Calibration
 {
@@ -31,7 +32,7 @@ namespace R3B::Neuland::Calibration
         std::unique_ptr<CosmicTracker> cosmic_tracker_;
 
         void Init() override;
-        void AddSignal(const BarCalData& signal) override;
+        void AddSignals(const CalData& signals) override;
         void Calibrate(Cal2HitPar& hit_par) override;
         void EndOfEvent(unsigned int event_num = 0) override;
         void EventReset() override
@@ -39,9 +40,9 @@ namespace R3B::Neuland::Calibration
             hit_cal_engine_.Reset();
             cosmic_tracker_->Reset();
         }
-        auto SignalFilter(const std::vector<BarCalData>& signals) -> bool override
+        auto SignalFilter(const CalData& signals) -> bool override
         {
-            return signals.size() > minimum_signal_size_;
+            return GetBarCalDataSize(signals) > minimum_signal_size_;
         }
 
         // private non-virtual function

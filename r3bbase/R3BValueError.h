@@ -112,4 +112,18 @@ namespace R3B
         auto new_err = std::sqrt(left.error * left.error + right.error * right.error);
         return { new_value, new_err };
     }
+
+    template <typename DataType>
+    auto operator-=(ValueError<DataType>& left, const ValueError<DataType>& right) -> ValueError<DataType>&
+    {
+        left = left - right;
+        return left;
+    }
+
+    template <typename DataType>
+    auto operator+=(ValueError<DataType>& left, const ValueError<DataType>& right) -> ValueError<DataType>&
+    {
+        left = left + right;
+        return left;
+    }
 } // namespace R3B

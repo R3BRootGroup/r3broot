@@ -45,7 +45,7 @@ namespace R3B::Neuland
 {
 
     Map2CalTask::Map2CalTask()
-        : Map2CalTask{ "NeulandMapped2Cal", 1 }
+        : Map2CalTask{ "NeulandMapToCalTask", 1 }
     {
     }
 
@@ -210,7 +210,8 @@ namespace R3B::Neuland
                                triggerID,
                                module_num,
                                eventNum));
-            R3BLOG(error, fmt::format("Available trigIDs: {}", fmt::join(trigMappedData_ | ranges::views::keys, ", ")));
+            R3BLOG(error,
+                   fmt::format("Available trigIDs: {}", fmt::join(trigMappedData_.get() | ranges::views::keys, ", ")));
             return { -1., 0 };
         }
         return convert_to_real_time(calibrationTrigPar_, trigData->second.signal, FTType::trigger, trigData->first);
@@ -285,18 +286,21 @@ namespace R3B::Neuland
     void Map2CalTask::calibrate()
     {
         R3BLOG(debug2, fmt::format("mapped Data size: {}", mappedData_.size()));
+        auto& cal_data = calData_.get();
         for (const auto& planeSignals : mappedData_)
         {
-            const auto planeNum = planeSignals.plane_num;
+            const auto planeNum = static_cast<int>(planeSignals.plane_num);
+            auto [plane_cal, is_plane_success] = cal_data.try_emplace(planeNum, PlaneCalData{ planeNum });
             for (const auto& [barNum, barSignals] : planeSignals.bars)
             {
                 if (not IsHistDisabled())
                 {
                     GetHistMonitor().get("module_num")->Fill(barNum);
                 }
-                const auto module_num = Neuland_PlaneBar2ModuleNum(planeNum, barNum);
-                auto& cal = calData_.get().emplace_back(module_num);
-                fill_cal_data(cal, barSignals);
+                const auto module_num = static_cast<int>(Neuland_PlaneBar2ModuleNum(planeNum, barNum));
+                auto [bar_cal, is_bar_success] =
+                    plane_cal->second.bar_cal_data.try_emplace(module_num, BarCalData{ module_num });
+                fill_cal_data(bar_cal->second, barSignals);
             }
         }
     }

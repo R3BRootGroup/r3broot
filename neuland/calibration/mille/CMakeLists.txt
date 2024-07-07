@@ -12,5 +12,6 @@ target_link_libraries(
     PUBLIC ${Boost_LIBRARIES}
     PRIVATE fmt::fmt range-v3::range-v3)
 if(DEFINED ENV{PEDEDIR})
+    message(STATUS "Millepede directory is set to be $ENV{PEDEDIR}")
     target_compile_definitions(R3BMille PUBLIC PEDEDIR="$ENV{PEDEDIR}")
 endif()

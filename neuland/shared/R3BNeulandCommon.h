@@ -88,7 +88,7 @@ namespace R3B::Neuland
     // bar number has the range of 1 ~ BarsPerPlane
     inline constexpr auto GetBarVerticalDisplacement(int module_num) -> double
     {
-        const auto bar_num = module_num % BarsPerPlane;
+        const auto bar_num = (module_num - 1) % BarsPerPlane + 1;
         return (2 * bar_num - 1 - BarsPerPlane) / 2. * BarSize_XY;
     }
     inline constexpr auto IsPlaneIDHorizontal(int plane_id) -> bool { return (plane_id % 2 == FirstHorizontalPlane); }

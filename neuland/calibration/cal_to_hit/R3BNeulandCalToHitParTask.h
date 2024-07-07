@@ -42,7 +42,7 @@ namespace R3B::Neuland
 
       private:
         int max_module_num_ = MaxNumberOfBars;
-        InputVectorConnector<BarCalData> cal_data_{ "NeulandCalData" };
+        InputConnector<CalData> cal_data_{ "NeulandCalData" };
 
         CalibrationBasePar* base_par_ = InputPar<CalibrationBasePar>("NeulandCalibrationBasePar");
         Map2CalPar* map_to_cal_par_ = InputPar<Map2CalPar>("LandTCalPar");

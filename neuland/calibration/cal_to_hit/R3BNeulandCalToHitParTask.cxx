@@ -63,14 +63,7 @@ namespace R3B::Neuland
     void Cal2HitParTask::TriggeredExec()
     {
         engine_->EventReset();
-        for (const auto& bar_signal : cal_data_)
-        {
-            if (bar_signal.module_num > max_module_num_)
-            {
-                continue;
-            }
-            engine_->AddSignal(bar_signal);
-        }
+        engine_->AddSignals(cal_data_.get());
         const auto* eventHeader = GetEventHeader();
         engine_->EndOfEvent(eventHeader->GetEventno());
     }

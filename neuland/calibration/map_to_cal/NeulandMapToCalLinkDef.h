@@ -28,5 +28,7 @@
 #pragma link C++ class R3B::Neuland::CalDataSignal+;
 #pragma link C++ class vector<R3B::Neuland::CalDataSignal>+;
 #pragma link C++ class R3B::Neuland::BarCalData+;
-#pragma link C++ class vector<R3B::Neuland::BarCalData>+;
+#pragma link C++ class unordered_map<int, R3B::Neuland::BarCalData>+;
+#pragma link C++ class R3B::Neuland::PlaneCalData+;
+#pragma link C++ class unordered_map<int, R3B::Neuland::PlaneCalData>+;
 #endif

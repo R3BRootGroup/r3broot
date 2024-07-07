@@ -62,19 +62,19 @@ namespace R3B::Millepede
 
     void Launcher::end()
     {
-        auto old_result_path = fs::current_path() / fs::path{ DEFAULT_RES_FILENAME };
-        auto new_result_path = fs::current_path() / fs::path{ parameter_file_ };
+        // auto old_result_path = fs::current_path() / fs::path{ DEFAULT_RES_FILENAME };
+        // auto new_result_path = fs::current_path() / fs::path{ parameter_file_ };
 
-        if (fs::exists(old_result_path))
-        {
-            fmt::print(
-                "Info: copy the file {:?} to the file {:?}!\n", old_result_path.string(), new_result_path.string());
-            fs::copy(old_result_path, new_result_path, fs::copy_options::overwrite_existing);
-        }
-        else
-        {
-            fmt::print("Error: millepede.res doesn't exist!\n");
-        }
+        // if (fs::exists(old_result_path))
+        // {
+        //     fmt::print(
+        //         "Info: copy the file {:?} to the file {:?}!\n", old_result_path.string(), new_result_path.string());
+        //     fs::copy(old_result_path, new_result_path, fs::copy_options::overwrite_existing);
+        // }
+        // else
+        // {
+        //     fmt::print("Error: millepede.res doesn't exist!\n");
+        // }
     }
 
 } // namespace R3B::Millepede

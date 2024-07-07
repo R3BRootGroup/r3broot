@@ -109,10 +109,10 @@ auto main(int argc, const char** argv) -> int
         auto cal2hit_method =
             (enable_mille.value()) ? R3B::Neuland::Cal2HitParMethod::Millipede : R3B::Neuland::Cal2HitParMethod::LSQT;
         auto cal2hitParTask = std::make_unique<R3B::Neuland::Cal2HitParTask>(cal2hit_method);
-        cal2hitParTask->SetTrigger(R3B::Neuland::CalTrigger::offspill);
+        cal2hitParTask->SetTrigger(R3B::Neuland::CalTrigger::all);
         cal2hitParTask->SetMinStat(min_stat.value());
         cal2hitParTask->SetErrorScale(error_scale.value());
-        cal2hitParTask->SetMaxModuleNum(1000);
+        cal2hitParTask->SetMaxModuleNum(1300);
         run->AddTask(cal2hitParTask.release());
 
         // set par input/output--------------------------------------------------------
@@ -128,7 +128,16 @@ auto main(int argc, const char** argv) -> int
 
         run->Init();
 
+        // histogram calibration
         run->Run(0, event_num.value() <= 0 ? 0 : event_num.value());
+
+        if (enable_mille.value())
+        {
+            rtdb->saveOutput();
+
+            // millepede calibration
+            run->Run(0, event_num.value() <= 0 ? 0 : event_num.value());
+        }
 
         timer.Stop();
         std::cout << "Cal level data written to file " << outputfile_path << "\n";

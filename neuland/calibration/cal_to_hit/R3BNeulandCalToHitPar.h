@@ -25,6 +25,7 @@ namespace R3B::Neuland
         ValueError<double> tDiff;                  // ns
         ValueError<double> tSync;                  // ns
         ValueError<double> effectiveSpeed;         // cm/ns
+        ValueError<double> offset_effective_c;         // cm
         ValueError<double> lightAttenuationLength; // cm, 1/alpha
         ValueError<double> lightAttenuationFactor; // exp(alpha*L/2)
         LRPair<int> pedestal;                      //
@@ -72,7 +73,7 @@ namespace R3B::Neuland
         }
         auto GetDistancesToFirstPlane() const -> const auto& { return distances_to_first_plane_; }
         auto GetNumModulePar() const { return module_pars_.size(); }
-        auto GetModuleParAt(unsigned int module_num) const -> const auto& { return module_pars_.at(module_num); }
+        auto GetModuleParAt(unsigned int module_num) const -> const HitModulePar&;
         auto GetModulePars() const -> const auto& { return module_pars_; }
         auto GetListOfModulePar() const -> const std::unordered_map<unsigned int, R3B::Neuland::HitModulePar>&
         {

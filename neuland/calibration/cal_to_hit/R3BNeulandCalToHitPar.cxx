@@ -32,6 +32,15 @@ namespace
 
 namespace R3B::Neuland
 {
+    auto Cal2HitPar::GetModuleParAt(unsigned int module_num) const -> const HitModulePar&
+    {
+        if (auto module_par = module_pars_.find(module_num); module_par == module_pars_.end())
+        {
+            throw R3B::runtime_error(fmt::format("Cannot find the parameter with module num {}", module_num));
+        }
+        return module_pars_.at(module_num);
+    }
+
     Cal2HitPar::Cal2HitPar(std::string_view name, std::string_view title, std::string_view context, Bool_t own)
         : ParSet(name, title, context, own)
     {

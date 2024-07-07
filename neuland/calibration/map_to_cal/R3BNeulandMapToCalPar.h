@@ -81,10 +81,7 @@ namespace R3B
         // Getters:
         [[nodiscard]] auto GetSlowClockFrequency() const -> const auto& { return slow_clock_frequency_; }
         [[nodiscard]] auto GetParams() const -> const auto& { return moduleParams_; }
-        [[nodiscard]] auto GetParamAt(unsigned int module_num) const -> const auto&
-        {
-            return moduleParams_.at(module_num);
-        }
+        [[nodiscard]] auto GetParamAt(unsigned int module_num) const -> const TCalVFTXModulePar&;
         auto HasTrigEnabled() const -> bool { return is_trig_enabled_; }
 
       private:

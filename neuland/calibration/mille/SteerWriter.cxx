@@ -79,7 +79,7 @@ namespace R3B
         ofile << "Parameter\n";
         for (const auto& [par_id, values] : parameter_defaults_)
         {
-            ofile << fmt::format("{} {:.1f} {:.1f}\n", par_id, values.first, values.second);
+            ofile << fmt::format("{} {:.3f} {:.1f}\n", par_id, values.first, values.second);
         }
     }
 

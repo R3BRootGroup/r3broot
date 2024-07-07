@@ -12,6 +12,15 @@ namespace R3B
     {
     }
 
+    auto Map2CalPar::GetParamAt(unsigned int module_num) const -> const TCalVFTXModulePar&
+    {
+        if (auto module_iter = moduleParams_.find(module_num); module_iter == moduleParams_.end())
+        {
+            throw R3B::runtime_error(
+                fmt::format("Module number {} cannot be found in the map2cal parameter!", module_num));
+        }
+        return moduleParams_.at(module_num);
+    }
     void Map2CalPar::AddModuleParam(unsigned int module_num, TCalVFTXModulePar modulePar)
     {
         moduleParams_.emplace(module_num, std::move(modulePar));

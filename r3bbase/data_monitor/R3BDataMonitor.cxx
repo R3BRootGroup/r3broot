@@ -126,7 +126,11 @@ namespace R3B
     {
         for (auto& [name, hist] : histograms_)
         {
-            dir->WriteObject(hist.get(), hist->GetName(), "overwrite");
+            if (hist->GetEntries() == 0)
+            {
+                R3BLOG(warn, fmt::format("Histogram {} is empty while written to the file!", hist->GetName()));
+            }
+            dir->WriteObject(hist.get(), hist->GetName());
         }
         for (auto& [name, graph] : graphs_)
         {
