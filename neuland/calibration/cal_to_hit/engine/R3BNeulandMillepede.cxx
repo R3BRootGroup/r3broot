@@ -195,15 +195,16 @@ namespace R3B::Neuland::Calibration
             auto& par_ref = module_pars.emplace(module_num, HitModulePar{}).first->second;
             switch (global_label)
             {
+                // TODO: why the plus sign here?
                 case GlobalLabel::tsync:
-                    par_ref.tSync -= ValueErrorD{ par.value, par.error } * SCALE_FACTOR;
+                    par_ref.tSync += ValueErrorD{ par.value, par.error } * SCALE_FACTOR;
                     break;
                 case GlobalLabel::offset_effective_c:
                     // The value here is the product of tDiff and effectiveSped. Real tDiff will be calculated later
-                    par_ref.offset_effective_c -= (ValueErrorD{ par.value, par.error } * SCALE_FACTOR);
+                    par_ref.offset_effective_c += (ValueErrorD{ par.value, par.error } * SCALE_FACTOR);
                     break;
                 case GlobalLabel::effective_c:
-                    par_ref.effectiveSpeed -= ValueErrorD{ par.value, par.error };
+                    par_ref.effectiveSpeed += ValueErrorD{ par.value, par.error };
                     break;
                 default:
                     throw std::runtime_error("An error occured with unrecognized global tag");
