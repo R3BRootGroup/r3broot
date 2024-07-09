@@ -78,9 +78,9 @@ namespace R3B::Neuland::Calibration
 
     void LSQREngineAdaptor::AddSignals(const CalData& signals)
     {
-        for (const auto& [_, plane_cal_data] : signals)
+        for (const auto& [plane_num, plane_cal_data] : signals)
         {
-            for (const auto& [_, bar_signal] : plane_cal_data.bar_cal_data)
+            for (const auto& [bar_num, bar_signal] : plane_cal_data.bar_cal_data)
             {
                 add_bar_signal(bar_signal, Side::left);
                 add_bar_signal(bar_signal, Side::right);

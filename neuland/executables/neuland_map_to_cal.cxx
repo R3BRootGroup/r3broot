@@ -15,8 +15,10 @@
 #include "R3BEventHeaderPropagator.h"
 #include "R3BFileSource2.h"
 #include "R3BNeulandHitPar.h"
+#include "R3BNeulandLSQREngineAdaptor.h"
 #include "R3BNeulandMapToCalParTask.h"
 #include "R3BNeulandMapToCalTask.h"
+#include "R3BNeulandMillepede.h"
 #include "R3BTCalContFact.h"
 #include <FairParRootFileIo.h>
 #include <FairRootFileSink.h>
@@ -54,8 +56,6 @@ auto main(int argc, const char** argv) -> int
     auto input_par = programOptions.create_option<std::string>("in-par,p", "set the input parameter");
     auto output_file = programOptions.create_option<std::string>("out,o", "set the output file");
     auto event_num = programOptions.create_option<int>("eventNum,n", "set the event number", DEFAULT_EVENT_NUM);
-    auto error_scale = programOptions.create_option<float>(
-        "event_scale,e", "set the error scale for global parameter measurements", ERROR_SCALE);
     auto min_stat =
         programOptions.create_option<int>("min-stat,m", "set minimun statistics for calibration", DEFAULT_MIN_STAT);
     auto run_num = programOptions.create_option<int>("runNum,r", "set the number of runs", 1);
@@ -106,13 +106,18 @@ auto main(int argc, const char** argv) -> int
         map2Cal->SetTrigger(R3B::Neuland::CalTrigger::all);
         run->AddTask(map2Cal.release());
 
-        auto cal2hit_method =
-            (enable_mille.value()) ? R3B::Neuland::Cal2HitParMethod::Millipede : R3B::Neuland::Cal2HitParMethod::LSQT;
-        auto cal2hitParTask = std::make_unique<R3B::Neuland::Cal2HitParTask>(cal2hit_method);
+        auto cal2hitParTask = std::make_unique<R3B::Neuland::Cal2HitParTask>();
+        if (enable_mille.value())
+        {
+            auto* engine = cal2hitParTask->SetEngine(std::make_unique<R3B::Neuland::Calibration::MillepedeEngine>());
+            engine->set_error_factor(1.F);
+        }
+        else
+        {
+            cal2hitParTask->SetEngine(std::make_unique<R3B::Neuland::Calibration::LSQREngineAdaptor>());
+        }
         cal2hitParTask->SetTrigger(R3B::Neuland::CalTrigger::all);
         cal2hitParTask->SetMinStat(min_stat.value());
-        cal2hitParTask->SetErrorScale(error_scale.value());
-        cal2hitParTask->SetMaxModuleNum(1300);
         run->AddTask(cal2hitParTask.release());
 
         // set par input/output--------------------------------------------------------

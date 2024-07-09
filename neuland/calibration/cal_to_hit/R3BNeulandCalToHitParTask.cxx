@@ -18,22 +18,9 @@
 
 namespace R3B::Neuland
 {
-    Cal2HitParTask::Cal2HitParTask(Cal2HitParMethod method, std::string_view name, int iVerbose)
+    Cal2HitParTask::Cal2HitParTask(std::string_view name, int iVerbose)
         : CalibrationTask(name, iVerbose)
     {
-        switch (method)
-        {
-            case Cal2HitParMethod::LSQT:
-                R3BLOG(info, "Cal2HitPar method: LSQT.");
-                engine_ = std::make_unique<Calibration::LSQREngineAdaptor>();
-                break;
-            case Cal2HitParMethod::Millipede:
-                R3BLOG(info, "Cal2HitPar method: Millepede.");
-                engine_ = std::make_unique<Calibration::MillepedeEngine>();
-                break;
-            default:
-                throw R3B::logic_error("Unrecgonized calibration method!");
-        }
     }
 
     void Cal2HitParTask::HistogramInit(DataMonitor& histograms) { engine_->HistInit(histograms); }
@@ -46,6 +33,11 @@ namespace R3B::Neuland
 
     void Cal2HitParTask::ExtraInit(FairRootManager* /*rootMan*/)
     {
+        if (engine_ == nullptr)
+        {
+            throw R3B::logic_error("Engine is empty! Please use SetEngine method to setup a valid engine.");
+        }
+
         cal_data_.init();
 
         const auto plane_num = base_par_->GetNumOfPlanes();
@@ -55,6 +47,7 @@ namespace R3B::Neuland
         }
         engine_->SetTask(this);
         engine_->SetModuleSize(plane_num * BarsPerPlane);
+        engine_->SetMinStat(minimal_stat_);
         engine_->Init();
     }
 

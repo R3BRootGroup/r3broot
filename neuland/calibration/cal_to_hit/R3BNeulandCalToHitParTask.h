@@ -32,16 +32,25 @@ namespace R3B::Neuland
     class Cal2HitParTask : public CalibrationTask
     {
       public:
-        explicit Cal2HitParTask(Cal2HitParMethod method = Cal2HitParMethod::LSQT,
-                                std::string_view name = "NeulandCal2HitParTask",
-                                int iVerbose = 1);
-        void SetMinStat(int min) { engine_->SetMinStat(min); }
-        void SetErrorScale(float scale) { engine_->SetErrorScale(scale); }
+        explicit Cal2HitParTask(std::string_view name = "NeulandCal2HitParTask", int iVerbose = 1);
+        // void SetMinStat(int min) { engine_->SetMinStat(min); }
+        // void SetErrorScale(float scale) { engine_->SetErrorScale(scale); }
         auto GetCal2HitPar() -> auto* { return hit_par_; }
+        // TODO: (C++20) replace with concepts
+        template <typename EngineType,
+                  typename = std::enable_if_t<std::is_base_of_v<Calibration::CosmicEngineInterface, EngineType>>>
+        auto SetEngine(std::unique_ptr<EngineType> engine) -> EngineType*
+        {
+            auto* engine_ptr = engine.get();
+            engine_ = std::move(engine);
+            return engine_ptr;
+        }
+        void SetMinStat(int min) { minimal_stat_ = min; }
         void SetMaxModuleNum(int max_num);
 
       private:
         int max_module_num_ = MaxNumberOfBars;
+        int minimal_stat_ = 1;
         InputConnector<CalData> cal_data_{ "NeulandCalData" };
 
         CalibrationBasePar* base_par_ = InputPar<CalibrationBasePar>("NeulandCalibrationBasePar");

@@ -246,16 +246,6 @@ namespace R3B::Neuland::Calibration
             return false;
         }
 
-        // // select out vertical cosmic rays
-        // if (rng::all_of(signals |
-        //                     rng::views::transform([](const auto& bar_signal)
-        //                                           { return ModuleID2PlaneID(bar_signal.module_num - 1); }) |
-        //                     rng::views::sliding(2),
-        //                 [](const auto& pair) { return pair.front() == pair.back(); }))
-        // {
-        //     return false;
-        // }
-
         // Make sure the track has large zenith angle
         auto is_too_vertical = rng::any_of(
             signals, [this](const auto& plane_cal) { return plane_cal.second.bar_cal_data.size() > plane_max_hit_; });
@@ -265,9 +255,6 @@ namespace R3B::Neuland::Calibration
         }
 
         set_minimum_values(signals);
-
-        // // testing:
-        // fmt::print("new event--------------------\n");
         return true;
     }
 
@@ -412,6 +399,21 @@ namespace R3B::Neuland::Calibration
 
     void MillepedeEngine::fill_data_to_mille(const CalData& signals)
     {
+        // for (const auto& [plane_num, plane_signals] : signals)
+        // {
+        //     for (const auto& [bar_num, bar_signal] : plane_signals.bar_cal_data)
+        //     {
+        //         add_spacial_local_constraint(plane_num, GetBarVerticalDisplacement(bar_num), BarSize_XY / 2.);
+        //         if (has_only_one_signal(bar_signal))
+        //         {
+        //             add_signal_t(bar_signal);
+        //         }
+        //     }
+        // }
+        // write_local_constraint(bar_positions_);
+
+        // return;
+
         auto fill_bar_position_action = [this](auto plane_num, auto& filtered_bar_signals)
         {
             const auto filtered_size =
@@ -444,13 +446,6 @@ namespace R3B::Neuland::Calibration
             const auto pos_z = PlaneID2ZPos<double>(plane_num - 1);
             const auto pred = bar_positions_.get_prediction(is_horizontal, pos_z);
 
-            // fmt::print("[{}, {}, [{}]],",
-            //            pos_z,
-            //            pred,
-            //            fmt::join(filtered_bar_signals | rng::views::values |
-            //                          rng::views::transform([this](const auto& bar_signal)
-            //                                                { return calculate_position(bar_signal); }),
-            //                      ", "));
             // TODO: need to optimized here. get_bar_cal_residual get called too many times
 
             // choose the bar signal closest to the regression line
@@ -459,7 +454,6 @@ namespace R3B::Neuland::Calibration
                                                  return get_bar_cal_residual(second_bar.second, pred) >
                                                         get_bar_cal_residual(first_bar.second, pred);
                                              });
-            // fmt::print("selected bar num: {}\n", bar_iter->second.module_num);
             if (get_bar_cal_residual(bar_iter->second, pred) < pos_residual_threshold)
             {
                 add_signal_t(bar_iter->second);
@@ -486,10 +480,6 @@ namespace R3B::Neuland::Calibration
         auto fill_action = [this](const auto& bar_position)
         {
             buffer_clear();
-            // fmt::print("writting local constrants: pos_z : {}, disp: {} error: {}\n",
-            //            bar_position.pos_z,
-            //            bar_position.displacement,
-            //            bar_position.displacement_error);
             const auto local_derivs =
                 bar_position.is_horizontal
                     ? std::array{ 0.F, static_cast<float>(bar_position.pos_z) / SCALE_FACTOR, 0.F, 1.F }
@@ -601,8 +591,16 @@ namespace R3B::Neuland::Calibration
         graph_effective_c_ = histograms.add_graph("effective_c", std::make_unique<TGraphErrors>(module_size));
         graph_effective_c_->SetTitle("Effective c vs BarNum");
 
-        hist_time_offsets_ = histograms.add_hist<TH2I>(
-            "hist_time_offsets", "hist_time_offsets", module_size, 0.5, module_size + 0.5, 1000, -500, 500);
+        constexpr auto hist_time_offsets_y_size = 1000;
+        constexpr auto hist_time_offsets_y_max = 500;
+        hist_time_offsets_ = histograms.add_hist<TH2I>("hist_time_offsets",
+                                                       "hist_time_offsets",
+                                                       module_size,
+                                                       0.5,
+                                                       module_size + 0.5,
+                                                       hist_time_offsets_y_size,
+                                                       -hist_time_offsets_y_max,
+                                                       hist_time_offsets_y_max);
     }
 
     void MillepedeEngine::buffer_clear()
@@ -621,33 +619,14 @@ namespace R3B::Neuland::Calibration
         buffer_clear();
     }
 
-    // void MillepedeEngine::init_parameter()
-    // {
-    //     auto num_of_modules = GetModuleSize();
-
-    //     if (cal_to_hit_par_ == nullptr)
-    //     {
-    //         throw R3B::runtime_error("Pointer to cal_to_hit_par is nullptr!");
-    //     }
-
-    //     auto& module_pars = cal_to_hit_par_->GetListOfModuleParRef();
-    //     module_pars.clear();
-
-    //     for (unsigned int module_num{ 1 }; module_num <= num_of_modules; ++module_num)
-    //     {
-    //         auto module_par_iter = module_pars.try_emplace(module_num).first;
-    //         module_par_iter->second.effectiveSpeed.value = init_effective_c_;
-    //     }
-    // }
-
-    void MillepedeEngine::init_steer_writer(const Cal2HitPar& cal_to_hit_par)
+    void MillepedeEngine::init_steer_writer(const Cal2HitPar& /*cal_to_hit_par*/)
     {
         auto steer_writer = SteerWriter{};
         steer_writer.set_filepath(pede_steer_filename_);
         steer_writer.set_parameter_file(parameter_filename_);
         steer_writer.set_data_filepath(input_data_filename_);
-        steer_writer.add_method(SteerWriter::Method::inversion, std::make_pair(3.F, 0.1F));
-        // steer_writer.add_other_options(std::vector<std::string>{ "hugecut", "50000" });
+        steer_writer.add_method(SteerWriter::Method::inversion,
+                                std::make_pair(static_cast<float>(pede_interartion_number_), pede_error_threshold_));
         steer_writer.add_other_options(std::vector<std::string>{ "outlierdownweighting", "4" });
         // steer_writer.add_other_options(
         //     std::vector<std::string>{ "scaleerrors", fmt::format("{}", error_scale_factor_) });

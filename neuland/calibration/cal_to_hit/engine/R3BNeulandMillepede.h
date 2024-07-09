@@ -26,6 +26,7 @@ class TGraphErrors;
 
 namespace R3B::Neuland::Calibration
 {
+    constexpr auto DEFAULT_PEDE_ERROR_THRES = 0.1F;
     enum class GlobalLabel
     {
         tsync,              // tsync
@@ -127,15 +128,20 @@ namespace R3B::Neuland::Calibration
         };
 
         MillepedeEngine() = default;
-        void enable_rank_check(bool rank_check = true) { has_rank_check_ = rank_check; }
+
+        // Setters:
+        void set_pede_interation_number(int number) { pede_interartion_number_ = number; }
+        void set_pede_error_threshold(float thres) { pede_error_threshold_ = thres; }
+        void set_error_factor(float scale) { error_scale_factor_ = scale; }
 
       private:
-        bool has_rank_check_ = false;
         State current_state_ = State::histogram_calibration;
         int minimum_hit_ = 1;
         int plane_max_hit_ = 3;
+        int pede_interartion_number_ = 3;
+        float pede_error_threshold_ = DEFAULT_PEDE_ERROR_THRES;
+        float error_scale_factor_ = 1.F;
         double pos_residual_threshold = BarSize_XY;
-        float error_scale_factor_ = 1000.F;
         // float minimum_pos_z_ = 0;
         // float smallest_time_sum_ = 0.;
         std::optional<float> average_t_sum_;
@@ -172,7 +178,6 @@ namespace R3B::Neuland::Calibration
             minimum_hit_ = min;
             R3BLOG(info, fmt::format("Minimum number of hits is set to {}", minimum_hit_));
         }
-        void SetErrorScale(float scale) override { error_scale_factor_ = scale; }
 
         // private non-virtual methods:
         void buffer_clear();
