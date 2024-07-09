@@ -541,32 +541,7 @@ namespace R3B::Neuland::Calibration
 
         par_result_.read();
         fill_module_parameters(par_result_, cal_to_hit_par);
-        // // fill_data_to_figure(cal_to_hit_par);
         R3BLOG(info, "Millepede calibration finished.");
-    }
-
-    void MillepedeEngine::fill_data_to_figure(Cal2HitPar& cal_to_hit_par)
-    {
-        const auto& pars = cal_to_hit_par.GetListOfModulePar();
-        for (const auto& [module_num, par] : pars)
-        {
-            if (graph_time_offset_ != nullptr)
-            {
-                graph_time_offset_->SetPoint(static_cast<int>(module_num), module_num, par.tDiff.value);
-                graph_time_offset_->SetPointError(static_cast<int>(module_num), 0., par.tDiff.error);
-            }
-            if (graph_time_sync_ != nullptr)
-            {
-                graph_time_sync_->SetPoint(static_cast<int>(module_num), module_num, par.tSync.value);
-                graph_time_sync_->SetPointError(static_cast<int>(module_num), 0., par.tSync.error);
-            }
-
-            if (graph_effective_c_ != nullptr)
-            {
-                graph_effective_c_->SetPoint(static_cast<int>(module_num), module_num, par.effectiveSpeed.value);
-                graph_effective_c_->SetPointError(static_cast<int>(module_num), 0., par.effectiveSpeed.error);
-            }
-        }
     }
 
     void MillepedeEngine::EndOfEvent(unsigned int /*event_num*/)
@@ -581,15 +556,6 @@ namespace R3B::Neuland::Calibration
     void MillepedeEngine::HistInit(DataMonitor& histograms)
     {
         const auto module_size = GetModuleSize();
-
-        graph_time_offset_ = histograms.add_graph("time_offset", std::make_unique<TGraphErrors>(module_size));
-        graph_time_offset_->SetTitle("Time offset vs BarNum");
-
-        // graph_time_sync_ = histograms.add_graph("time_sync", std::make_unique<TGraphErrors>(module_size));
-        // graph_time_sync_->SetTitle("Time sync vs BarNum");
-
-        graph_effective_c_ = histograms.add_graph("effective_c", std::make_unique<TGraphErrors>(module_size));
-        graph_effective_c_->SetTitle("Effective c vs BarNum");
 
         constexpr auto hist_time_offsets_y_size = 1000;
         constexpr auto hist_time_offsets_y_max = 500;

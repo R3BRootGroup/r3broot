@@ -22,8 +22,6 @@
 #include <optional>
 // #include <RankChecker.h>
 
-class TGraphErrors;
-
 namespace R3B::Neuland::Calibration
 {
     constexpr auto DEFAULT_PEDE_ERROR_THRES = 0.1F;
@@ -156,9 +154,6 @@ namespace R3B::Neuland::Calibration
         BarPositionFitter bar_positions_;
 
         // histograms:
-        TGraphErrors* graph_time_offset_ = nullptr;
-        TGraphErrors* graph_time_sync_ = nullptr;
-        TGraphErrors* graph_effective_c_ = nullptr;
         TH2I* hist_time_offsets_ = nullptr;
 
         // parameter:
@@ -190,7 +185,6 @@ namespace R3B::Neuland::Calibration
         inline auto to_global_label_id(int module_num, GlobalLabel label) -> int;
         inline auto to_module_num_label(int par_num) -> std::pair<int, GlobalLabel>;
         void fill_module_parameters(const Millepede::ResultReader& result, Neuland::Cal2HitPar& cal_to_hit_par);
-        void fill_data_to_figure(Cal2HitPar& cal_to_hit_par);
         void fill_data_to_mille(const CalData& signals);
         void fill_time_differences(const CalData& cal_data, TH2I* hist_time_offsets);
 
