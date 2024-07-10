@@ -18,7 +18,9 @@ set(LINKDEF NeulandCalToHitLinkDef.h)
 
 set(SRCS
     # cmake-format: sortable
+    engine/BarPositionFilter.cxx
     engine/R3BNeulandLSQREngineAdaptor.cxx
+    engine/R3BNeulandMille.cxx
     engine/R3BNeulandMillepede.cxx
     R3BNeulandCalToHitPar.cxx
     R3BNeulandCalToHitParTask.cxx
@@ -26,9 +28,14 @@ set(SRCS
 
 set(HEADERS
     # cmake-format: sortable
+    engine/BarPositionFilter.h
+    engine/R3BNeulandCosmicEngine.h
     engine/R3BNeulandCosmicEngine.h
     engine/R3BNeulandLSQREngineAdaptor.h
+    engine/R3BNeulandMille.h
     engine/R3BNeulandMillepede.h
+    engine/R3BNeulandPede.h
+    engine/Utilities.h
     R3BNeulandCalToHitPar.h
     R3BNeulandCalToHitParTask.h
     R3BNeulandCalToHitTask.h)
