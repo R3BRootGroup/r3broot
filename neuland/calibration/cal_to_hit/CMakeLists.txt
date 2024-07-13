@@ -22,6 +22,8 @@ set(SRCS
     engine/R3BNeulandLSQREngineAdaptor.cxx
     engine/R3BNeulandMille.cxx
     engine/R3BNeulandMillepede.cxx
+    engine/R3BNeulandPede.cxx
+    engine/R3BNeulandPositionCal.cxx
     R3BNeulandCalToHitPar.cxx
     R3BNeulandCalToHitParTask.cxx
     R3BNeulandCalToHitTask.cxx)
@@ -30,11 +32,11 @@ set(HEADERS
     # cmake-format: sortable
     engine/BarPositionFilter.h
     engine/R3BNeulandCosmicEngine.h
-    engine/R3BNeulandCosmicEngine.h
     engine/R3BNeulandLSQREngineAdaptor.h
     engine/R3BNeulandMille.h
     engine/R3BNeulandMillepede.h
     engine/R3BNeulandPede.h
+    engine/R3BNeulandPositionCal.h
     engine/Utilities.h
     R3BNeulandCalToHitPar.h
     R3BNeulandCalToHitParTask.h

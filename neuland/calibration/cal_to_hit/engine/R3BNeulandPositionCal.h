@@ -10,42 +10,37 @@
  * granted to it by virtue of its status as an Intergovernmental Organization *
  * or submit itself to any jurisdiction.                                      *
  ******************************************************************************/
+
 #pragma once
 
-#include "R3BNeulandCalToHitPar.h"
-#include <ParResultReader.h>
-#include <PedeLauncher.h>
+#include <R3BNeulandCalData2.h>
+#include <R3BValueError.h>
+
+class TH2I;
+
+namespace R3B
+{
+    class DataMonitor;
+    namespace Neuland
+    {
+        class Cal2HitPar;
+    }
+} // namespace R3B
 
 namespace R3B::Neuland::Calibration
 {
-    constexpr auto DEFAULT_PEDE_ERROR_THRES = 0.1F;
-
-    class PedeHandler
+    class PositionCalibrator
     {
       public:
-        PedeHandler() = default;
-        void init();
-        void calibrate();
-        void init_steer_writer(const Cal2HitPar& /*cal_to_hit_par*/);
-
-        void set_pede_interation_number(int number) { pede_interartion_number_ = number; }
-        void set_pede_error_threshold(float thres) { pede_error_threshold_ = thres; }
-        void set_error_factor(float scale) { error_scale_factor_ = scale; }
+        PositionCalibrator() = default;
         void set_max_number_of_modules(int num_of_modules) { max_number_of_modules_ = num_of_modules; }
-        void set_scale_factor(float scale_factor) { scale_factor_ = scale_factor; }
-        void set_data_filename(std::string_view filename) { data_filename_ = filename; }
-
-        void fill_module_parameters(Neuland::Cal2HitPar& cal_to_hit_par);
+        void fill_time_differences(const CalData& cal_data);
+        void HistInit(DataMonitor& histograms);
+        void calibrate(Cal2HitPar& cal_to_hit_par);
 
       private:
         int max_number_of_modules_ = 0;
-        int pede_interartion_number_ = 3;
-        float pede_error_threshold_ = DEFAULT_PEDE_ERROR_THRES;
-        float error_scale_factor_ = 1.F;
-        float scale_factor_ = 1.F;
-        std::string data_filename_;
-        Millepede::ResultReader par_result_;
-        Millepede::Launcher pede_launcher_;
+        TH2I* hist_time_offsets_ = nullptr;
+        auto calculate_time_offset_effective_speed(int module_num) -> std::pair<ValueErrorD, ValueErrorD>;
     };
-
 } // namespace R3B::Neuland::Calibration

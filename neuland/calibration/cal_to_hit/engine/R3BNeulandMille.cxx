@@ -17,7 +17,6 @@
 
 namespace R3B::Neuland::Calibration
 {
-    constexpr auto SCALE_FACTOR = 10.F;
     constexpr auto DEFAULT_ERROR_NS = 1.F;
 
     void MilleHandler::add_signal_t_sum(const BarCalData& signal, Cal2HitPar* cal_to_hit_par_)
@@ -36,16 +35,16 @@ namespace R3B::Neuland::Calibration
                            (right_signal.leading_time - right_signal.trigger_time) - average_t_sum_;
 
         input_data_buffer_.measurement =
-            static_cast<float>(t_sum.value / SCALE_FACTOR / 2.F - BarLength / SCALE_FACTOR / init_effective_c);
-        input_data_buffer_.sigma = static_cast<float>(t_sum.error / SCALE_FACTOR / 2.);
+            static_cast<float>(t_sum.value / scale_factor_ / 2.F - BarLength / scale_factor_ / init_effective_c);
+        input_data_buffer_.sigma = static_cast<float>(t_sum.error / scale_factor_ / 2.);
         // input_data_buffer_.sigma = static_cast<float>(DEFAULT_MEAS_ERROR);
-        const auto local_derivs_t = std::array{ 0.F, 0.F, pos_z / SCALE_FACTOR, 0.F, 0.F, 1.F };
+        const auto local_derivs_t = std::array{ 0.F, 0.F, pos_z / scale_factor_, 0.F, 0.F, 1.F };
         std::copy(local_derivs_t.begin(), local_derivs_t.end(), std::back_inserter(input_data_buffer_.locals));
         input_data_buffer_.globals.emplace_back(
             to_global_label_id(module_num, GlobalLabel::tsync, max_number_of_modules_), 1.F);
         input_data_buffer_.globals.emplace_back(
             to_global_label_id(module_num, GlobalLabel::effective_c, max_number_of_modules_),
-            -BarLength / SCALE_FACTOR / 2.F / init_effective_c / init_effective_c);
+            -BarLength / scale_factor_ / 2.F / init_effective_c / init_effective_c);
 
         write_to_buffer();
     }
@@ -66,10 +65,10 @@ namespace R3B::Neuland::Calibration
 
         const auto measurement = calculate_position_along_bar(signal, cal_to_hit_par);
         // input_data_buffer_.measurement = 4 * static_cast<float>(t_diff.value / SCALE_FACTOR);
-        input_data_buffer_.measurement = static_cast<float>(measurement) / SCALE_FACTOR;
-        input_data_buffer_.sigma = static_cast<float>(DEFAULT_ERROR_NS / SCALE_FACTOR);
-        const auto local_derivs = is_horizontal ? std::array{ pos_z / SCALE_FACTOR, 0.F, 1.F, 0.F }
-                                                : std::array{ 0.F, pos_z / SCALE_FACTOR, 0.F, 1.F };
+        input_data_buffer_.measurement = static_cast<float>(measurement) / scale_factor_;
+        input_data_buffer_.sigma = static_cast<float>(DEFAULT_ERROR_NS / scale_factor_);
+        const auto local_derivs = is_horizontal ? std::array{ pos_z / scale_factor_, 0.F, 1.F, 0.F }
+                                                : std::array{ 0.F, pos_z / scale_factor_, 0.F, 1.F };
         // const auto local_derivs = is_horizontal ? std::array{ pos_z / SCALE_FACTOR, 0.F, 0.F, 1.F, 0.F, 0.F }
         //                                         : std::array{ 0.F, pos_z / SCALE_FACTOR, 0.F, 0.F, 1.F, 0.F };
         std::copy(local_derivs.begin(), local_derivs.end(), std::back_inserter(input_data_buffer_.locals));
@@ -77,7 +76,7 @@ namespace R3B::Neuland::Calibration
             to_global_label_id(module_num, GlobalLabel::offset_effective_c, max_number_of_modules_), -0.5F);
         input_data_buffer_.globals.emplace_back(
             to_global_label_id(module_num, GlobalLabel::effective_c, max_number_of_modules_),
-            static_cast<float>(t_diff.value / SCALE_FACTOR / 2.));
+            static_cast<float>(t_diff.value / scale_factor_ / 2.));
 
         write_to_buffer();
         R3BLOG(
@@ -103,10 +102,10 @@ namespace R3B::Neuland::Calibration
             buffer_clear();
             const auto local_derivs =
                 bar_position.is_horizontal
-                    ? std::array{ 0.F, static_cast<float>(bar_position.pos_z) / SCALE_FACTOR, 0.F, 1.F }
-                    : std::array{ static_cast<float>(bar_position.pos_z) / SCALE_FACTOR, 0.F, 1.F, 0.F };
-            input_data_buffer_.measurement = static_cast<float>(bar_position.displacement / SCALE_FACTOR);
-            input_data_buffer_.sigma = static_cast<float>(bar_position.displacement_error / SCALE_FACTOR);
+                    ? std::array{ 0.F, static_cast<float>(bar_position.pos_z) / scale_factor_, 0.F, 1.F }
+                    : std::array{ static_cast<float>(bar_position.pos_z) / scale_factor_, 0.F, 1.F, 0.F };
+            input_data_buffer_.measurement = static_cast<float>(bar_position.displacement / scale_factor_);
+            input_data_buffer_.sigma = static_cast<float>(bar_position.displacement_error / scale_factor_);
             std::copy(local_derivs.begin(), local_derivs.end(), std::back_inserter(input_data_buffer_.locals));
             write_to_buffer();
         };

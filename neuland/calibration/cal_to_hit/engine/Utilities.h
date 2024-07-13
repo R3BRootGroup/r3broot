@@ -23,6 +23,12 @@ namespace R3B::Neuland::Calibration
         offset_effective_c, // offset times effective_C
         effective_c         // effective speed of light
     };
+
+    inline auto has_only_one_signal(const BarCalData& bar_signal) -> bool
+    {
+        return bar_signal.left.size() == 1 and bar_signal.right.size() == 1;
+    }
+
     inline auto calculate_position_along_bar(const BarCalData& signal, Cal2HitPar* cal_to_hit_par) -> double
     {
         const auto module_num = static_cast<int>(signal.module_num);

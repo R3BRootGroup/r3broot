@@ -61,6 +61,7 @@ namespace R3B::Neuland
             // Setters:
             void set_max_number_of_modules(int num_of_modules) { max_number_of_modules_ = num_of_modules; }
             void set_avarage_t_sum(float t_sum) { average_t_sum_ = t_sum; }
+            void set_scale_factor(float scale_factor) { scale_factor_ = scale_factor; }
 
             // Getters:
             auto get_filename() const -> const auto& { return input_data_filename_; }
@@ -69,6 +70,7 @@ namespace R3B::Neuland
           private:
             int max_number_of_modules_ = 0;
             float average_t_sum_ = 0.F;
+            float scale_factor_ = 1.F;
             static constexpr auto MILLE_BUFFER_SIZE = std::size_t{ 100000 };
             std::string input_data_filename_ = "neuland_cosmic_mille.bin";
             Mille binary_data_writer_{ input_data_filename_ };
