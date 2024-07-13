@@ -24,16 +24,16 @@ runs:
     - name: cmake configure ${{ matrix.repos }}
       run: |
         git config --global --add safe.directory $GITHUB_WORKSPACE
+        git submodule udpate --init --recursive
         git clone https://github.com/R3BRootGroup/macros.git
         echo ""
         echo "path environment variable: $PATH\n"
         echo ""
-        ./build.py -p -c --cmake-extra-args="-DBUILD_GEOMETRY=OFF;-C $GITHUB_WORKSPACE/cmake/CI_CD/configure_options.cmake"
+        cmake --preset default . -C "$GITHUB_WORKSPACE/cmake/CI_CD/configure_options.cmake"
       shell: bash
 
     - name: build ${{ matrix.repos }}
       if: inputs.build-needed == 'true'
       run: |
-        ./build.py -b -j ${NUM_THREADS} 
-        # ./build_thisr3broot.sh -b build -j ${NUM_THREADS}
+        cmake --build --preset default -- -j ${NUM_THREADS}
       shell: bash

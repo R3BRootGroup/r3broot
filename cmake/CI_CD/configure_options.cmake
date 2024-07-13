@@ -1,10 +1,3 @@
-set(BUILD_GEOMETRY
-    OFF
-    CACHE BOOL "disable build geo")
-set(USE_DIFFERENT_COMPILER
-    ON
-    CACHE BOOL "use different compiler")
-
 find_program(CCACHE "ccache")
 if(CCACHE)
     message("enable ccache for cmake build")
