@@ -13,6 +13,7 @@
 
 #include "BarPositionFilter.h"
 #include <Math/WrappedMultiTF1.h>
+#include <R3BException.h>
 #include <R3BLogger.h>
 
 namespace R3B::Neuland::Calibration
@@ -25,8 +26,44 @@ namespace R3B::Neuland::Calibration
     }
     auto BarPositionFitter::fit_positions() -> bool
     {
-        return fit_with(horizontal_bars_, y_pos_fitting_function_) and
-               fit_with(vertical_bars_, x_pos_fitting_function_);
+        if (not fit_status_.has_value())
+        {
+            fit_status_ = fit_with(horizontal_bars_, y_pos_fitting_function_) and
+                          fit_with(vertical_bars_, x_pos_fitting_function_);
+        }
+        return fit_status_.value();
+    }
+
+    void BarPositionFitter::clear()
+    {
+        fit_status_.reset();
+        horizontal_bars_.clear();
+        vertical_bars_.clear();
+        y_pos_fitting_function_.SetParameter(0, 0.);
+        y_pos_fitting_function_.SetParameter(1, 0.);
+        x_pos_fitting_function_.SetParameter(0, 0.);
+        x_pos_fitting_function_.SetParameter(1, 0.);
+    }
+
+    void BarPositionFitter::add_one_bar_signal(const BarPosition& bar_position)
+    {
+        if (fit_status_.has_value())
+        {
+            fit_status_.reset();
+        }
+        auto& bar_positions = bar_position.is_horizontal ? horizontal_bars_ : vertical_bars_;
+        bar_positions.displacements.push_back(bar_position.displacement);
+        bar_positions.displacement_errors.push_back(bar_position.displacement_error);
+        bar_positions.pos_z.push_back(bar_position.pos_z);
+    }
+
+    auto BarPositionFitter::get_prediction(bool is_horizontal, double pos_z) const -> double
+    {
+        if (not fit_status_.has_value())
+        {
+            throw R3B::logic_error("Cannot make prediction without fitting the data first!");
+        }
+        return is_horizontal ? x_pos_fitting_function_(pos_z) : y_pos_fitting_function_(pos_z);
     }
 
     auto BarPositionFitter::fit_with(const BarPositions& positions, TF1& func) -> bool

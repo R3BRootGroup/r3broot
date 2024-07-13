@@ -90,7 +90,6 @@ namespace R3B::Neuland::Calibration
         par_result_.set_filename(DEFAULT_RES_FILENAME);
         pede_launcher_.set_steer_filename(pede_steer_filename_);
         pede_launcher_.set_parameter_filename(parameter_filename_);
-        // binary_data_writer_.set_buffer_size(MILLE_BUFFER_SIZE);
     }
 
     void MillepedeEngine::fill_module_parameters(const Millepede::ResultReader& result,
@@ -120,7 +119,7 @@ namespace R3B::Neuland::Calibration
                     throw std::runtime_error("An error occured with unrecognized global tag");
             }
         }
-        calculate_time_offset(*cal_to_hit_par_);
+        calculate_time_offset(cal_to_hit_par);
     }
 
     void MillepedeEngine::set_minimum_values(const CalData& signals)

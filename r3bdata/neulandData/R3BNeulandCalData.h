@@ -38,7 +38,7 @@ class R3BNeulandCalData : public TObject
     Double_t fTriggerTime;
     double fQdc;
 
-    ClassDefOverride(R3BNeulandCalData, 2)
+    ClassDefOverride(R3BNeulandCalData, 3)
 };
 
 std::ostream& operator<<(std::ostream&, const R3BNeulandCalData&); // Support easy printing

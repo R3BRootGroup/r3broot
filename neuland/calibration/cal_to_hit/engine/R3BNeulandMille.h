@@ -31,7 +31,10 @@ namespace R3B::Neuland
 
             inline void do_end_of_event()
             {
-                write_local_constraint(bar_positions_);
+                if (not bar_positions_.is_skippable())
+                {
+                    write_local_constraint(bar_positions_);
+                }
                 binary_data_writer_.end();
                 average_t_sum_ = 0.F;
                 bar_positions_.clear();
