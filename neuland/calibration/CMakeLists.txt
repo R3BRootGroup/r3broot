@@ -14,16 +14,22 @@
 # cmake-format: on
 
 add_subdirectory(legacy)
-add_subdirectory(mille)
-add_subdirectory(share)
-add_subdirectory(map_to_cal)
-add_subdirectory(cal_to_hit)
+
+if(CONAN_ENABLED)
+    add_subdirectory(mille)
+    add_subdirectory(share)
+    add_subdirectory(map_to_cal)
+    add_subdirectory(cal_to_hit)
+endif()
 
 add_library(R3BNeulandCalibration INTERFACE)
-target_link_libraries(
-    R3BNeulandCalibration
-    INTERFACE R3BNeulandCalibrationShare
-              R3BNeulandMapToCal
-              R3BNeulandCalToHit
-              R3BNeulandCalibrationLegacy
-              R3BSource)
+target_link_libraries(R3BNeulandCalibration INTERFACE R3BNeulandCalibrationLegacy)
+
+if(CONAN_ENABLED)
+    target_link_libraries(
+        R3BNeulandCalibration
+        INTERFACE R3BNeulandCalibrationShare
+                  R3BNeulandMapToCal
+                  R3BNeulandCalToHit
+                  R3BSource)
+endif()

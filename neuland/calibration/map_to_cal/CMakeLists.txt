@@ -32,7 +32,10 @@ set(HEADERS
 
 add_library(R3BNeulandMapToCal SHARED ${SRCS})
 target_include_directories(R3BNeulandMapToCal PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(R3BNeulandMapToCal PUBLIC R3BNeulandCalibrationShare nlohmann_json::nlohmann_json)
+target_link_libraries(
+    R3BNeulandMapToCal
+    PUBLIC R3BNeulandCalibrationShare range-v3::range-v3
+    PRIVATE nlohmann_json::nlohmann_json)
 
 root_generate_dictionary(
     R3BNeulandMapToCal_dict

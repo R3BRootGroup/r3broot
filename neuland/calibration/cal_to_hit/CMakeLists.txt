@@ -44,8 +44,12 @@ set(HEADERS
 
 add_library(R3BNeulandCalToHit SHARED ${SRCS})
 target_include_directories(R3BNeulandCalToHit PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} engine)
-target_link_libraries(R3BNeulandCalToHit PUBLIC R3BNeulandMapToCal R3BNeulandCalibrationLegacy
-                                                R3BMille)
+target_link_libraries(
+    R3BNeulandCalToHit
+    PUBLIC R3BNeulandMapToCal
+           R3BNeulandCalibrationLegacy
+           R3BMille
+           range-v3::range-v3)
 root_generate_dictionary(
     R3BNeulandCalToHit_dict
     ${HEADERS}

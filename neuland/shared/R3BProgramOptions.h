@@ -74,9 +74,9 @@ namespace R3B
 
       private:
         std::unordered_map<std::string, OptionConcept*> registries_;
-        po::positional_options_description pos_desc_ = {};
-        po::options_description desc_ = {};
-        po::variables_map varMap_ = {};
+        po::positional_options_description pos_desc_;
+        po::options_description desc_;
+        po::variables_map varMap_;
     };
 
     class OptionConcept

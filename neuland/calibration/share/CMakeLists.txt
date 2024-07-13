@@ -26,7 +26,10 @@ set(HEADERS
 
 add_library(R3BNeulandCalibrationShare SHARED ${SRCS})
 target_include_directories(R3BNeulandCalibrationShare PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(R3BNeulandCalibrationShare PUBLIC R3BNeulandShared)
+target_link_libraries(
+    R3BNeulandCalibrationShare
+    PUBLIC R3BSource R3BNeulandShared
+    PRIVATE Microsoft.GSL::GSL range-v3::range-v3)
 root_generate_dictionary(
     R3BNeulandCalibrationShare_dict
     ${HEADERS}
