@@ -41,6 +41,8 @@
 # the pull request and merge respectively. For the pull request (Experimental),
 # the project is built with the cache files from ccache while for the merge
 # (Continuous) it's built from scratch without using any cache files.
+#
+# SPDX-License-Identifier: LGPL-3.0-or-later
 
 name: CI-CD
 

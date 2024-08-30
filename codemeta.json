@@ -6,11 +6,11 @@
   "contIntegration": "https://github.com/R3BRootGroup/R3BRoot/actions",
   "dateCreated": "2009-04-14",
   "datePublished": "2009-08-01",
-  "dateModified": "2023-11-04",
-  "downloadUrl": "https://github.com/R3BRootGroup/R3BRoot/archive/refs/tags/nov23.tar.gz",
+  "dateModified": "2024-12-06",
+  "downloadUrl": "https://github.com/R3BRootGroup/R3BRoot/archive/refs/tags/dec24.tar.gz",
   "issueTracker": "https://github.com/R3BRootGroup/R3BRoot/issues",
   "name": "R3BRoot",
-  "softwareVersion": "nov23",
+  "softwareVersion": "dec24",
   "description": "Software for simulations and data analysis of Reactions with Relativistic Radioactive Beams experiment at FAIR",
   "readme": "https://github.com/R3BRootGroup/R3BRoot/blob/dev/README.md",
   "releaseNotes": "",
@@ -18,7 +18,14 @@
   "developmentStatus": "active",
   "referencePublication": "https://doi.org/10.1088/1742-6596/523/1/012034",
   "keywords": [
-    "MC simulation",
+    "Geant4",
+    "c-plus-plus",
+    "cmake",
+    "vmc",
+    "modular",
+    "Event reconstruction",
+    "Simulation",
+    "Data analysis",
     "Structure and dynamics of nuclei",
     "Nuclear reactions",
     "Nuclear fission",
@@ -43,13 +50,15 @@
   "maintainer": {
     "@type": "Person",
     "givenName": "Jose Luis",
-    "familyName": "Rodriguez Sanchez"
+    "familyName": "Rodriguez Sanchez",
+    "@id": "https://orcid.org/0000-0002-4702-5294"
   },
   "author": [
     {
       "@type": "Person",
       "givenName": "Hector",
-      "familyName": "Alvarez Pol"
+      "familyName": "Alvarez Pol",
+      "@id": "https://orcid.org/0000-0001-9643-6252"
     },
     {
       "@type": "Person",
@@ -59,7 +68,8 @@
     {
       "@type": "Person",
       "givenName": "Dmytro",
-      "familyName": "Kresan"
+      "familyName": "Kresan",
+      "@id": "https://orcid.org/0000-0002-7537-2875"
     },
     {
       "@type": "Person",
@@ -69,7 +79,8 @@
     {
       "@type": "Person",
       "givenName": "Jose Luis",
-      "familyName": "Rodriguez Sanchez"
+      "familyName": "Rodriguez Sanchez",
+      "@id": "https://orcid.org/0000-0002-4702-5294"
     },
     {
       "@type": "Person",
@@ -79,7 +90,8 @@
     {
       "@type": "Person",
       "givenName": "Mohammad",
-      "familyName": "Al-Turany"
+      "familyName": "Al-Turany",
+      "@id": "https://orcid.org/0000-0002-8071-4497"
     }
   ],
   "contributor": [
@@ -247,6 +259,11 @@
       "@type": "Person",
       "givenName": "Lorenzo",
       "familyName": "Zanetti"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Matthew",
+      "familyName": "Whitehead"
     },
     {
       "@type": "Person",
