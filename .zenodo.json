@@ -1,0 +1,189 @@
+{
+    "creators": [
+        {
+            "name": "Al-Turany, Mohammad",
+            "orcid": "0000-0002-8071-4497"
+        },
+        {
+            "name": "Alvarez Pol, Hector",
+            "orcid": "0000-0001-9643-6252"
+        },
+        {
+            "name": "Heil, Michael"
+        },
+        {
+            "name": "Kresan, Dmytro",
+            "orcid": "0000-0002-7537-2875"
+        },
+        {
+            "name": "Mayer, Jan"
+        },
+        {
+            "name": "Rodriguez Sanchez, Jose Luis",
+            "orcid": "0000-0002-4702-5294"
+        },
+        {
+            "name": "Wagner, Vadim"
+        }
+    ],
+    "contributors": [
+        {
+            "type": "Other",
+            "name": "Boretzky, Konstanze"
+        },
+        {
+            "type": "Other",
+            "name": "Cabanelas, Pablo"
+        },
+        {
+            "type": "Other",
+            "name": "Chatillon, Audrey"
+        },
+        {
+            "type": "Other",
+            "name": "Douma, Christiaan"
+        },
+        {
+            "type": "Other",
+            "name": "Falduto, Ashton"
+        },
+        {
+            "type": "Other",
+            "name": "Feijoo, Martina"
+        },
+        {
+            "type": "Other",
+            "name": "Galiana, Elisabet"
+        },
+        {
+            "type": "Other",
+            "name": "Garcia, Gabriel"
+        },
+        {
+            "type": "Other",
+            "name": "Gasparic, Igor"
+        },
+        {
+            "type": "Other",
+            "name": "Gra\u00f1a, Antia"
+        },
+        {
+            "type": "Other",
+            "name": "Johansson, H\u00e5kan"
+        },
+        {
+            "type": "Other",
+            "name": "Heiss, Benjamin"
+        },
+        {
+            "type": "Other",
+            "name": "Horvat, Andrea"
+        },
+        {
+            "type": "Other",
+            "name": "Inglessi, Alexander"
+        },
+        {
+            "type": "Other",
+            "name": "Kelic-Heil, Aleksandra"
+        },
+        {
+            "type": "Other",
+            "name": "Klenze, Philipp"
+        },
+        {
+            "type": "Other",
+            "name": "Kripko, Aron"
+        },
+        {
+            "type": "Other",
+            "name": "Kudaibergenova, Eleonora"
+        },
+        {
+            "type": "Other",
+            "name": "Labiche, Marc"
+        },
+        {
+            "type": "Other",
+            "name": "Lagni, Andrea"
+        },
+        {
+            "type": "Other",
+            "name": "Lihtar, Ivana"
+        },
+        {
+            "type": "Other",
+            "name": "Loeher, Bastian"
+        },
+        {
+            "type": "Other",
+            "name": "Milhomens da Fonseca, Leandro"
+        },
+        {
+            "type": "Other",
+            "name": "Mozumdar, Nikhil"
+        },
+        {
+            "type": "Other",
+            "name": "Panin, Valerii"
+        },
+        {
+            "type": "Other",
+            "name": "Plag, Ralf"
+        },
+        {
+            "type": "Other",
+            "name": "Ponnath, Lukas"
+        },
+        {
+            "type": "Other",
+            "name": "Rybalchenko, Alexey"
+        },
+        {
+            "type": "Other",
+            "name": "Storck, Sonja"
+        },
+        {
+            "type": "Other",
+            "name": "Syndikus, Ina"
+        },
+        {
+            "type": "Other",
+            "name": "Taniuchi, Ryo"
+        },
+        {
+            "type": "Other",
+            "name": "Tscheuschner, Joachim"
+        },
+        {
+            "type": "Other",
+            "name": "Wang, Yanzhao"
+        },
+        {
+            "type": "Other",
+            "name": "Whitehead, Matthew"
+        },
+        {
+            "type": "Other",
+            "name": "Wongel, Alicia"
+        },
+        {
+            "type": "Other",
+            "name": "Xarepe, Manuel"
+        },
+        {
+            "type": "Other",
+            "name": "Zanetti, Lorenzo"
+        }
+    ],
+    "description": "The R3BRoot software is based on the FairRoot framework and can be used to perform Monte Carlo simulations and experimental data analysis of the R3B (Reactions with Relativistic Radioactive Beams) nuclear physics experiments at the GSI-FAIR research center (Facility for Antiproton and Ion Research). The user can create simulated data and/or perform analysis with the same framework. Geant3 and Geant4 transport engines are supported, however, the implemented tasks that create simulated data do not depend on a particular Monte Carlo engine. The framework delivers base classes which enable the users to construct their detectors and/or analysis tasks in a simple way, it also delivers some general functionality like track visualization. Moreover, an interface for reading experimental and/or simulated magnetic field maps is also implemented.",
+    "related_identifiers": [
+        {
+            "identifier": "https://github.com/R3BRootGroup/R3BRoot/",
+            "relation": "isSupplementTo",
+            "resource_type": "software",
+            "scheme": "url"
+        }
+    ],
+    "title": "R3BRoot"
+}

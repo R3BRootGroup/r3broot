@@ -1575,6 +1575,7 @@ Bool_t isCrystalInstalled(Int_t alvType, Int_t alveolusCopy, Int_t instCry[])
 
 void create_califa_geo(const int index = 0)
 {
+    gROOT->Reset();
     if (index == 1)
     {
         create_califa_geo_selector("s467");
