@@ -48,9 +48,10 @@ class R3BInputRootFiles
   public:
     using Strings = std::vector<std::string>;
     R3BInputRootFiles() = default;
-    auto AddFileName(std::string name) -> std::optional<std::string>;
+    auto AddFileName(std::string name, bool is_tree_file = false) -> std::optional<std::string>;
     void SetInputFileChain(TChain* chain);
     void RegisterTo(FairRootManager*);
+    [[nodiscard]] auto is_empty() const -> bool { return fileNames_.empty(); }
 
     [[nodiscard]] auto is_friend() const -> bool { return is_friend_; }
     void Make_as_friend() { is_friend_ = true; }
@@ -69,7 +70,6 @@ class R3BInputRootFiles
     void SetTreeName(std::string_view treeName) { treeName_ = treeName; }
     void SetTitle(std::string_view title) { title_ = title; }
     void SetFileHeaderName(std::string_view fileHeader) { fileHeader_ = fileHeader; }
-    void SetEnableTreeFile(bool is_tree_file) { is_tree_file_ = is_tree_file; }
     void SetRunID(uint run_id) { initial_RunID_ = run_id; }
 
     // rule of five:
@@ -81,7 +81,6 @@ class R3BInputRootFiles
 
   private:
     bool is_friend_ = false;
-    bool is_tree_file_ = false;
     uint initial_RunID_ = 0;
     // TODO: title of each file group seems not necessary. Consider to remove it in the future.
     std::string title_;
@@ -95,8 +94,8 @@ class R3BInputRootFiles
     std::vector<TFolder*> validMainFolders_;
     TChain* rootChain_ = nullptr;
 
-    void Intitialize(std::string_view filename);
-    auto ValidateFile(const std::string& filename) -> bool;
+    void Intitialize(std::string_view filename, bool is_tree_file = false);
+    auto ValidateFile(const std::string& filename, bool is_tree_file = false) -> bool;
     static auto ExtractMainFolder(TFile*) -> std::optional<TKey*>;
     auto ExtractRunId(TFile* rootFile) -> std::optional<uint>;
     void register_branch_name();
@@ -110,8 +109,10 @@ class R3BFileSource2 : public FairFileSourceBase
     R3BFileSource2(std::vector<std::string> fileNames, std::string_view title);
     explicit R3BFileSource2(std::vector<std::string> fileNames);
 
-    void AddFile(std::string);
-    void AddFriend(std::string_view);
+    void AddFile(std::string file_name, bool is_tree_file = false);
+    void AddFile(std::vector<std::string> file_names, bool is_tree_file = false);
+    void AddFriend(std::string, bool is_tree_file = false);
+    void AddFriend(std::vector<std::string> file_names, bool is_tree_file = false);
 
     [[nodiscard]] auto GetEventEnd() const { return event_end_; }
 
@@ -119,7 +120,6 @@ class R3BFileSource2 : public FairFileSourceBase
     void SetFileHeaderName(std::string_view fileHeaderName) { inputDataFiles_.SetFileHeaderName(fileHeaderName); }
     // Set event print refresh rate in Hz
     void SetEventPrintRefreshRate(float rate) { event_progress_.SetRefreshRate_Hz(rate); }
-    void SetEnableTreeFile(bool is_tree_file) { inputDataFiles_.SetEnableTreeFile(is_tree_file); }
     void SetInitRunID(int run_id)
     {
         inputDataFiles_.SetRunID(run_id);

@@ -103,9 +103,8 @@ To add the source files which only contain root trees:
 auto file_source = std::make_unique<R3BFileSource2>();
 
 file_source->SetInitRunID(999); // set the run iD
-file_source->SetEnableTreeFile(true);
 
-file_source->AddFile("filename.root");
+file_source->AddFile("filename.root", true);
 ```
 Please make sure that the run ID set to file_source is consistent with the run ID from the parameter file.
 

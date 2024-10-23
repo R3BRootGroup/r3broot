@@ -68,7 +68,7 @@ add_library_with_dictionary(
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9)
     message(STATUS "Linking -lstdc++fs due to the old version of gcc")
-    target_link_libraries(R3BBase PRIVATE -lstdc++fs)
+    target_link_libraries(R3BBase PUBLIC -lstdc++fs)
 endif()
 
 if("${FairRoot_VERSION}" VERSION_LESS 19.0.0)

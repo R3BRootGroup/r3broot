@@ -12,6 +12,7 @@
  ******************************************************************************/
 
 #include "R3BFileSource2.h"
+
 #include "R3BException.h"
 #include "R3BLogger.h"
 #include <FairEventHeader.h>
@@ -221,16 +222,16 @@ void R3BEventProgressPrinter::Print(uint64_t event_num, double speed_per_ms)
     std::cout << std::flush;
 }
 
-auto R3BInputRootFiles::AddFileName(std::string fileName) -> std::optional<std::string>
+auto R3BInputRootFiles::AddFileName(std::string fileName, bool is_tree_file) -> std::optional<std::string>
 {
     auto const msg = fmt::format("Adding {} to file source\n", fileName);
     R3BLOG(info, msg);
     if (fileNames_.empty())
     {
-        Intitialize(fileName);
+        Intitialize(fileName, is_tree_file);
         register_branch_name();
     }
-    if (!ValidateFile(fileName))
+    if (!ValidateFile(fileName, is_tree_file))
     {
         return fileName;
     }
@@ -289,11 +290,11 @@ auto R3BInputRootFiles::ExtractMainFolder(TFile* rootFile) -> std::optional<TKey
     return GetDataFromAnyFolder(rootFile, folderNames);
 }
 
-auto R3BInputRootFiles::ValidateFile(const std::string& filename) -> bool
+auto R3BInputRootFiles::ValidateFile(const std::string& filename, bool is_tree_file) -> bool
 {
     auto rootFile = R3B::make_rootfile(filename.c_str());
 
-    if (is_tree_file_)
+    if (is_tree_file)
     {
         if (!is_friend_)
         {
@@ -334,11 +335,11 @@ auto R3BInputRootFiles::ExtractRunId(TFile* rootFile) -> std::optional<uint>
     return runID;
 }
 
-void R3BInputRootFiles::Intitialize(std::string_view filename)
+void R3BInputRootFiles::Intitialize(std::string_view filename, bool is_tree_file)
 {
     auto file = R3B::make_rootfile(filename.data());
 
-    if (is_tree_file_)
+    if (is_tree_file)
     {
         branchList_ = GetBranchListFromTree(file.get(), treeName_);
         return;
@@ -424,9 +425,9 @@ R3BFileSource2::R3BFileSource2()
 {
 }
 
-void R3BFileSource2::AddFile(std::string fileName)
+void R3BFileSource2::AddFile(std::string file_name, bool is_tree_file)
 {
-    if (auto const res = inputDataFiles_.AddFileName(std::move(fileName)); res.has_value())
+    if (auto const res = inputDataFiles_.AddFileName(std::move(file_name), is_tree_file); res.has_value())
     {
         if (not dataFileNames_.empty())
         {
@@ -438,16 +439,32 @@ void R3BFileSource2::AddFile(std::string fileName)
         }
         else
         {
-            R3BLOG(error, fmt::format("Failed to add the first root file {:?}", fileName));
+            R3BLOG(error, fmt::format("Failed to add the first root file {:?}", file_name));
         }
     }
-    dataFileNames_.emplace_back(fileName);
+    dataFileNames_.emplace_back(file_name);
 }
 
-void R3BFileSource2::AddFriend(std::string_view fileName)
+void R3BFileSource2::AddFile(std::vector<std::string> file_names, bool is_tree_file)
+{
+    for (auto& file_name : file_names)
+    {
+        AddFile(std::move(file_name), is_tree_file);
+    }
+}
+
+void R3BFileSource2::AddFriend(std::vector<std::string> file_names, bool is_tree_file)
+{
+    for (auto& file_name : file_names)
+    {
+        AddFriend(std::move(file_name), is_tree_file);
+    }
+}
+
+void R3BFileSource2::AddFriend(std::string file_name, bool is_tree_file)
 {
     //
-    auto rootfile = R3B::make_rootfile(fileName.data());
+    auto rootfile = R3B::make_rootfile(file_name.c_str());
     auto friendGroup = std::find_if(inputFriendFiles_.begin(),
                                     inputFriendFiles_.end(),
                                     [&rootfile](const auto& friends)
@@ -460,7 +477,7 @@ void R3BFileSource2::AddFriend(std::string_view fileName)
         friendGroup = --inputFriendFiles_.end();
         friendGroup->SetTitle(fmt::format("FriendTree_{}", inputFriendFiles_.size()));
     }
-    auto res = friendGroup->AddFileName(std::string{ fileName });
+    auto res = friendGroup->AddFileName(file_name, is_tree_file);
     if (res.has_value())
     {
         R3BLOG(error,
@@ -471,12 +488,17 @@ void R3BFileSource2::AddFriend(std::string_view fileName)
     else
     {
         // TODO: really need it?
-        friendFileNames_.emplace_back(fileName);
+        friendFileNames_.emplace_back(std::move(file_name));
     }
 }
 
 Bool_t R3BFileSource2::Init()
 {
+    if (inputDataFiles_.is_empty())
+    {
+        throw R3B::logic_error{ "No input file available!" };
+    }
+
     inputDataFiles_.RegisterTo(FairRootManager::Instance());
 
     for (auto& friendGroup : inputFriendFiles_)
@@ -509,7 +531,7 @@ void R3BFileSource2::FillEventHeader(FairEventHeader* evtHeader)
     if (init_runID != GetRunId())
     {
         R3BLOG(
-            error,
+            warn,
             fmt::format("runID {} being set is different from the runID {} in the data file!", GetRunId(), init_runID));
     }
     SetRunId(init_runID); // NOLINT

@@ -193,6 +193,10 @@ namespace R3B
 
     inline auto GetFilesFromRegex(std::string_view filename_regex) -> std::vector<std::string>
     {
+        if (filename_regex.empty())
+        {
+            return {};
+        }
         auto regex_path = fs::path{ filename_regex };
         auto parent_folder = GetParentDir(filename_regex);
         const auto regex_string = regex_path.filename().string();
