@@ -23,6 +23,8 @@
 #include "TH2F.h"
 
 class TClonesArray;
+class TH1F;
+class TH2F;
 class R3BTGeoPar;
 class R3BCalifaMappingPar;
 class R3BEventHeader;
@@ -43,6 +45,13 @@ class R3BCalifaCrystalCal2Cluster : public FairTask
     /** Virtual method Reset **/
     virtual void Reset();
 
+    /**
+     * A method for finish of processing of an event.
+     * Is called by the framework for each event after executing
+     * the tasks.
+     */
+    virtual void FinishTask();
+
     /** Public method SelectGeometryVersion **/
     void SelectGeometryVersion(Int_t version);
 
@@ -51,6 +60,8 @@ class R3BCalifaCrystalCal2Cluster : public FairTask
     void SetGammaClusterThreshold(Double_t clusterThresh){fGammaClusterThreshold = clusterThresh;}
 
     void SetProtonClusterThreshold(Double_t clusterThresh){fProtonClusterThreshold = clusterThresh;}
+    
+    inline void SetThresholdFile(std::string file){fThresholdFile = file;}
 
     /** Virtual method SetParContainers **/
     virtual void SetParContainers();
@@ -100,9 +111,11 @@ class R3BCalifaCrystalCal2Cluster : public FairTask
     Int_t fTotalCrystals;
 
     Double_t fCrystalThreshold;       // Minimum energy requested in a crystal to be included in a cluster
+    Double_t fCrystalThresholdInd[5000];
     Double_t fProtonClusterThreshold; // Minimum energy in a crystal to be considered as a proton cluster candidate
     Double_t fGammaClusterThreshold;  // Minimum energy in a crystal to be considered as a gamma cluster candidate
     Double_t fProtonThreshold;        // Defines the cut energy between proton and gamma readout
+    std::string fThresholdFile;
 
     Double_t fRoundWindow;        // Cluster window
     Bool_t fSimulation;           // Simulation flag
@@ -120,6 +133,8 @@ class R3BCalifaCrystalCal2Cluster : public FairTask
      ** Adds a CalifaCluster to the ClusterCollection
      **/
     R3BCalifaClusterData* AddCluster(std::vector<Int_t> crystalList,
+                             std::vector<Double_t> energyList,
+                             std::vector<ULong64_t> timeList,
                              Double_t ene,
                              Double_t Nf,
                              Double_t Ns,
@@ -128,6 +143,7 @@ class R3BCalifaCrystalCal2Cluster : public FairTask
                              ULong64_t time,
                              Int_t clusterType);
 
+	TH2F* fh_EvsT;
 
     ClassDef(R3BCalifaCrystalCal2Cluster, 3);
 };

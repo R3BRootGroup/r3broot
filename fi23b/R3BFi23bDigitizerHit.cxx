@@ -200,22 +200,25 @@ void R3BFi23bDigitizerHit::Exec(Option_t* opt)
                                << " t: " << time[i].at(&energyl - energy[i].data());
 
                     Double_t xx = x[i].at(&energyl - energy[i].data());
-                    Bool_t granularity = false;
+                    Double_t yy = y[i].at(&energyl - energy[i].data());
+
+                    Bool_t granularity = true;
+
                     if (granularity)
                     {
-                        LOG(debug) << "x before granularity: " << xx;
-                        Double_t fiber_width = 0.028; // cm
-                        xx = (int)((xx + fiber_width / 2.) / fiber_width) * fiber_width;
-                        LOG(debug) << "x after granularity: " << xx;
+                        LOG(debug) << "y before granularity: " << yy;
+                        yy = -detector_width / 2. + fiber_thickness * (1 + air_layer) / 2. +
+                             double(fiber_id) * (1 + air_layer) * fiber_thickness;
+                        LOG(debug) << "y after granularity: " << yy;
                     }
 
                     new ((*Hits)[Hits->GetEntries()])
                         R3BFiberMAPMTHitData(1,
                                              prnd->Gaus(xx, xsigma),
-                                             prnd->Gaus((y[i].at(&energyl - energy[i].data())), ysigma),
+                                             prnd->Gaus(yy, ysigma),
                                              prnd->Gaus(energyl, esigma),
                                              prnd->Gaus(time[i].at(&energyl - energy[i].data()), tsigma),
-                                             i,
+                                             i + 1,
                                              0.,
                                              0.,
                                              0.,

@@ -213,47 +213,38 @@ void R3BFi30DigitizerHit::Exec(Option_t* opt)
                                << " t: " << time[i].at(&energyl - energy[i].data()) << endl;
 
                     // for s494 simulations
-                    Double_t PositionX = -62.18069;
+                    Double_t PositionX = -62.59230;
                     Double_t PositionY = 0.;
-                    Double_t PositionZ = 570.59330;
-                    Double_t RotationY = -13.68626;
+                    Double_t PositionZ = 571.7103;
+                    Double_t RotationY = -13.89355;
 
-                    TVector3 posGlobal(x[i].at(&energyl - energy[i].data()),
-                                       y[i].at(&energyl - energy[i].data()),
-                                       z[i].at(&energyl - energy[i].data()));
-                    TVector3 posDet(PositionX, PositionY, PositionZ);
+                    TVector3 posGlobal;
+                    posGlobal.SetX(x[i].at(&energyl - energy[i].data()));
+                    posGlobal.SetY(y[i].at(&energyl - energy[i].data()));
+                    posGlobal.SetZ(z[i].at(&energyl - energy[i].data()));
 
-                    TVector3 local = posGlobal - posDet;
+                    TVector3 pos0;
+                    pos0.SetX(0);
+                    pos0.SetY(0);
+                    pos0.SetZ(0);
+                    pos0.RotateY(RotationY * TMath::DegToRad());
+                    TVector3 trans(PositionX, PositionY, PositionZ);
+                    pos0 += trans;
+
+                    TVector3 local = posGlobal - pos0;
                     local.RotateY(-RotationY * TMath::DegToRad());
                     Double_t x_local = local.X();
                     Double_t y_local = local.Y();
 
-                    Double_t fiber_thickness = 0.1034;
-                    Double_t air_layer = 0.01 * 0.; // relative to fiber_thickness
-                    Double_t detector_width = fiber_nbr * fiber_thickness * (1. + air_layer);
-
-                    // Double_t xx = -detector_width / 2. + fiber_thickness * (1. + air_layer) / 2. +
-                    //          double(fiber_id - 1) * (1. + air_layer) * fiber_thickness;
-
-                    Double_t xx = -detector_width / 2. + fiber_thickness / 2. + double(fiber_id - 1) * fiber_thickness;
-
-                    // cout<<setprecision(10) << "Hit Fi30 local-x from fiberNum: " << xx<<" from transf: " << x_local
-                    // <<", diff: "<< x_local-xx<<", fID: "<<fiber_id<<
-                    //", detWidth: "<<detector_width<<endl;
-
-                    TVector3 posGlobalcheck(x_local, y_local, 0.);
-                    posGlobalcheck.RotateY(RotationY * TMath::DegToRad());
-                    posGlobalcheck = posGlobalcheck + posDet;
-
-                    // cout<<setprecision(10)<< "Hit Fi30 global-dx,dy,dz: "<<posGlobalcheck.X()-posGlobal.X()<<",
-                    // "<<posGlobalcheck.Y()-posGlobal.Y()<<", "<<posGlobalcheck.Z()-posGlobal.Z()<<endl;
-
-                    Bool_t granularity = false;
+                    Bool_t granularity = true;
                     if (granularity)
                     {
                         LOG(debug) << "x before granularity: " << x_local;
-                        Double_t fiber_width = 0.1; // cm
-                        x_local = (int)((x_local + fiber_width / 2.) / fiber_width) * fiber_width;
+                        x_local = -detector_width / 2. + fiber_thickness * (1 + air_layer) / 2. +
+                                  double(fiber_id) * (1 + air_layer) * fiber_thickness;
+
+                        // Double_t fiber_width = 0.1; // cm
+                        // x_local = (int)((x_local + fiber_width / 2.) / fiber_width) * fiber_width;
                         LOG(debug) << "x after granularity: " << x_local;
                     }
 
@@ -265,7 +256,7 @@ void R3BFi30DigitizerHit::Exec(Option_t* opt)
                                              prnd->Gaus(y_local, ysigma),
                                              qcharge,
                                              prnd->Gaus(time[i].at(&energyl - energy[i].data()), tsigma),
-                                             i,
+                                             i + 1,
                                              0.,
                                              0.,
                                              0.,

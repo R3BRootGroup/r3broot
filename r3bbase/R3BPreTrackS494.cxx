@@ -1627,14 +1627,14 @@ void R3BPreTrackS494::Exec(Option_t* option)
     //   cout<<"Before fib23 cut"<<endl;
     auto detHit23aa = fHitItems.at(DET_FI23A);
     Int_t nHits23aa = detHit23aa->GetEntriesFast();
-    if (!fPairs && nHits23aa > 0)
+    if (!fSimu && !fPairs && nHits23aa > 0)
         return;
     //   if (fPairs && nHits23aa < 1)
     //     return;
     //  cout<<"After fib23a cut"<<endl;
     auto detHit23bb = fHitItems.at(DET_FI23B);
     Int_t nHits23bb = detHit23bb->GetEntriesFast();
-    if (!fPairs && nHits23bb > 0)
+    if (!fSimu && !fPairs && nHits23bb > 0)
         return;
     //  if (fPairs && nHits23bb < 1)
     //    return;
@@ -3008,7 +3008,7 @@ void R3BPreTrackS494::Exec(Option_t* option)
         }
 
         // if we have magnetic field runs we do not have hits in Fib23
-        if (nHits23a < 1 && nHits23b < 1 && !fPairs && fB != -1710)
+        if (!fSimu && nHits23a < 1 && nHits23b < 1 && !fPairs && fB != -1710)
         {
             det = fi23a;
             detector[countdet] = det;
@@ -3029,6 +3029,48 @@ void R3BPreTrackS494::Exec(Option_t* option)
 
             countdet++;
 
+            det = fi23b;
+            detector[countdet] = det;
+            xdet[countdet] = 0.;
+            ydet[countdet] = 0.;
+            zdet[countdet] = 0.;
+            qdet[countdet] = 8.;
+            tdet[countdet] = 0.;
+
+            fh_Fib_ToF_ac[det]->Fill(xdet[countdet] * 100., tStart - tdet[countdet]);
+            fh_xy_Fib_ac[det]->Fill(xdet[countdet] * 100., ydet[countdet] * 100.);
+            fh_mult_Fib_ac[det]->Fill(mult23a);
+            fh_ToT_Fib_ac[det]->Fill(xdet[countdet] * 100., qdet[countdet]);
+            fh_Fibs_vs_Tofd_ac[det]->Fill(x1[tofd1r] * 100. + randx, xdet[countdet] * 100.);
+            fh_Fib_vs_Events_ac[det]->Fill(fNEvents, xdet[countdet] * 100.);
+            fh_ToF_vs_Events_ac[det]->Fill(fNEvents, tStart - tdet[countdet]);
+            fh_Fib_Time_ac[det]->Fill(xdet[countdet] * 100., tdet[countdet]);
+
+            countdet++;
+        }
+        if (fSimu && nHits23a < 1 && !fPairs && fB != -1710)
+        {
+            det = fi23a;
+            detector[countdet] = det;
+            xdet[countdet] = 0.;
+            ydet[countdet] = 0.;
+            zdet[countdet] = 0.;
+            qdet[countdet] = 8.;
+            tdet[countdet] = 0.;
+
+            fh_Fib_ToF_ac[det]->Fill(xdet[countdet] * 100., tStart - tdet[countdet]);
+            fh_xy_Fib_ac[det]->Fill(xdet[countdet] * 100., ydet[countdet] * 100.);
+            fh_mult_Fib_ac[det]->Fill(mult23a);
+            fh_ToT_Fib_ac[det]->Fill(xdet[countdet] * 100., qdet[countdet]);
+            fh_Fibs_vs_Tofd_ac[det]->Fill(x1[tofd1r] * 100. + randx, xdet[countdet] * 100.);
+            fh_Fib_vs_Events_ac[det]->Fill(fNEvents, xdet[countdet] * 100.);
+            fh_ToF_vs_Events_ac[det]->Fill(fNEvents, tStart - tdet[countdet]);
+            fh_Fib_Time_ac[det]->Fill(xdet[countdet] * 100., tdet[countdet]);
+
+            countdet++;
+        }
+        if (fSimu && nHits23b < 1 && !fPairs && fB != -1710)
+        {
             det = fi23b;
             detector[countdet] = det;
             xdet[countdet] = 0.;
@@ -4343,18 +4385,22 @@ void R3BPreTrackS494::Exec(Option_t* option)
             if (fcut1 && fcut2)
                 fcut = true;
 
+            if (fSimu)
+                fcut = true;
+
             countdet_s = 0;
 
             Double_t qdet_s7 = 0., qdet_s6 = 0., qdet_s8 = 0., qdet_s9 = 0.;
 
-            if ((ncount[9] > 0 && ncount[7] > 0 && ncount[2] > 0 && ncount[4] > 0 && ncount[0] > 0 && ncount[1] > 0 &&
-                 ncount[3] < 1 && ncount[5] < 1 && ncount[9] == ncount[7] && ncount[7] == ncount[2] &&
-                 ncount[2] == ncount[4] && ncount[6] < 1 && ncount[8] < 1 && ncount[3] < 1 && ncount[5] < 1 &&
-                 abs(fB) < 1710. && fcut) ||
-                (ncount[6] > 0 && ncount[8] > 0 && ncount[3] > 0 && ncount[5] > 0 && ncount[0] > 0 && ncount[1] > 0 &&
-                 ncount[2] < 1 && ncount[4] < 1 && ncount[8] == ncount[6] && ncount[6] == ncount[3] &&
-                 ncount[3] == ncount[5] && ncount[7] < 1 && ncount[9] < 1 && ncount[2] < 1 && ncount[4] < 1 &&
-                 abs(fB) > 1710. && fcut))
+            if (fSimu ||
+                (!fSimu && ((ncount[9] > 0 && ncount[7] > 0 && ncount[2] > 0 && ncount[4] > 0 && ncount[0] > 0 &&
+                             ncount[1] > 0 && ncount[3] < 1 && ncount[5] < 1 && ncount[9] == ncount[7] &&
+                             ncount[7] == ncount[2] && ncount[2] == ncount[4] && ncount[6] < 1 && ncount[8] < 1 &&
+                             ncount[3] < 1 && ncount[5] < 1 && abs(fB) < 1710. && fcut) ||
+                            (ncount[6] > 0 && ncount[8] > 0 && ncount[3] > 0 && ncount[5] > 0 && ncount[0] > 0 &&
+                             ncount[1] > 0 && ncount[2] < 1 && ncount[4] < 1 && ncount[8] == ncount[6] &&
+                             ncount[6] == ncount[3] && ncount[3] == ncount[5] && ncount[7] < 1 && ncount[9] < 1 &&
+                             ncount[2] < 1 && ncount[4] < 1 && abs(fB) > 1710. && fcut))))
             // if(1 == 1)
             {
                 Bool_t goodQ = true;
@@ -5947,6 +5993,8 @@ void R3BPreTrackS494::Exec(Option_t* option)
                     }
 
                     new ((*fCalifaHitItems)[fNofCalifaHitItems++]) R3BCalifaClusterData(hitCalifa->GetCrystalList(),
+                                                                                        hitCalifa->GetEnergyList(),
+                                                                                        hitCalifa->GetTimeList(),
                                                                                         hitCalifa->GetEnergy(),
                                                                                         hitCalifa->GetNf(),
                                                                                         hitCalifa->GetNs(),
@@ -6143,7 +6191,7 @@ void R3BPreTrackS494::FinishTask()
     cout << "Wrong Trigger:                  " << counterWrongTrigger << endl;
     cout << "Wrong Tpat:                     " << counterWrongTpat << endl;
     cout << "ROLU veto:                      " << counterRolu << endl;
-    cout << "Califa veto:                    " << counterCalifa << endl;
+    cout << "Califa true:                    " << counterCalifa << endl;
     cout << "Evets with nHits Tofd > 0:      " << counterTofd << endl;
     cout << "TofD average multi:             " << (float)counterTofd / (float)counterTofdMulti << endl;
     cout << "Number of single hits in Tofd:  " << Nevent_singles << endl;

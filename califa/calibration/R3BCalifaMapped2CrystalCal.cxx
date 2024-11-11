@@ -19,12 +19,19 @@
 #include "FairRootManager.h"
 #include "FairRuntimeDb.h"
 
+#include "R3BEventHeader.h"
+
 #include "R3BCalifaCrystalCalData.h"
 #include "R3BCalifaCrystalCalPar.h"
 #include "R3BCalifaMapped2CrystalCal.h"
 #include "R3BCalifaMappedData.h"
 #include "R3BCalifaTotCalPar.h"
 #include "R3BLogger.h"
+
+#include "TCanvas.h"
+#include "TFile.h"
+#include "TH1F.h"
+#include "TH2F.h"
 
 // R3BCalifaMapped2CrystalCal::Constructor
 R3BCalifaMapped2CrystalCal::R3BCalifaMapped2CrystalCal()
@@ -160,6 +167,12 @@ InitStatus R3BCalifaMapped2CrystalCal::Init()
         return kFATAL;
     }
 
+    header = dynamic_cast<R3BEventHeader*>(rootManager->GetObject("EventHeader."));
+    if (header)
+        R3BLOG(info, "EventHeader. was found");
+    else
+        R3BLOG(info, "EventHeader. was not found");
+
     fCalifaMappedDataCA = dynamic_cast<TClonesArray*>(rootManager->GetObject("CalifaMappedData"));
     if (!fCalifaMappedDataCA)
     {
@@ -174,6 +187,11 @@ InitStatus R3BCalifaMapped2CrystalCal::Init()
     rootManager->Register("CalifaCrystalCalData", "CALIFA Crystal Cal", fCalifaCryCalDataCA, !fOnline);
 
     SetParameter();
+
+    fh_EvsT = new TH2F("CrystalId_vs_T_Califa_callevel", "CrystalId vs time Califa", 2000, 0., 4000, 1700, 900, 2600);
+    fh_EvsT->GetYaxis()->SetTitle("Crystal Id");
+    fh_EvsT->GetXaxis()->SetTitle("time / ns");
+
     return kSUCCESS;
 }
 
@@ -193,6 +211,12 @@ void R3BCalifaMapped2CrystalCal::Exec(Option_t* option)
     Int_t nHits = fCalifaMappedDataCA->GetEntries();
     if (!nHits)
         return;
+
+    ULong64_t timeTS = 0;
+    if (header)
+    {
+        timeTS = header->GetTimeStamp();
+    }
 
     R3BCalifaMappedData** mappedData = new R3BCalifaMappedData*[nHits];
 
@@ -233,6 +257,42 @@ void R3BCalifaMapped2CrystalCal::Exec(Option_t* option)
         auto Tot = mappedData[i]->GetTot();
         auto pu = mappedData[i]->GetPileup();
 
+        Bool_t writeout = true;
+        Double_t time = (double)(wrts - timeTS);
+        Int_t low, high;
+        if (crystalId < 2434)
+        {
+            if (crystalId > 927 && crystalId < 2433)
+            {
+                for (Int_t irange = 0; irange < 30; irange++)
+                {
+                    if (irange < 22)
+                    {
+                        low = 929 + irange * 64;
+                        high = 992 + irange * 64;
+                    }
+                    else
+                    {
+                        low = 2337 + (irange - 22) * 12;
+                        high = 2348 + (irange - 22) * 12;
+                    }
+                    if (crystalId >= low && crystalId <= high)
+                    {
+                        if (irange % 2 == 0)
+                        {
+                            time = time - 11.;
+                        }
+                        else
+                        {
+                            time = time + 11.;
+                        }
+
+                        break;
+                    }
+                }
+            }
+        }
+
         auto validate_smear = [](uint16_t err_cond, double raw) {
             return err_cond ? NAN : raw + gRandom->Rndm() - 0.5;
         };
@@ -266,7 +326,10 @@ void R3BCalifaMapped2CrystalCal::Exec(Option_t* option)
             double a1 = fCalTotParams->GetAt(fNumTotParams * (crystalId - 1) + 1);
             TotCal = a0 * TMath::Exp(Tot / a1);
         }
-        AddCalData(crystalId, cal[en], cal[Nf], cal[Ns], wrts, TotCal);
+        if (crystalId < 2434)
+            fh_EvsT->Fill(time, crystalId);
+        if (writeout)
+            AddCalData(crystalId, cal[en], cal[Nf], cal[Ns], wrts, TotCal);
     }
 
     if (mappedData)
@@ -293,5 +356,5 @@ R3BCalifaCrystalCalData* R3BCalifaMapped2CrystalCal::AddCalData(Int_t id,
     Int_t size = clref.GetEntriesFast();
     return new (clref[size]) R3BCalifaCrystalCalData(id, energy, Nf, Ns, wrts, tot_energy);
 }
-
+void R3BCalifaMapped2CrystalCal::FinishTask() { fh_EvsT->Write(); }
 ClassImp(R3BCalifaMapped2CrystalCal);

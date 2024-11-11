@@ -112,13 +112,15 @@ class R3BPdcCal2Hit : public FairTask
 
     virtual void SetParContainers();
 
+    R3BPdcHitModulePar* GetModuleParAt(Int_t wire);
+
   private:
     TClonesArray* fCalItems;        /**< Array with Cal items - input data. */
     TClonesArray* fCalTriggerItems; /**< Array with trigger Cal items - input data. */
     TClonesArray* fHitItems;        /**< Array with Hit items - output data. */
     UInt_t fNofHitItems;            /**< Number of hit items for cur event. */
     R3BPdcHitPar* fHitPar;     /**< Hit parameter container. */
-	//R3BPdcHitPar* fCalPar; /**< Parameter container. */
+	R3BPdcHitPar* fCalPar; /**< Parameter container. */
     UInt_t fNofHitPars;             /**< Number of modules in parameter file. */
     R3BEventHeader* header;         /**< Event header - input data. */
     Double_t fClockFreq;            /**< Clock cycle in [ns]. */
@@ -159,7 +161,7 @@ class R3BPdcCal2Hit : public FairTask
 	TH2F* fh_wire_cor;
 	
   public:
-    ClassDef(R3BPdcCal2Hit, 1)
+    ClassDef(R3BPdcCal2Hit, 3)
 };
 
 #endif

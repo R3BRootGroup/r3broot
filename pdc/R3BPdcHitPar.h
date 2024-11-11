@@ -50,10 +50,10 @@ class R3BPdcHitPar : public FairParGenericSet
      * @param own class ownership, if flag is kTRUE FairDB has the par.
      */
     R3BPdcHitPar(const char* name = "PdcHitPar",
-                          const char* title = "Pdc HIT calibration",
+                          const char* title = "Pdc Hit Parameters",
                           const char* context = "TestDefaultContext",
                           Bool_t own = kTRUE);
-    /**
+    /** 
      * Destructor. Cleares the memory used by the object.
      */
     virtual ~R3BPdcHitPar(void);

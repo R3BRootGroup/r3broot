@@ -632,8 +632,8 @@ void R3BTofdTofiCal2HitS494::Exec(Option_t* option)
                     // calculate y-position
                     auto pos = ((bot_ns + par->GetOffset1()) - (top_ns + par->GetOffset2())) * par->GetVeff();
 
-                    // cout << "Test1: " << pos << " bot: " << bot_ns << " top: " << top_ns << " offsets: " <<
-                    // par->GetOffset1() << "  " << par->GetOffset2() << " veff: " << par->GetVeff() << endl;
+                    //  cout << "Test1: " << pos << " bot: " << bot_ns << " top: " << top_ns << " offsets: " <<
+                    //  par->GetOffset1() << "  " << par->GetOffset2() << " veff: " << par->GetVeff() <<  endl;
 
                     // calculate y-position from ToT
                     auto posToT =
@@ -642,8 +642,9 @@ void R3BTofdTofiCal2HitS494::Exec(Option_t* option)
                     //    cout<<"TOFD POS: "<<posToT<<"; "<<par->GetLambda() <<", "<<par->GetToTOffset2()<<";
                     //    "<<par->GetToTOffset1()<<", "<<top_tot<<", "<<bot_tot<<endl;
 
-                    // cout << "Test2: " << posToT << " bot: " << bot_tot << " top: " << top_tot << " offsets: " <<
-                    // par->GetToTOffset1() << "  " << par->GetToTOffset2() << " lambda: " << par->GetLambda() << endl;
+                    //    cout << "Test2: " << posToT << " bot: " << bot_tot << " top: " << top_tot << " offsets: " <<
+                    //   par->GetToTOffset1() << "  " << par->GetToTOffset2() << " lambda: " << par->GetLambda() <<
+                    //   endl;
 
                     if (fTofdTotPos)
                         pos = posToT;
@@ -714,6 +715,13 @@ void R3BTofdTofiCal2HitS494::Exec(Option_t* option)
                     {
                         qb = TMath::Sqrt(top_tot * bot_tot);
                     }
+
+                    /*   if(fSimu)
+                       {
+                           pos = (bot_ns - top_ns) * par->GetVeff();
+                           if(par->GetVeff() == 0.) cout<< "tofd veff != 6 "<<par->GetVeff()<<"; "<<iPlane<<";
+                       "<<iBar<<endl;
+                       }*/
 
                     Double_t parz[3];
                     parz[0] = par->GetPar1za();
@@ -1275,6 +1283,13 @@ void R3BTofdTofiCal2HitS494::Exec(Option_t* option)
 
                     if (fTofiTotPos)
                         pos = posToT;
+
+                    /*	if(fSimu)
+                        {
+                             pos = (bot_ns - top_ns) * parTofi->GetVeff();
+                             if(parTofi->GetVeff() == 0) cout<<"tofi veff=0 "<<parTofi->GetVeff()<<", "<<iPlane<<";
+                       "<<iBar<<endl;
+                         }*/
 
                     Float_t paddle_width = 0.50000;
                     Float_t paddle_thickness = 0.50000;

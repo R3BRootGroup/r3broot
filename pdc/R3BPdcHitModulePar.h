@@ -41,7 +41,7 @@ class R3BPdcHitModulePar : public FairParGenericSet
      * @param own class ownership, if flag is kTRUE FairDB has the par.
      */
     R3BPdcHitModulePar(const char* name = "PdcHitModulePar",
-                                const char* title = "Fiber hit calibration of a module",
+                                const char* title = "Pdc hit calibration of a module",
                                 const char* context = "TestDefaultContext",
                                 Bool_t own = kTRUE);
 
@@ -123,7 +123,7 @@ class R3BPdcHitModulePar : public FairParGenericSet
     Double_t fXT_tArray[XTC_MAXPOINTS]={0};
     Double_t fXT_xArray[XTC_MAXPOINTS]={0};
 
-    ClassDef(R3BPdcHitModulePar, 2);
+    ClassDef(R3BPdcHitModulePar, 1);
 };
 
 #endif

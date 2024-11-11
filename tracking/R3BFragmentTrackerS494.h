@@ -63,6 +63,7 @@ class R3BFragmentTrackerS494 : public FairTask
     void SetForward(Bool_t forward) {fForward = forward;}
     void SetOptimizeGeometry(Int_t optimizeGeometry) {fOptimizeGeometry = optimizeGeometry;}
     void SetPairs(Bool_t pairs) {fPairs = pairs;}
+    void SetOutput(Bool_t WriteOut){fWriteOut = WriteOut;}
     void SetPlimits(Double_t pmin, Double_t pmax){
 		fPmin=pmin;
 		fPmax=pmax;
@@ -85,22 +86,39 @@ class R3BFragmentTrackerS494 : public FairTask
     R3BTGeoPar* fGeo;
  // input arrays   
     std::vector<TClonesArray*> fHitItems;
+    std::vector<TClonesArray*> fPointItems;
     TClonesArray* fMCTrack;
  // output ararys   
     TClonesArray* fTrackItems;
     Int_t fNofTrackItems;
     TClonesArray* fCalifaHitItems;       
     Int_t fNofCalifaHitItems = 0;
+    TClonesArray* fTofdHitItems;       
+    Int_t fNofTofdHitItems;
+    TClonesArray* fFi23aHitItems;       
+    Int_t fNofFi23aHitItems;
+    TClonesArray* fFi23bHitItems;       
+    Int_t fNofFi23bHitItems;
+    TClonesArray* fFi30HitItems;       
+    Int_t fNofFi30HitItems;
+    TClonesArray* fFi31HitItems;       
+    Int_t fNofFi31HitItems;
+    TClonesArray* fFi32HitItems;       
+    Int_t fNofFi32HitItems;
+    TClonesArray* fFi33HitItems;       
+    Int_t fNofFi33HitItems;    
     
     std::vector<R3BTrackingParticle*> fFragments;
-    TClonesArray* fArrayFragments;
+    TClonesArray* fArrayFragments; 
+    R3BTrackingParticle* candidate;
     
     Int_t fNEvents = 0;
     Int_t fNEventsLeft = 0;
     Int_t fNEventsRight=0;
     Int_t sumwrite = 0;
-    Int_t counter1 = 0, fNEvents_nonull=0, counterHe=0, counterC=0,counter_wo = 0;
+    Int_t counter0 = 0, counter1 = 0, fNEvents_nonull=0, counterHe=0, counterC=0,counter_wo = 0;
     Bool_t fPairs;
+    Bool_t fWriteOut;
     
     Int_t icount100 = 0;
     
@@ -125,34 +143,36 @@ class R3BFragmentTrackerS494 : public FairTask
                                                 "Fi31",   "Fi32", "Fi33", "Tofd", NULL };
     TLorentzVector Oxygen; 
     TVector3 pos16O0;
-    TVector3 pos16O3;    
+    TVector3 pos16O3;  
+ 
     
     R3BTrackData* AddTrack(Double_t x, 
-									   Double_t y, 
-									   Double_t z, 
-										Double_t px, 
-										Double_t py, 
-										Double_t pz, 
-										Int_t q, 
-										Double_t AoZ, 
-										Double_t chix, 
-										Double_t chiy, 
-										Int_t quality, 
-										std::vector<Double_t> detPos, 
-										Double_t t);                                     
+						   Double_t y, 
+						   Double_t z, 
+						   Double_t px, 
+						   Double_t py, 
+						   Double_t pz, 
+						   Int_t q, 
+						   Double_t AoZ, 
+						   Double_t chix, 
+						   Double_t chiy, 
+						   Int_t quality, 
+						   std::vector<Double_t> detPos, 
+						   Double_t t);                                     
     Bool_t fVis;
-//   	Double_t amu = 0.93149410242;
-   	Double_t amu = 0.931494028;   // Gev/c**2
-   	//0.938272;
+
    	Double_t totalChi2Mass = 0;
+   	Double_t totalChi2Mass0 = 0;
    	Double_t totalChi2P = 0;
    	Double_t totalEvents = 0;
+    Double_t totalEvents0 = 0;
     Int_t maxevent;
     R3BFragmentFitterGeneric* fFitter;
     Bool_t fEnergyLoss;
     Bool_t fSimu;
     Bool_t fForward;
     Bool_t fOptimizeGeometry;
+
     Bool_t fHisto;
     Double_t fAfterGladResolution;
     Int_t eventCounter = 0;
@@ -160,8 +180,22 @@ class R3BFragmentTrackerS494 : public FairTask
     Double_t minChi2_12C;
     TLorentzVector alphaP, carbonP;
     TVector3 p12C, p4He;
-    Double_t mHe = 3.728401291*1e3; // 3727.409;
-	Double_t mC = 11.17486339*1.e3; //11174.950;
+    Int_t iwriteout = 0;
+    
+    //   	Double_t amu = 0.93149410242;
+   	Double_t amu = 0.931494028;   // Gev/c**2
+    Double_t mHe = 3.7273791; //simu
+	Double_t mC = 11.17486; //simu
+	Double_t mO = 15.01235;//14.895085; //simu
+	
+	Double_t ps = 17391.5;
+	Double_t pBeamz = 17.3915;
+	Double_t beta_beam = 0.7593209;           
+    
+    Double_t dfib = 0.084;
+    Double_t cut_yfib23 = 0.21; //0.1512
+    Double_t cut_xfib23 = 0.21; //0.1512
+    
 	Double_t x_l[8];
     Double_t y_l[8];
     Double_t eloss_hit[8];
@@ -174,8 +208,11 @@ class R3BFragmentTrackerS494 : public FairTask
     Double_t det_hit_xHe[8];
     Double_t det_hit_yHe[8];
     Double_t det_hit_tHe[8];
+    Double_t det_hit_tO[8];
     Int_t fNwriteout=0;
 	Int_t counterCalifa = 0;
+//	Double_t z_tp = 174.5638;  // target to turning point
+    Double_t z_tp = 174.5851; // after 2022+2023 meausrements
 
     TH1F* fh_mult_fi23a;
     TH1F* fh_mult_fi23b;
@@ -183,7 +220,16 @@ class R3BFragmentTrackerS494 : public FairTask
     TH1F* fh_mult_fi31;
     TH1F* fh_mult_fi32;
     TH1F* fh_mult_fi33;
+    TH1F* fh_mult_fi3X;
     TH1F* fh_mult_tofd;
+    TH1F* fh_mult_fi23a_select;
+    TH1F* fh_mult_fi23b_select;
+    TH1F* fh_mult_fi30_select;
+    TH1F* fh_mult_fi31_select;
+    TH1F* fh_mult_fi32_select;
+    TH1F* fh_mult_fi33_select;
+    TH1F* fh_mult_fi3X_select;
+    TH1F* fh_mult_tofd_select;
     TH1F* fh_eloss_fi23a_mc;
     TH1F* fh_eloss_fi23a;
     TH1F* fh_eloss_fi23b_mc;
@@ -198,17 +244,21 @@ class R3BFragmentTrackerS494 : public FairTask
     TH1F* fh_eloss_fi33;
     TH1F* fh_ncand;
     TH1F* fh_x_res[8];
+    TH1F* fh_x_res0[8];
     TH1F* fh_x_pull[8];
     TH1F* fh_y_res[8];
+    TH1F* fh_y_res0[8];
     TH1F* fh_y_pull[8];
     TH1F* fh_A_reco1;
     TH1F* fh_A_reco2;
+    TH1F* fh_psum_res;
     TH1F* fh_mom_res;
     TH1F* fh_mom_res_x;
     TH1F* fh_mom_res_y;
     TH1F* fh_mom_res_z;
     TH1F* fh_mass_res;
     TH1F* fh_chi2;
+    TH1F* fh_chi02;
     TH1F* fh_vz_res;
     TH1F* fh_beta_res;
     TH1F* fh_p;
@@ -264,8 +314,7 @@ class R3BFragmentTrackerS494 : public FairTask
     TH2F* fh_phi_16O;
     TH2F* fh_xfi23a_target_track;
     TH2F* fh_yfi23b_target_track;
-    TH2F* fh_xy_target_C;
-    TH2F* fh_xy_target_He;
+    TH2F* fh_xy_target;
     TH2F* fh_dxdy;
     TH2F* fh_mass_corel;
     TH2F* fh_mass_vs_ch2;
@@ -287,6 +336,18 @@ class R3BFragmentTrackerS494 : public FairTask
     TH2F* fh_Erel_vs_nhits23b;
     TH2F* fh_xFi23a_tofd_exp;
     TH2F* fh_xFi23a_tofd_exp_select;
+    TH2F* fh_py_vs_yFib23b;
+    TH2F* fh_px_vs_yFib23b;
+    TH2F* fh_pz_vs_yFib23b;
+    TH2F* fh_px_vs_xFib23a;
+    TH2F* fh_py_vs_xFib23a;
+    TH2F* fh_pz_vs_xFib23a;
+    TH2F* fh_ptot_vs_ntrack;
+    TH2F* fh_y0_vs_ytrack;
+    TH2F* fh_yC_vs_yC_target;
+    TH2F* fh_yC_vs_yHe_target_geom;
+    TH2F* fh_xFi23a_tofd_track;
+    TH2F* fh_chiX_vs_chiP;
     
 
     TH2F* fh_califa_energy;

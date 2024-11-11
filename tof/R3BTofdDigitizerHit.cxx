@@ -183,9 +183,9 @@ void R3BTofdDigitizerHit::Exec(Option_t* opt)
                                                              Double_t RotationY = -14.;
                                          */
                                          // position for s494 simulations
-                    Double_t PositionX = -129.3;
-                    Double_t PositionY = 0.;
-                    Double_t PositionZ = 685.4;
+                    Double_t PositionX = -129.6732;
+                    Double_t PositionY = 1.492008;
+                    Double_t PositionZ = 686.1278;
                     Double_t RotationY = -18.;
 
                     TVector3 posGlobal;
@@ -205,6 +205,29 @@ void R3BTofdDigitizerHit::Exec(Option_t* opt)
                     local.RotateY(-RotationY * TMath::DegToRad());
                     Double_t x_local = local.X();
                     Double_t y_local = local.Y();
+
+                    Bool_t granularity = true;
+                    if (granularity)
+                    {
+                        LOG(debug) << "x before granularity: " << x_local << ", layer = " << layer_label + 1 << endl;
+
+                        Double_t xp = -1000.;
+                        // calculate x-position
+                        if (layer_label + 1 == 1 || layer_label + 1 == 3)
+                        {
+                            xp = -detector_width / 2 + (paddle_width + air_gap_paddles) / 2 +
+                                 paddle_number * (paddle_width + air_gap_paddles) - 0.04;
+                        }
+                        if (layer_label + 1 == 2 || layer_label + 1 == 4)
+                        {
+                            xp = -detector_width / 2 + (paddle_width + air_gap_paddles) +
+                                 paddle_number * (paddle_width + air_gap_paddles) - 0.04;
+                        }
+
+                        x_local = xp;
+
+                        LOG(debug) << "x after granularity: " << x_local << ", layer = " << layer_label + 1 << endl;
+                    }
 
                     Time[channel] = vPoints[channel].at(point)->GetTime();
                     Energy_Loss[channel] = vPoints[channel].at(point)->GetEnergyLoss();

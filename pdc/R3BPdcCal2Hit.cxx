@@ -11,21 +11,25 @@
  * or submit itself to any jurisdiction.                                      *
  ******************************************************************************/
 // ------------------------------------------------------------
-// -----                 R3BTofdCal2Hit                   -----
+// -----                 R3BPdcCal2Hit                   -----
 // -----            Created June 2020 by M.Heil            -----
 // ------------------------------------------------------------
 
 #include "R3BPdcCal2Hit.h"
-#include "R3BEventHeader.h"
 #include "R3BPdcCalData.h"
 #include "R3BPdcHitData.h"
-#include "R3BTCalEngine.h"
-//#include "R3BPdcHitModulePar.h"
+#include "R3BPdcHitModulePar.h"
 #include "R3BPdcHitPar.h"
+
+#include "R3BEventHeader.h"
+#include "R3BTCalEngine.h"
 
 #include "FairLogger.h"
 #include "FairRootManager.h"
+#include "FairRtdbRun.h"
+#include "FairRunIdGenerator.h"
 #include "FairRuntimeDb.h"
+
 #include "TCanvas.h"
 #include "TF1.h"
 #include "TGraph.h"
@@ -69,21 +73,24 @@ R3BPdcCal2Hit::ToT::ToT(R3BPdcCalData const* a_lead,
 
 R3BPdcCal2Hit::R3BPdcCal2Hit(const char* name, Bool_t a_is_calibrator, Bool_t a_is_sync, Int_t iVerbose)
     : FairTask(name, iVerbose)
-    , fCalItems(NULL)
-    , fCalTriggerItems(NULL)
+    , fCalItems()
+    , fCalTriggerItems()
     , fHitItems(new TClonesArray("R3BPdcHitData"))
     , fIsCalibrator(a_is_calibrator)
     , fIsSync(a_is_sync)
-    , fNofHitItems(0)
-    , fNofHitPars(0)
-    , fHitPar(NULL)
+    , fNofHitItems()
+    , fNofHitPars()
+    , fHitPar()
     , fnEvents(0)
     , fClockFreq(1. / CTDC_16_CLOCK_MHZ * 1000.)
 {
+
+    pdc_trig_map_setup();
 }
 
 R3BPdcCal2Hit::~R3BPdcCal2Hit()
 {
+
     if (fHitItems)
     {
         delete fHitItems;
@@ -94,22 +101,43 @@ R3BPdcCal2Hit::~R3BPdcCal2Hit()
 
 InitStatus R3BPdcCal2Hit::Init()
 {
-    pdc_trig_map_setup();
 
-    fHitPar = (R3BPdcHitPar*)FairRuntimeDb::instance()->getContainer("PdcHitPar");
-    if (!fHitPar)
+    LOG(info) << "PDC at Init() start" << endl;
+
+    // get access to Cal data
+    FairRootManager* mgr = FairRootManager::Instance();
+    if (NULL == mgr)
+        LOG(fatal) << "FairRootManager not found";
+    header = (R3BEventHeader*)mgr->GetObject("R3BEventHeader");
+    fCalItems = (TClonesArray*)mgr->GetObject("PdcCal");
+    if (NULL == fCalItems)
+        LOG(fatal) << "Branch PdcCal not found";
+    fCalTriggerItems = (TClonesArray*)mgr->GetObject("PdcTriggerCal");
+    if (NULL == fCalTriggerItems)
+        LOG(fatal) << "Branch PdcTriggerCal not found";
+    maxevent = mgr->CheckMaxEventNo();
+
+    // request storage of Hit data in output tree
+    mgr->Register("PdcHit", "Land", fHitItems, kTRUE);
+
+    if ((fIsCalibrator && !fIsSync) || !fIsCalibrator)
     {
-        LOG(error) << "Could not get access to PdcHitPar-Container.";
-        fNofHitPars = 0;
-        // return kFATAL;
-    }
-    else
-    {
-        fNofHitPars = fHitPar->GetNumModulePar();
-        if (fNofHitPars == 0)
+        fHitPar = (R3BPdcHitPar*)FairRuntimeDb::instance()->getContainer("PdcHitPar");
+        if (!fHitPar)
         {
-            LOG(error) << "There are no Hit parameters in container PdcHitPar";
+            LOG(error) << "Could not get access to PdcHitPar-Container.";
+            fNofHitPars = 0;
             // return kFATAL;
+        }
+        else
+        {
+            fNofHitPars = fHitPar->GetNumModulePar();
+            if (fNofHitPars == 0)
+            {
+                LOG(error) << "There are no Hit parameters in container PdcHitPar";
+                fHitPar = nullptr;
+                // return kFATAL;
+            }
         }
     }
 
@@ -137,22 +165,6 @@ InitStatus R3BPdcCal2Hit::Init()
     {
         it->resize(ch_num);
     }
-
-    // get access to Cal data
-    FairRootManager* mgr = FairRootManager::Instance();
-    if (NULL == mgr)
-        LOG(fatal) << "FairRootManager not found";
-    header = (R3BEventHeader*)mgr->GetObject("R3BEventHeader");
-    fCalItems = (TClonesArray*)mgr->GetObject("PdcCal");
-    if (NULL == fCalItems)
-        LOG(fatal) << "Branch PdcCal not found";
-    fCalTriggerItems = (TClonesArray*)mgr->GetObject("PdcTriggerCal");
-    if (NULL == fCalTriggerItems)
-        LOG(fatal) << "Branch PdcTriggerCal not found";
-    maxevent = mgr->CheckMaxEventNo();
-
-    // request storage of Hit data in output tree
-    mgr->Register("PdcHit", "Land", fHitItems, kTRUE);
 
     char chistName[255];
     char chistTitle[255];
@@ -281,22 +293,23 @@ InitStatus R3BPdcCal2Hit::Init()
     return kSUCCESS;
 }
 
+InitStatus R3BPdcCal2Hit::ReInit() { return kSUCCESS; }
+
 // Note that the container may still be empty at this point.
 void R3BPdcCal2Hit::SetParContainers()
 {
     fHitPar = (R3BPdcHitPar*)FairRuntimeDb::instance()->getContainer("PdcHitPar");
     if (!fHitPar)
     {
-        LOG(error) << "Could not get access to PdcHitPar-Container.";
+        LOG(error) << "R3BPdcCal2Hit::Init() Could not get access to PdcHitPar-Container.";
         fNofHitPars = 0;
         return;
     }
-}
-
-InitStatus R3BPdcCal2Hit::ReInit()
-{
-    SetParContainers();
-    return kSUCCESS;
+    else
+    {
+        LOG(info) << "R3BPdcCal2Hit::Init() container PdcHitPar initialized" << endl;
+    }
+    LOG(info) << "PDC SetParContainers() end" << endl;
 }
 
 void R3BPdcCal2Hit::Exec(Option_t* option)
@@ -699,6 +712,7 @@ void R3BPdcCal2Hit::Exec(Option_t* option)
                         */
                         // end version AK
                     }
+
                     if (method2)
                     {
                         R3BPdcHitModulePar* par1 = fHitPar->GetModuleParAt((ID_old - 1) * N_WIRE_MAX + wire_old);
@@ -707,6 +721,8 @@ void R3BPdcCal2Hit::Exec(Option_t* option)
                             dtmin = par1->GetTmin();
                             dtmax = par1->GetTmax();
                             xtc_npoints = par1->GetNPoints();
+                            if (xtc_npoints > 0)
+                                cout << "npoints: " << xtc_npoints << endl;
                             xtc_x = par1->GetXT_xArray();
                             xtc_t = par1->GetXT_tArray();
                             for (Int_t ic = 0; ic < xtc_npoints; ic++)
@@ -919,22 +935,23 @@ void R3BPdcCal2Hit::FinishTask()
     if (fIsCalibrator)
     {
         cout << "IN CALIBRATOR!" << endl;
-
-        R3BPdcHitModulePar* mpar;
-
-        for (Int_t plane = 0; plane < N_PLANE_MAX_PDC; plane++)
-        {
-            for (UInt_t i = 1; i <= N_WIRE_MAX; i++)
-            {
-                mpar = new R3BPdcHitModulePar();
-                mpar->SetWire(plane * N_WIRE_MAX + i);
-                // cout << "New module: " << plane*N_WIRE_MAX + i << endl;
-                fHitPar->AddModulePar(mpar);
-            }
-        }
+        cout << "Test" << endl;
 
         if (fIsSync)
         {
+
+            R3BPdcHitModulePar* mpar;
+
+            for (Int_t plane = 0; plane < N_PLANE_MAX_PDC; plane++)
+            {
+                for (UInt_t i = 1; i <= N_WIRE_MAX; i++)
+                {
+                    mpar = new R3BPdcHitModulePar();
+                    mpar->SetWire(plane * N_WIRE_MAX + i);
+                    // cout << "New module: " << plane*N_WIRE_MAX + i << endl;
+                    fHitPar->AddModulePar(mpar);
+                }
+            }
             // tsync
             for (Int_t plane = 0; plane < N_PLANE_MAX_PDC; plane++)
             {
@@ -957,8 +974,9 @@ void R3BPdcCal2Hit::FinishTask()
 
                     R3BPdcHitModulePar* par0 = fHitPar->GetModuleParAt(plane * N_WIRE_MAX + i);
                     par0->SetSync(tsync);
-                    cout << "Plane: " << plane << "  " << plane * N_WIRE_MAX + i << endl;
-                    cout << "Set tsync  parameter of wire: " << i << " tsync: " << tsync << endl;
+
+                    // cout << "Plane: " << plane << "  " << plane * N_WIRE_MAX + i << endl;
+                    // cout << "Set tsync  parameter of wire: " << i << " tsync: " << tsync << endl;
                 }
             }
         }
@@ -1009,9 +1027,9 @@ void R3BPdcCal2Hit::FinishTask()
                         par2->SetdTmax(tmax);
                         par2->SetSync(tsync);
 
-                        cout << "Plane: " << plane << "  " << plane * N_WIRE_MAX + i << endl;
-                        cout << "Set parameter of wire: " << i << " tmin: " << tmin << " tmax: " << tmax
-                             << " tsync: " << tsync << endl;
+                        //  cout << "Plane: " << plane << "  " << plane * N_WIRE_MAX + i << endl;
+                        //  cout << "Set parameter of wire: " << i << " tmin: " << tmin << " tmax: " << tmax
+                        //       << " tsync: " << tsync << endl;
                     }
                 }
                 // end of short version
@@ -1367,16 +1385,17 @@ void R3BPdcCal2Hit::FinishTask()
                                 if (proj->GetBinContent(j) >= 0.9 * maxContent)
                                 {
                                     index_high = j;
-                                    cout << "index low: " << index_low << ", " << proj->GetBinContent(index_low) << ", "
-                                         << 0.1 * maxContent << ", " << maxContent << endl;
-                                    cout << "index high: " << index_high << ", " << proj->GetBinContent(j) << ". "
-                                         << 0.9 * maxContent << "; " << maxContent << endl;
+                                    if (plane == 1)
+                                        cout << "index low: " << index_low << ", " << proj->GetBinContent(index_low)
+                                             << ", " << 0.1 * maxContent << ", " << maxContent << endl;
+                                    if (plane == 1)
+                                        cout << "index high: " << index_high << ", " << proj->GetBinContent(j) << ". "
+                                             << 0.9 * maxContent << "; " << maxContent << endl;
 
                                     break;
                                 }
                             }
 
-                            // cout << "Final indexes: " << index_low << ", " << index_high << ", " << endl;
 
                             int content_low = proj->GetBinContent(index_low);
                             int content_high = proj->GetBinContent(index_high);
@@ -1397,8 +1416,6 @@ void R3BPdcCal2Hit::FinishTask()
 
                             Int_t index_start = findex_start;
                             Int_t index_end = findex_start + 240. / proj->GetBinWidth(0);
-
-                            // cout << "Index start: " << index_start << " Index end: " << index_end << endl;
 
                             for (UInt_t j = index_start; j < index_end; j++)
                             {
@@ -1544,18 +1561,25 @@ void R3BPdcCal2Hit::FinishTask()
                                                         // cout<<"Err: "<<err_check<<", "<<err<<", "<<isum<<endl;
                             */
                         }
-                        tmin = t_ns[0];
-                        tmax = t_ns[npoints - 1];
-                        cout << "reading par: " << plane << "  " << iwire << endl;
+
+                        tmin = -1000;
+                        tmax = -1000;
+                        if (npoints > 0)
+                        {
+                            tmin = t_ns[0];
+                            tmax = t_ns[npoints - 1];
+                        }
+                        if (plane == 1 && npoints > 0)
+                            cout << "reading par: " << plane << "  " << iwire << endl;
                         R3BPdcHitModulePar* par3 = fHitPar->GetModuleParAt(plane * N_WIRE_MAX + iwire);
                         par3->SetTmin(tmin);
                         par3->SetTmax(tmax);
-                        cout << "Tmin, Tmax: " << tmin << "  " << tmax << endl;
+                        if (plane == 1 && npoints > 0)
+                            cout << "Tmin, Tmax: " << tmin << "  " << tmax << endl;
                         par3->SetSync(tsync_mem[plane * N_WIRE_MAX + iwire - 1]);
                         par3->SetNPoints(npoints);
                         par3->SetXT_xArray(x_mm, npoints);
                         par3->SetXT_tArray(t_ns, npoints);
-                        cout << "Npoints: " << npoints << endl;
                         /*
                                                 for (Int_t icount = 0; icount < xtc_points; icount++)
                                                 {
@@ -1574,10 +1598,11 @@ void R3BPdcCal2Hit::FinishTask()
 
                         */
 
-                        cout << "Plane: " << plane + 1 << ", wire: " << i << ", channel: " << plane * N_WIRE_MAX + iwire
-                             << ", tmin: " << tmin << ", tmax: " << tmax
-                             << ", tsync: " << tsync_mem[plane * N_WIRE_MAX + iwire - 1] << ", xtc points: " << npoints
-                             << endl;
+                        if (plane == 1 && npoints > 0)
+                            cout << "Plane: " << plane + 1 << ", wire: " << i
+                                 << ", channel: " << plane * N_WIRE_MAX + iwire << ", tmin: " << tmin
+                                 << ", tmax: " << tmax << ", tsync: " << tsync_mem[plane * N_WIRE_MAX + iwire - 1]
+                                 << ", xtc points: " << npoints << endl;
                     }
                     // cfit->cd(plane + 1);
                     // fh_error[plane]->SetMarkerStyle(22);
@@ -1587,6 +1612,28 @@ void R3BPdcCal2Hit::FinishTask()
         }
 
         fHitPar->setChanged();
+        for (Int_t j = 1; j < 2; j++)
+        {
+            for (UInt_t i = 1; i <= N_WIRE_MAX; i++)
+            {
+                R3BPdcHitModulePar* par4 = fHitPar->GetModuleParAt(j * N_WIRE_MAX + i);
+                // cout<<"Testing par for wire: "<<i<<", tsync: "<< par4->GetSync()<<", tmin: "<<par4->GetTmin()<<",
+                // tmax: "<<par4->GetTmax()<<endl;
+                if (i == 25)
+                {
+                    Int_t np = par4->GetNPoints();
+                    xtc_x = par4->GetXT_xArray();
+                    xtc_t = par4->GetXT_tArray();
+                    for (Int_t ic = 0; ic < par4->GetNPoints(); ic++)
+                    {
+                        Double_t xx = *(xtc_x + ic);
+                        Double_t tt = *(xtc_t + ic);
+                        cout << "x: " << xx << ", t: " << tt << endl;
+                    }
+                }
+            }
+        }
+
         fh_running_sum->Write();
         fh_xtc->Write();
         //        for (Int_t j = 0; j < N_PLANE_MAX_PDC; j++)

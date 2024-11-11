@@ -18,6 +18,8 @@
 #include "FairRunSim.h"
 #include "G4NistManager.hh"
 #include "TRandom.h"
+#include <TDatabasePDG.h>
+#include <TParticlePDG.h>
 #include <boost/filesystem.hpp>
 //#include <boost/iostreams/filter/bzip2.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
@@ -104,7 +106,7 @@ bool R3BAsciiGenerator::ReadEvent(FairPrimaryGenerator* primGen)
     }
     // Ignore the other stuff that might still be on that line
     fInput.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-    LOG(debug) << "R3BAsciiGenerator: Event " << eventId << " nTracks " << nTracks;
+    LOG(debug) << "R3BAsciiGenerator::ReadEvent: Event " << eventId << " nTracks " << nTracks;
 
     if (fPointVtxIsSet)
     {
@@ -133,8 +135,7 @@ bool R3BAsciiGenerator::ReadEvent(FairPrimaryGenerator* primGen)
         fInput.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
         // Ions: -1, Particles +1
-        // int pdg = iPid == -1 ? GetIonPdg(iZ, iA) : iPid;
-        int pdg = iPid == -1 ? GetIonPdg(iZ, iA) : iA;
+        int pdg = iPid == -1 ? GetIonPdg(iZ, iA) : iPid;
 
         if (!fPointVtxIsSet)
         {
@@ -183,7 +184,7 @@ void R3BAsciiGenerator::RegisterIons()
         }
         // Ignore the other stuff that might still be on that line
         fInput.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-        LOG(debug) << "R3BAsciiGenerator: Event " << eventId << " nTracks " << nTracks;
+        LOG(debug) << "R3BAsciiGenerator::RegisterIons: Event " << eventId << " nTracks " << nTracks;
 
         for (int iTrack = 0; iTrack < nTracks; iTrack++)
         {
@@ -199,6 +200,7 @@ void R3BAsciiGenerator::RegisterIons()
                 const int pdg = GetIonPdg(iZ, iA);
                 if (ions.find(pdg) == ions.end())
                 {
+
                     const double mass = G4NistManager::Instance()->GetIsotopeMass(iZ, iA) / CLHEP::GeV;
                     LOG(debug) << "R3BAsciiGenerator: New ion " << iZ << "\t" << iA << "\t" << mass;
                     ions[pdg] = new FairIon(TString::Format("Ion_%d_%d", iA, iZ), iZ, iA, iZ, 0., mass);
@@ -211,6 +213,8 @@ void R3BAsciiGenerator::RegisterIons()
     {
         // Note: FairRoot will not register ions known to TDatabasePDG (e.g. alphas)
         FairRunSim::Instance()->AddNewIon(kv.second);
+        std::cout.precision(7);
+        std::cout << "***TESTING MASS ****" << kv.second->GetMass() << ", " << std::endl;
     }
 
     LOG(info) << "R3BAsciiGenerator: " << ions.size() << " ions registered.";

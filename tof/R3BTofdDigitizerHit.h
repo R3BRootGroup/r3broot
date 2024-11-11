@@ -62,7 +62,7 @@ class R3BTofdDigitizerHit : public FairTask
     Float_t fsigma_y;
     Float_t fsigma_t;
     Float_t fsigma_ELoss;
-
+						
     // detector parameter
     Int_t number_layers = 2;
     Int_t number_paddles = 44; // per layer

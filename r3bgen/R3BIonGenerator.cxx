@@ -49,9 +49,11 @@ R3BIonGenerator::R3BIonGenerator()
     , fPz(0.)
     , fR(0.)
     , fz(0.)
-    , fOffset(0.)
+    , fOffsetX(0.)
+    , fOffsetY(0.)
     , fSigmaP(0.)
-    , fAngle(0.)
+    , fAngleX(0.)
+    , fAngleY(0.)
     , fVx(0.)
     , fVy(0.)
     , fVz(0.)
@@ -71,9 +73,11 @@ R3BIonGenerator::R3BIonGenerator(const Char_t* ionName, Int_t mult, Double_t px,
     , fPz(0.)
     , fR(0.)
     , fz(0.)
-    , fOffset(0.)
+    , fOffsetX(0.)
+    , fOffsetY(0.)
     , fSigmaP(0.)
-    , fAngle(0.)
+    , fAngleX(0.)
+    , fAngleY(0.)
     , fVx(0.)
     , fVy(0.)
     , fVz(0.)
@@ -132,9 +136,11 @@ R3BIonGenerator::R3BIonGenerator(Int_t z, Int_t a, Int_t q, Int_t mult, Double_t
     , fPz(0.)
     , fR(0.)
     , fz(0.)
-    , fOffset(0.)
+    , fOffsetX(0.)
+    , fOffsetY(0.)
     , fSigmaP(0.)
-    , fAngle(0.)
+    , fAngleX(0.)
+    , fAngleY(0.)
     , fVx(0.)
     , fVy(0.)
     , fVz(0.)
@@ -173,9 +179,11 @@ R3BIonGenerator::R3BIonGenerator(const R3BIonGenerator& right)
     , fPz(right.fPz)
     , fR(right.fR)
     , fz(right.fz)
-    , fOffset(right.fOffset)
+    , fOffsetX(right.fOffsetX)
+    , fOffsetY(right.fOffsetY)
     , fSigmaP(right.fSigmaP)
-    , fAngle(right.fAngle)
+    , fAngleX(right.fAngleX)
+    , fAngleY(right.fAngleY)
     , fVx(right.fVx)
     , fVy(right.fVy)
     , fVz(right.fVz)
@@ -227,16 +235,18 @@ Bool_t R3BIonGenerator::ReadEvent(FairPrimaryGenerator* primGen)
 
     if (fBeamSpotIsSet)
     {
-        fVx = fOffset + SpotR * cos(Phi); // gRandom->Uniform(-fx,fx);
-        fVy = SpotR * sin(Phi);           // gRandom->Uniform(-fy,fy);
+        fVx = fOffsetX + SpotR * cos(Phi); // gRandom->Uniform(-fx,fx);
+        fVy = fOffsetY + SpotR * sin(Phi); // gRandom->Uniform(-fy,fy);
         fVz = fz;
+
 		//cout << "x, y :" << fVx << "  "  << fVy << endl;
 
 		// Special for experiment s494. we make a focus on the hole of fib23
+
         Double_t p = sqrt(fPx * fPx + fPy * fPy + fPz * fPz);
         fPx = -atan(fVx / 245.05) * fPz;
         fPy = -atan(fVy / 245.05) * fPz;
-		//cout << "Px, Py :" << fPx << "  "  << fPy << endl;
+        // cout << "Px, Py :" << fPx << "  "  << fPy << endl;
         fPz = sqrt(p * p - fPx * fPx - fPy * fPy);
     }
     else
@@ -252,30 +262,78 @@ Bool_t R3BIonGenerator::ReadEvent(FairPrimaryGenerator* primGen)
         fPz = p0;
     }
 
-    if (fAngle > 0.)
+    Double_t thetaY, thetaX;
+
+    if (fAngleX > 0. && fAngleY == 0.)
     {
         Double_t p = sqrt(fPx * fPx + fPy * fPy + fPz * fPz);
 
-		//Double_t test = gRandom->Uniform(-1, 1);
-		Double_t test = -1;
-		if(test < 0)
-		{
-			Double_t thetaX = gRandom->Uniform(-fAngle, fAngle); // max angle in mrad
-			// Double_t thetaX = fAngle;
-			fPx = tan(thetaX) * fPz;
-		}
-		//else
-		{
-			Double_t thetaY = gRandom->Uniform(-fAngle, fAngle); // max angle in mrad
-			//Double_t thetaY = 0.;
-			fPy = tan(thetaY) * fPz;
-			//fPy = 0.;
-		}
+        thetaX = gRandom->Uniform(-fAngleX, fAngleX); // max angle in rad
+        /*if(thetaX < 0)
+        {
+            thetaX=-fAngleX;
+        }
+        else
+        {
+            thetaX=fAngleX;
+        }*/
 
-		//Double_t thetaY = 0.04;
-		//fPy = tan(thetaY) * fPz;
+        // Double_t thetaX = fAngle;
+        fPx = sin(thetaX) * p;
 
         fPz = sqrt(p * p - fPx * fPx - fPy * fPy);
+
+        // cout<< " theta "<< thetaX << "  " << thetaY << "  "<<endl;
+        // cout << "p alt: "<< p << " p neu: " << sqrt(fPx*fPx+fPy*fPy+fPz*fPz) << endl;
+    }
+    if (fAngleX == 0. && fAngleY > 0.)
+    {
+        Double_t p = sqrt(fPx * fPx + fPy * fPy + fPz * fPz);
+
+        thetaY = gRandom->Uniform(-fAngleY, fAngleY); // max angle in rad
+        // Double_t thetaY = 0.;
+        // fPy = tan(thetaY) * fPz;
+        /*if(thetaY < 0)
+        {
+            thetaY=-fAngleY;
+        }
+        else
+        {
+            thetaY=fAngleY;
+        }*/
+        fPy = sin(thetaY) * p;
+
+        // Double_t thetaY = 0.04;
+        // fPy = tan(thetaY) * fPz;
+
+        fPz = sqrt(p * p - fPx * fPx - fPy * fPy);
+
+        // cout<< " theta "<< thetaX << "  " << thetaY << "  "<<endl;
+        // cout << "p alt: "<< p << " p neu: " << sqrt(fPx*fPx+fPy*fPy+fPz*fPz) << endl;
+    }
+    if (fAngleX > 0. && fAngleY > 0.)
+    {
+        Double_t p = sqrt(fPx * fPx + fPy * fPy + fPz * fPz);
+
+        thetaY = gRandom->Uniform(-fAngleY, fAngleY); // max angle in rad
+        // Double_t thetaY = 0.;
+        /*if(thetaY < 0)
+        {
+            thetaY=-fAngleY;
+        }
+        else
+        {
+            thetaY=fAngleY;
+        }*/
+        fPy = sin(thetaY) * p;
+
+        thetaX = gRandom->Uniform(-fAngleX, fAngleX); // max angle in rad
+        // Double_t thetaX = fAngle;
+
+        fPx = cos(thetaY) * sin(thetaX) * p;
+
+        fPz = sqrt(p * p - fPx * fPx - fPy * fPy);
+
         // cout<< " theta "<< thetaX << "  " << thetaY << "  "<<endl;
         // cout << "p alt: "<< p << " p neu: " << sqrt(fPx*fPx+fPy*fPy+fPz*fPz) << endl;
     }

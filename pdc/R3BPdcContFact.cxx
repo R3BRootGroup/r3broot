@@ -67,7 +67,7 @@ void R3BPdcContFact::setAllContainers()
      p2->addContext("TestNonDefaultContext");
 
      containers->Add(p1);
-     containers->Add(p2); 
+     containers->Add(p2);
      */
     FairContainer* p1 = new FairContainer("PdcHitPar", "Pdc Hit Parameters", "TestDefaultContext");
     p1->addContext("TestNonDefaultContext");
@@ -85,7 +85,7 @@ FairParSet* R3BPdcContFact::createContainer(FairContainer* c)
      * of this container, the name is concatinated with the context. */
 
     const char* name = c->GetName();
-    cout << " -I container name " << name << endl;
+    cout << "[INFO] container name " << name << " created. " << endl;
     FairParSet* p = 0;
     /*if (strcmp(name,"R3BPdcDigiPar")==0) {
       p=new R3BPdcDigiPar(c->getConcatName().Data(),c->GetTitle(),c->getContext());
@@ -99,7 +99,7 @@ FairParSet* R3BPdcContFact::createContainer(FairContainer* c)
         p = new R3BTGeoPar(c->getConcatName().Data(), c->GetTitle(), c->getContext());
     }
 
-    if (strcmp(name,"PdcHitPar")==0) 
+    if (strcmp(name, "PdcHitPar") == 0)
     {
         p = new R3BPdcHitPar(c->getConcatName().Data(), c->GetTitle(), c->getContext());
     }

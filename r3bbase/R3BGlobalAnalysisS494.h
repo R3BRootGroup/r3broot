@@ -170,13 +170,23 @@ class R3BGlobalAnalysisS494 : public FairTask
 	}
 	
 	inline void SetEvsECut(TString file){fEvsE = file;}
+	inline void SetCalifaCut(TString file){fCalifaCut = file;}
   
   private:
     TClonesArray* fMCTrack;
     TClonesArray* fTrack;
+    TClonesArray* fMappedItemsCalifa;
+    TClonesArray* fCalItemsCalifa;
     TClonesArray* fHitItemsCalifa;
     
-    const char* fDetectorNames[N_DET_MAX + 1] = {"Fi23a", "Fi23b",  "Fi30", "Fi31"," Fi32", "Fi33", "Tofd", NULL };
+    TClonesArray* fCalifaMappedItems;
+    TClonesArray* fCalifaCalItems;
+    TClonesArray* fCalifaHitItems; 
+    Int_t fNofCalifaMappedItems = 0; 
+    Int_t fNofCalifaCalItems = 0;     
+    Int_t fNofCalifaHitItems = 0;
+    
+    const char* fDetectorNames[N_DET_MAX + 1] = {"Fi23a", "Fi23b",  "Fi30", "Fi31","Fi32", "Fi33", "Tofd", NULL };
     // check for trigger should be done globablly (somewhere else)
     R3BEventHeader* header; /**< Event header. */
     Int_t fTrigger;         /**< Trigger value. */
@@ -192,6 +202,7 @@ class R3BGlobalAnalysisS494 : public FairTask
 	Bool_t tracker = true;
 	Double_t fxfibcut, fyfibcut;
 	TString fEvsE;
+	TString fCalifaCut;
 	
     unsigned long long time_start = 0, time = 0;
     unsigned long ic_start = 0, see_start = 0, tofdor_start = 0;
@@ -215,17 +226,7 @@ class R3BGlobalAnalysisS494 : public FairTask
 	Double_t Pxf_mc, Pyf_mc, Pzf_mc, Xf_mc, Yf_mc, Zf_mc, Pf_tot_mc;
 
      Double_t fcut_chiX ;
-     Double_t fcut_chiY ;
-        
-	//Double_t amu = 931.49410242; // 0.931494028
-//	Double_t mHe = 4.00260325413*amu;
-//	Double_t mC = 12. * amu;
-// Geant3:
-	Double_t amu = 0.931494028;  // GeV
-	Double_t mHe = 3728.401291;  // MeV
-	Double_t m3He = 2809.41328;
-	Double_t mC = 11174.86339;
-	Double_t mO = 15.99065084 * amu * 1000.;
+     Double_t fcut_chiY ;	
 	
 	Double_t tofCalifa_shift=119.52; //ns
 
@@ -254,6 +255,7 @@ class R3BGlobalAnalysisS494 : public FairTask
 	Int_t counter4 = 0;
 	Int_t countdet;
 	TCutG *cut_EHe_EC;
+	TCutG *cut_CalifaTof;
 	Int_t clocal = 0;
 	
     UInt_t num_spills = 0;
@@ -265,8 +267,8 @@ class R3BGlobalAnalysisS494 : public FairTask
  //   TH1F* fh_TOFDOR;
 //    TH2F* fh_Cave_position;
     TH2F* fh_target_xy;
-    TH1F* fh_target_xx;
-    TH1F* fh_target_yy;
+    TH2F* fh_target_xx;
+    TH2F* fh_target_yy;
     TH1F* fh_chi2;
     TH1F* fh_px_He;
     TH1F* fh_py_He;
@@ -359,6 +361,10 @@ class R3BGlobalAnalysisS494 : public FairTask
 	TH1F* fh_ErelB_nc;
 	TH1F* fh_theta_bc_cm_nc;
 	TH1F* fh_phi_bc_cm_nc;
+	TH2F* fh_p_vs_x0;
+    TH2F* fh_psum_vs_x0;
+	TH2F* fh_p_vs_y0;
+    TH2F* fh_psum_vs_y0;
 
 	TH1F* fh_theta26_simu;
 	TH1F* fh_Erel_simu;
@@ -377,12 +383,51 @@ class R3BGlobalAnalysisS494 : public FairTask
 	TH2F* fh_ErelB_vs_theta16O;
 	TH2F* fh_Erel_vs_theta16O_3He12C;
 	TH2F* fh_Erel_vs_thetaMC;
+	TH2F* fh_Erel_vs_y0;
+	TH2F* fh_Erel_vs_x0;
+	TH2F* fh_Erel_vs_yfi23;
+	TH2F* fh_Erel_vs_xfi23;
 	TH1F* fh_psum;
 	TH1F* fh_psum_MC;
 	TH1F* fh_pzsum;
 	TH1F* fh_pzsum_MC;
+	TH1F* fh_pxsum_MC;
+	TH1F* fh_pysum_MC;
 	TH1F* fh_dErel;
 	TH1F* fh_dtheta;
+	TH2F* fh_py_pz;
+	TH2F* fh_py_pz_MC;
+	TH2F* fh_py_yfi23;
+	TH2F* fh_py_yfi23_MC;
+	TH2F* fh_px_xfi23;
+	TH2F* fh_px_xfi23_MC;
+	TH2F* fh_dp_2d;
+	TH2F* fh_dpx_2d;
+	TH2F* fh_dpy_2d;
+	TH2F* fh_dpz_2d;
+	TH2F* fh_psum_vs_dx0;
+	TH2F* fh_pC_vs_dx0;
+	TH2F* fh_pC_vs_dx0_mc;
+	TH2F* fh_pC_vs_x0;
+	TH2F* fh_pC_vs_x0_mc;
+	TH2F* fh_pHe_vs_dx0;
+	TH2F* fh_pHe_vs_dx0_mc;
+	TH2F* fh_pHe_vs_x0;
+	TH2F* fh_pHe_vs_x0_mc;
+	TH2F* fh_dpC_vs_dx0;
+	TH2F* fh_dpHe_vs_dx0;
+	TH2F* fh_x0_vs_dx0;
+	TH2F* fh_Erel_vs_px;
+	TH2F* fh_Erel_vs_py;
+	TH2F* fh_Erel_vs_dr_tofd;
+	TH2F* fh_Erel_vs_dr_limit_tofd;
+	TH1F* fh_Erel_limit_tofd;
+	TH2F* fh_Erel_vs_dr_fi23;
+	TH2F* fh_Erel_vs_dr_limit_fi23;
+	TH1F* fh_Erel_limit_fi23;
+	TH2F* fh_dr_vs_dr;
+	TH2F* fh_dr_vs_dr_limit;
+	
 	
 	TH2F* fh_ErelB_vs_phibc_bg;
 	TH2F* fh_ErelB_vs_theta26_bg;
@@ -401,6 +446,8 @@ class R3BGlobalAnalysisS494 : public FairTask
 	TH2F* fh_thetaB_12C_cm_ag;
 	TH2F* fh_phiB_12C_cm_ag;
 	TH2F* fh_Erel_vs_phibc_bg;
+	//TH2F* fh_Erel_vs_theta26;
+	//TH2F* fh_Erel_vs_theta26_max;
 	TH2F* fh_Erel_vs_theta26_bg;
 	TH2F* fh_erel_vs_ptransHe_bg;
 	TH2F* fh_erel_vs_ptransC_bg;
@@ -431,42 +478,53 @@ class R3BGlobalAnalysisS494 : public FairTask
 	TH2F* fh_energy_nc;
 	TH2F* fh_energy;
 	    
-    TH1F* fh_califa_hitenergy_boost_barrel;
-    TH1F* fh_Erel_withCalifa_barrel;
-    TH2F* fh_califaenergy_2d_barrel;
-    TH2F* fh_califaenergy_2d_iphos;
-    TH2F* fh_Erel_withCalifa_2d_barrel;
-    TH2F* fh_Erel_vs_theta16O_withcalifa_barrel;
-    TH2F* fh_califa_hitenergy_bg_barrel;
-    TH2F* fh_califa_hitenergy_ag_barrel;       	
-
-	TH2F* fh_Erel_withCalifa_2d_iphos;
-	TH2F* fh_califa_hitenergy_ag_iphos;
-	TH2F* fh_califa_hitenergy_bg_iphos;
-	TH1F* fh_califa_hitenergy_boost_iphos;
-	TH2F* fh_Erel_vs_theta16O_withcalifa_iphos;
-	TH1F* fh_Erel_withCalifa_iphos;
+    TH1F* fh_califa_hitenergy_boost;
+    TH1F* fh_califa_barrel_hitenergy_boost;
+    TH1F* fh_califa_iphos_hitenergy_boost;
+    TH1F* fh_Erel_withCalifa;
+    TH2F* fh_califaenergy_2d;
+    TH2F* fh_califaenergy_barrel_2d;
+    TH2F* fh_califaenergy_iphos_2d;
+    TH2F* fh_Erel_withCalifa_2d;
+    TH2F* fh_Erel_vs_theta16O_withcalifa;
+    TH2F* fh_califa_hitenergy_bg;
+    TH2F* fh_califa_hitenergy_ag; 
+    TH2F* fh_califa_hitenergy_rand_bg;
+    TH2F* fh_califa_hitenergy_rand_ag; 
+    TH2F* fh_califa_time_cId;
 	
 	TH2F* fh_califa_tofd;
-	TH2F* fh_califa_tofd_cut_barrel;
-	TH2F* fh_califa_tofd_cut_iphos;
+	TH2F* fh_califa_tofd_cut;
 	TH1F* fh_califa_hitenergy_select;
 	TH1F* fh_califa_hitenergy_nc;
 	TH2F* fh_Ecalifa_vs_theta;
 	TH2F* fh_Erel_withCalifa_tof;
 	TH2F* fh_Erel_withCalifa_motherId;
-	TH2F* fh_theta_vs_theta;
+	TH2F* fh_phi_vs_ecalifa_barrel;
+	TH2F* fh_phi_vs_ecalifa_iphos;
+	TH2F* fh_califa_tofd_ecr;
+	TH2F* fh_califa_ecl;
+	TH2F* fh_califa_dtime_ecr;
+	TH2F* fh_califa_dtof_ecr;
+	TH2F* fh_esumcluster_dc_2d;
+	TH1F* fh_califa_hitenergycorr_boost;
+	TH2F* fh_crystalNb;
+	TH1F* fh_califa_hitenergy_boost_rand;
+	TH2F* fh_Erel_vs_theta16O_withcalifa_rand;
 	
 	TH1F* fh_minv_simu;
 	TH1F* fh_minv;
 	
-	TH2F* fh_Erel_vs_xdet[N_DET_MAX];		                                		
-	TH2F* fh_Erel_vs_ydet[N_DET_MAX];  
+	TH2F* fh_psum_vs_xdet[N_DET_MAX];		                                		
+	TH2F* fh_p_vs_xdet[N_DET_MAX];		                                		
+	TH2F* fh_psum_vs_ydet[N_DET_MAX];  
 	TH2F* fh_yfi23_vs_ytofd_bc;
 	TH2F* fh_yfi23_vs_ytofd;
 	TH2F* fh_xfi23_vs_xtofd_bc;
 	TH2F* fh_xfi23_vs_xtofd;
 	TH2F* fh_xy_fib23;
+	TH2F* fh_xx_fib23;
+	TH2F* fh_yy_fib23;
 	TH2F* fh_xy_fib23_bc;
 	TH1F* fh_dt_fib23_bc;
 	

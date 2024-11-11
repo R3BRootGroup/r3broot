@@ -19,6 +19,7 @@
 #include "TArrayF.h"
 #include "TFile.h"
 #include "TMath.h"
+#include "TRandom.h"
 
 #include "R3BGladFieldMap.h"
 
@@ -125,31 +126,50 @@ R3BGladFieldMap::~R3BGladFieldMap()
 void R3BGladFieldMap::Init()
 {
 
-	Bool_t newField = true;
-    fPosX = 0.86128;
-    fPosY = -1.543865 + 1.5;
+    Bool_t newField = true;
 
-// Distance in z: turning point to flansch:   539.5 mm 
-//				       GLAD flansch target:  1210 mm
-//											  1749.5 mm
-// 					
-    fPosZ = 174.5681; // from the fit of the magnetic field measurements 
+    // Distance in z: turning point to flanch:   539.5 mm
+    //				       GLAD flanch target:  1210 mm
+    //										    1749.5 mm
+    //
 
+    if (newField)
+    {
+        // 2022
+        /*
+        fPosX = 0.86128;
+        fPosY = -1.543865 + 1.5;
+        fPosZ = 174.5681; // from the fit of the magnetic field measurements
+        fXAngle = -0.1446;
+        fYAngle = -14.19588;
+        fZAngle = -0.7113;
+        */
+        // 2022+2023
+        /*fPosX = 0.2443951;
+        fPosY = -0.97518 + 1.5;
+        fPosZ = 174.5638;
+        fXAngle = 0.1388603;
+        fYAngle = -14.20966;
+        fZAngle = -0.1381274;*/
 
-    fXAngle = -0.1446;
-    fYAngle = -14.19588;
-    fZAngle = -0.7113;
-    
-	if(!newField)
-	{
-		fPosX = 0.0;
-		fPosY = 1.5;
-		fPosZ = 174.95; // from the drawings
-		fXAngle = 0.0;
-		fYAngle = -14.0;
-		fZAngle = 0.0;
-	}
-	
+        fPosX = 0.4942526;
+        fPosY = -1.022616 + 1.5;
+        fPosZ = 174.5851;
+        fXAngle = 0.04190000; // fixed to the measured value by Michael
+        fYAngle = -14.18602;
+        fZAngle = -0.1464000; // fixed to the measured value by Michael
+    }
+
+    if (!newField)
+    {
+        fPosX = 0.0;
+        fPosY = 1.5;
+        fPosZ = 174.95; // from the drawings
+        fXAngle = 0.0;
+        fYAngle = -14.;
+        fZAngle = 0.0;
+    }
+
     gTrans = new TVector3(-fPosX, -fPosY, -fPosZ);
     if (fFileName.EndsWith(".dat"))
         ReadAsciiFile(fFileName);
@@ -169,12 +189,13 @@ Double_t R3BGladFieldMap::GetBx(Double_t x, Double_t y, Double_t z)
 
     // cout << "-I- get Bx called " << endl;
     // transform to local coordinates
-    // local to global
+    // x, y, z are global coordinates
     TVector3 localPoint(x, y, z);
 
     // gTrans = new TVector3(-fPosX, -fPosY, -fPosZ);
     // localPoint = localPoint + (*gTrans);
 
+    // fPosX, fPosY, fPosZ origin of GLAD system
     TVector3 gTrans1;
     gTrans1.SetX(-fPosX);
     gTrans1.SetY(-fPosY);
@@ -206,8 +227,13 @@ Double_t R3BGladFieldMap::GetBx(Double_t x, Double_t y, Double_t z)
 
         // Return interpolated field value
         Double_t val = Interpolate(dx, dy, dz);
-        // cout << " (X) interpolated " << val << endl;   
-//        val = val + 0.5;     
+        // cout << " (X) interpolated " << val << endl;
+        //        val = val + 0.5;
+        // val = val*0.8;
+
+        // cout<<"xx: "<<localPoint.X()<<", yy: "<<localPoint.Y()<<", zz: "<<localPoint.Z()<<", Bx: "<<fTrackerCorr *
+        // val<<endl;
+
         return (fTrackerCorr * val);
     }
     return 0;
@@ -257,29 +283,101 @@ Double_t R3BGladFieldMap::GetBy(Double_t x, Double_t y, Double_t z)
         // Return interpolated field value
         Double_t val = Interpolate(dx, dy, dz);
         // cout << " (Y) interpolated " << val << endl;
-        //if(localPoint.Z() > 300.) val = val * 1.2;
-        //if(localPoint.Z() > 200. && localPoint.Z() < 300.) val = val *1.02;
+        // if(localPoint.Z() > 300.) val = val * 1.2;
+        // if(localPoint.Z() > 200. && localPoint.Z() < 300.) val = val *1.02;
 
-/*        
-        
-        Double_t fcor = 1.;
-        if(localPoint.Z()>36.67 && localPoint.Z()<294.){
-//			if(localPoint.Y() == 0. ){  // correction for y=0 plane 
-				Double_t par[8]={1.0157655,-5.491E-04,8.7452E-06,-8.849E-08,5.6868E-10,-2.001E-12,2.8387E-15,-3.150E-19};
-				Double_t zz = localPoint.Z();
-				
-				fcor = par[0] + par[1]* TMath::Power(zz,1)
-				              + par[2]* TMath::Power(zz,2)
-				              + par[3]* TMath::Power(zz,3)
-				              + par[4]* TMath::Power(zz,4)
-				              + par[5]* TMath::Power(zz,5)
-				              + par[6]* TMath::Power(zz,6)
-				              + par[7]* TMath::Power(zz,7);
-//			}			
-		}
-	//	fcor = 1.;
-		val = val*fcor;
-*/        
+        /*
+
+                Double_t fcor = 1.;
+                if(localPoint.Z()>36.67 && localPoint.Z()<294.){
+        //			if(localPoint.Y() == 0. ){  // correction for y=0 plane
+                        Double_t
+        par[8]={1.0157655,-5.491E-04,8.7452E-06,-8.849E-08,5.6868E-10,-2.001E-12,2.8387E-15,-3.150E-19}; Double_t zz =
+        localPoint.Z();
+
+                        fcor = par[0] + par[1]* TMath::Power(zz,1)
+                                      + par[2]* TMath::Power(zz,2)
+                                      + par[3]* TMath::Power(zz,3)
+                                      + par[4]* TMath::Power(zz,4)
+                                      + par[5]* TMath::Power(zz,5)
+                                      + par[6]* TMath::Power(zz,6)
+                                      + par[7]* TMath::Power(zz,7);
+        //			}
+                }
+            //	fcor = 1.;
+                val = val*fcor;
+        */
+        Double_t xx = localPoint.X();
+        Double_t yy = localPoint.Y();
+        Double_t zz = localPoint.Z();
+        /*
+          Double_t p0,p1,p2,fitparfit[7];
+          p0=-0.00830474-0.0043102*yy-1.149e-4*yy*yy;
+          p1=0.00690782+5.522e-4*yy-3.835e-4*yy*yy;
+          p2=-0.00142735+2.2243e-5*yy;
+          fitparfit[0]=p0+p1*xx+p2*xx*xx;
+
+          p0=-0.01915779+0.00120021;
+          p1=-0.00180119+3.8234e-5*yy+7.8526e-6*yy*yy;
+          fitparfit[1]=p0+p1*xx;
+
+          p0=7.8322e-4-8.265e-5*yy;
+          p1=3.9034e-5-1.169e-6*yy+4.2791e-7*yy*yy;
+          fitparfit[2]=p0+p1*xx;
+
+          p0=-2.22e-6+2.3711e-6*yy;
+          p1=-6.132e-7+3.6396e-8*yy-9.395e-9*yy*yy;
+          fitparfit[3]=p0+p1*xx;
+
+          p0=1.6986e-7;
+          p1=-1.236e-8-6.819e-10*yy;
+          fitparfit[4]=p0+p1*xx;
+
+          p0=-1.597e-8-2.079e-9*yy-1.827e-10*yy*yy;
+          p1=4.9526e-10-4.448e-11*yy;
+          fitparfit[5]=p0+p1*xx;
+
+          p0=2.809e-10+3.9839e-11*yy+3.3516e-12*yy*yy;
+          p1=6.4899e-13+1.4236e-12*yy;
+          fitparfit[6]=p0+p1*xx;
+
+          Double_t fcorr=0.;
+          if(zz < 25.)
+          {
+              for(Int_t ipar=0; ipar<7; ipar++)
+              {
+                  fcorr=fcorr+fitparfit[ipar]*TMath::Power(zz,ipar);
+              }
+          }
+          //val = val/(1.-fcorr/100.);
+          */
+        /*
+         Double_t fcorr = 0.0;
+         if(zz < 5.75 && zz > -44.25)
+          {
+              zz = zz + 121. +  53.25;
+              fcorr=fcorr + 1417.05
+                          - 33.2292 * TMath::Power(zz,1)
+                          + 0.292215 * TMath::Power(zz,2)
+                          - 0.00114258 * TMath::Power(zz,3)
+                          + 1.67625e-06* TMath::Power(zz,4);
+          }
+          val = val/(1.-fcorr/100.);
+       */
+
+        gRandom->SetSeed(0);
+        /*
+          //if(zz > -84.25 && zz < -43.25) //fi23-10cm
+         // if(zz < -84.25 && zz > -174.25)  // target and fi23
+          //if(zz < -53.25 && zz > -174.25)  // target and entrance
+          if(zz < -43.25 && zz > -174.25)  // target and 10cm
+          //if(zz > 400.)
+          {
+                val = val * 1.;
+           }
+         */
+        //   cout<<"xx: "<<xx<<", yy: "<<yy<<", zz: "<<zz<<", By: "<<fTrackerCorr * val<<endl;
+
         return (fTrackerCorr * val);
     }
     return 0.;
@@ -330,8 +428,12 @@ Double_t R3BGladFieldMap::GetBz(Double_t x, Double_t y, Double_t z)
         // Return interpolated field value
         Double_t val = Interpolate(dx, dy, dz);
         // cout << " (Z) interpolated " << val << endl;
-//        val = val + 0.5;     
-        
+        //        val = val + 0.5;
+        // val = val*1.2;
+
+        //   cout<<"xx: "<<localPoint.X()<<", yy: "<<localPoint.Y()<<", zz: "<<localPoint.Z()<<", Bz: "<<fTrackerCorr *
+        //   val<<endl;
+
         return (fTrackerCorr * val);
     }
 

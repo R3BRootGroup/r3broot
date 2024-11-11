@@ -31,7 +31,7 @@ class R3BCalifaClusterData : public FairMultiLinkedData
      *@param fTheta					Reconstructed theta
      *@param fPhi					Reconstructed phi
      **/
-    R3BCalifaClusterData(std::vector<Int_t> crystalList, Double_t ene, Double_t nf, Double_t ns, Double_t theta, Double_t phi, ULong64_t time,Int_t clusterType);
+    R3BCalifaClusterData(std::vector<Int_t> crystalList, std::vector<Double_t> energyList, std::vector<ULong64_t> timeList, Double_t ene, Double_t nf, Double_t ns, Double_t theta, Double_t phi, ULong64_t time,Int_t clusterType);
 
     /** Copy constructor **/
     R3BCalifaClusterData(const R3BCalifaClusterData&);
@@ -54,7 +54,9 @@ class R3BCalifaClusterData : public FairMultiLinkedData
 
     std::vector<Int_t> GetCrystalList() const {return fCrystalList; }
     Int_t GetMotherCrystal() const {return fCrystalList.at(0); }
-
+	std::vector<Double_t> GetEnergyList() const {return fEnergyList; }
+    std::vector<ULong64_t> GetTimeList() const {return fTimeList; }
+    
 
     /** Modifiers **/
     void SetEnergy(Double_t ene) { fEnergy = ene; }
@@ -65,6 +67,8 @@ class R3BCalifaClusterData : public FairMultiLinkedData
     void SetTime(ULong64_t time) { fTime = time; }
     void SetClusterType(uint32_t id) { fClusterType = id; }
     void SetCrystalList(std::vector<Int_t> list) {fCrystalList = std::move(list);}
+    void SetEnergyList(std::vector<Double_t> liste) {fEnergyList = std::move(liste);}
+    void SetTimeList(std::vector<ULong64_t> listt) {fTimeList = std::move(listt);}
   protected:
 
     Double_t fEnergy;        // total energy deposited
@@ -75,6 +79,8 @@ class R3BCalifaClusterData : public FairMultiLinkedData
     ULong64_t fTime;         // WR time stamp
     uint32_t fClusterType;
     std::vector<Int_t> fCrystalList; // List with crystals inside the cluster. First one is the mother crystal
+	std::vector<Double_t> fEnergyList; // List with crystals inside the cluster. First one is the mother crystal
+	std::vector<ULong64_t> fTimeList; // List with crystals inside the cluster. First one is the mother crystal
 
     ClassDef(R3BCalifaClusterData, 3)
 };

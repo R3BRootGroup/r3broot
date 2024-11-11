@@ -37,12 +37,19 @@
 #include <list>
 #include <vector>
 
+#include "TCanvas.h"
+#include "TFile.h"
+#include "TH1F.h"
+#include "TH2F.h"
+
 using namespace std;
 
 struct califa_candidate
 {
     Int_t motherId;
     vector<Int_t> crystalList;
+    vector<Double_t> energyList;
+    vector<ULong64_t> timeList;
     Double_t energy;
     Double_t ns;
     Double_t nf;
@@ -134,6 +141,8 @@ void addCrystal2Cluster(struct califa_candidate* cluster,
     cluster->ns += crystalCal->GetNs();
     cluster->nf += crystalCal->GetNf();
     cluster->crystalList.push_back(crystalCal->GetCrystalId());
+    cluster->energyList.push_back(crystalCal->GetEnergy());
+    cluster->timeList.push_back(crystalCal->GetTime());
 
     usedCrystals->push_back(crystalCal->GetCrystalId());
 
@@ -164,6 +173,7 @@ R3BCalifaCrystalCal2Cluster::R3BCalifaCrystalCal2Cluster()
     , fRand(0)
     , fTotalCrystals(2432)
     , fRandFile("")
+    , fThresholdFile("")
 {
 }
 
@@ -256,6 +266,31 @@ InitStatus R3BCalifaCrystalCal2Cluster::Init()
             fHistoFile->GetObject(name, fAngularDistributions[i]);
         }
     }
+
+    for (Int_t ic = 0; ic < 5000; ic++)
+    {
+        fCrystalThresholdInd[ic] = fCrystalThreshold;
+    }
+
+    std::string database_file = fThresholdFile;
+    ifstream infile(database_file.c_str());
+    if (!(infile.is_open()))
+        cout << "** WARNING ** THRESHOLD FILE NOT FOUND! " << database_file.c_str() << endl;
+    else
+        cout << "Threshold file : " << database_file.c_str() << " open" << endl;
+    Int_t crystId;
+    Double_t crystThr;
+    while (infile)
+    {
+        infile >> crystId >> crystThr;
+        fCrystalThresholdInd[crystId - 1] = crystThr;
+        // cout<<"Crystal: "<<crystId<<", threshold: "<<fCrystalThresholdInd[crystId-1]<<endl;
+    }
+    infile.close();
+
+    fh_EvsT = new TH2F("CrystalId_vs_T_Califa_hitlevel", "MotherId vs time Califa", 2000, 0., 4000, 1700, 900, 2600);
+    fh_EvsT->GetYaxis()->SetTitle("Mother Id");
+    fh_EvsT->GetXaxis()->SetTitle("time / ns");
     return kSUCCESS;
 }
 
@@ -286,6 +321,7 @@ void R3BCalifaCrystalCal2Cluster::Exec(Option_t* opt)
 
     Double_t cryEnergy;
     Int_t cryId;
+    Double_t ethresh;
 
     for (Int_t i = 0; i < numCrystalHits; i++)
     {
@@ -341,7 +377,9 @@ void R3BCalifaCrystalCal2Cluster::Exec(Option_t* opt)
 
         Int_t motherId = protonCandidatesVec.at(0)->GetCrystalId();
 
-        califa_candidate cluster = { motherId, vector<Int_t>(), 0.0, 0.0, 0.0, 0.0, 0.0 };
+        califa_candidate cluster = {
+            motherId, vector<Int_t>(), vector<Double_t>(), vector<ULong64_t>(), 0.0, 0.0, 0.0, 0.0, 0.0
+        };
 
         if (motherId <= fTotalCrystals)
             mother_angles = fCalifaGeo->GetAngles(motherId) - fCalifatoTargetPos;
@@ -409,8 +447,16 @@ void R3BCalifaCrystalCal2Cluster::Exec(Option_t* opt)
             }
         }
 
-        AddCluster(
-            cluster.crystalList, cluster.energy, cluster.nf, cluster.ns, cluster.theta, cluster.phi, cluster.time, 0);
+        AddCluster(cluster.crystalList,
+                   cluster.energyList,
+                   cluster.timeList,
+                   cluster.energy,
+                   cluster.nf,
+                   cluster.ns,
+                   cluster.theta,
+                   cluster.phi,
+                   cluster.time,
+                   0);
 
         RemoveUsedCrystals(
             usedCrystals, allCrystalVec, protonCandidatesVec, gammaCandidatesVec, saturatedCandidatesVec);
@@ -421,7 +467,9 @@ void R3BCalifaCrystalCal2Cluster::Exec(Option_t* opt)
     {
         Int_t motherId = gammaCandidatesVec.at(0)->GetCrystalId();
 
-        califa_candidate cluster = { motherId, vector<Int_t>(), 0.0, 0.0, 0.0, 0.0, 0.0 };
+        califa_candidate cluster = {
+            motherId, vector<Int_t>(), vector<Double_t>(), vector<ULong64_t>(), 0.0, 0.0, 0.0, 0.0, 0.0
+        };
 
         if (motherId <= fTotalCrystals)
             mother_angles = fCalifaGeo->GetAngles(motherId) - fCalifatoTargetPos;
@@ -463,6 +511,8 @@ void R3BCalifaCrystalCal2Cluster::Exec(Option_t* opt)
 
                 if (InsideClusterWindow(mother_angles, angles))
                     addCrystal2Cluster(&cluster, allCrystalVec.at(j), "gamma", &usedCrystals, fTotalCrystals);
+
+                fh_EvsT->Fill(allCrystalVec.at(j)->GetTime() - timeTS, thisCryId);
             }
         }
 
@@ -493,8 +543,16 @@ void R3BCalifaCrystalCal2Cluster::Exec(Option_t* opt)
             }
         }
 
-        AddCluster(
-            cluster.crystalList, cluster.energy, cluster.nf, cluster.ns, cluster.theta, cluster.phi, cluster.time, 1);
+        AddCluster(cluster.crystalList,
+                   cluster.energyList,
+                   cluster.timeList,
+                   cluster.energy,
+                   cluster.nf,
+                   cluster.ns,
+                   cluster.theta,
+                   cluster.phi,
+                   cluster.time,
+                   1);
 
         RemoveUsedCrystals(
             usedCrystals, allCrystalVec, protonCandidatesVec, gammaCandidatesVec, saturatedCandidatesVec);
@@ -505,7 +563,9 @@ void R3BCalifaCrystalCal2Cluster::Exec(Option_t* opt)
     {
         Int_t motherId = saturatedCandidatesVec.at(0)->GetCrystalId();
 
-        califa_candidate cluster = { motherId, vector<Int_t>(), 0.0, 0.0, 0.0, 0.0, 0.0 };
+        califa_candidate cluster = {
+            motherId, vector<Int_t>(), vector<Double_t>(), vector<ULong64_t>(), 0.0, 0.0, 0.0, 0.0, 0.0
+        };
 
         mother_angles = fCalifaGeo->GetAngles(motherId) - fCalifatoTargetPos;
 
@@ -545,8 +605,16 @@ void R3BCalifaCrystalCal2Cluster::Exec(Option_t* opt)
             }
         }
 
-        AddCluster(
-            cluster.crystalList, cluster.energy, cluster.nf, cluster.ns, cluster.theta, cluster.phi, cluster.time, 2);
+        AddCluster(cluster.crystalList,
+                   cluster.energyList,
+                   cluster.timeList,
+                   cluster.energy,
+                   cluster.nf,
+                   cluster.ns,
+                   cluster.theta,
+                   cluster.phi,
+                   cluster.time,
+                   2);
 
         RemoveUsedCrystals(
             usedCrystals, allCrystalVec, protonCandidatesVec, gammaCandidatesVec, saturatedCandidatesVec);
@@ -570,6 +638,8 @@ void R3BCalifaCrystalCal2Cluster::SelectGeometryVersion(Int_t version)
 }
 
 R3BCalifaClusterData* R3BCalifaCrystalCal2Cluster::AddCluster(vector<Int_t> crystalList,
+                                                              vector<Double_t> energyList,
+                                                              vector<ULong64_t> timeList,
                                                               Double_t ene,
                                                               Double_t Nf,
                                                               Double_t Ns,
@@ -580,7 +650,8 @@ R3BCalifaClusterData* R3BCalifaCrystalCal2Cluster::AddCluster(vector<Int_t> crys
 {
     TClonesArray& clref = *fCalifaClusterData;
     Int_t size = clref.GetEntriesFast();
-    return new (clref[size]) R3BCalifaClusterData(crystalList, ene, Nf, Ns, pAngle, aAngle, time, clusterType);
+    return new (clref[size])
+        R3BCalifaClusterData(crystalList, energyList, timeList, ene, Nf, Ns, pAngle, aAngle, time, clusterType);
 }
-
+void R3BCalifaCrystalCal2Cluster::FinishTask() { fh_EvsT->Write(); }
 ClassImp(R3BCalifaCrystalCal2Cluster);

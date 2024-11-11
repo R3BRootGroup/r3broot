@@ -110,9 +110,12 @@ class R3BOptimizeGeometryS494 : public FairTask
     TVector3 pos16O3;    
                                            
     Bool_t fVis;
-//   	Double_t amu = 0.93149410242;
-   	Double_t amu = 0.931494028;   // Gev/c**2
-   	//0.938272;
+    Double_t mHe = 3.7273791; //simu
+	Double_t mC = 11.17486; //simu
+	Double_t mO = 14.895085; //simu	
+	Double_t ps = 17391.5;
+    Double_t cut_yfib23 = 0.1512; //0.1512
+    Double_t cut_xfib23 = 0.1512; //0.1512
    	Double_t totalChi2Mass = 0;
    	Double_t totalChi2P = 0;
    	Double_t totalEvents = 0;
@@ -121,10 +124,10 @@ class R3BOptimizeGeometryS494 : public FairTask
     Bool_t fWriteOut;
     Double_t minChi2;
     Double_t minChi2_12C;
+    Double_t minChi2_4He;
     TLorentzVector alphaP, carbonP;
-    TVector3 p12C;
-    Double_t mHe = 3727.409;
-	Double_t mC = 11174.950;
+    TVector3 p12C, p4He;
+	Double_t z_tp = 174.5638;  // target to turning point
 	Double_t x_l[8];
     Double_t y_l[8];
     Double_t det_hit_x[8];
@@ -132,82 +135,11 @@ class R3BOptimizeGeometryS494 : public FairTask
     Double_t det_hit_xC[8];
     Double_t det_hit_yC[8];
     Int_t fNwriteout=0;
-
-    TH1F* fh_mult_fi23a;
-    TH1F* fh_mult_fi23b;
-    TH1F* fh_mult_fi30;
-    TH1F* fh_mult_fi31;
-    TH1F* fh_mult_fi32;
-    TH1F* fh_mult_fi33;
-    TH1F* fh_mult_tofd;
-    TH1F* fh_eloss_fi23a_mc;
-    TH1F* fh_eloss_fi23a;
-    TH1F* fh_eloss_fi23b_mc;
-    TH1F* fh_eloss_fi23b;
-    TH1F* fh_eloss_fi30_mc;
-    TH1F* fh_eloss_fi30;
-    TH1F* fh_eloss_fi31_mc;
-    TH1F* fh_eloss_fi31;
-    TH1F* fh_eloss_fi32_mc;
-    TH1F* fh_eloss_fi32;
-    TH1F* fh_eloss_fi33_mc;
-    TH1F* fh_eloss_fi33;
-    TH1F* fh_ncand;
-    TH1F* fh_x_res[8];
-    TH1F* fh_x_pull[8];
-    TH1F* fh_y_res[8];
-    TH1F* fh_y_pull[8];
-    TH1F* fh_A_reco1;
-    TH1F* fh_A_reco2;
-    TH1F* fh_mom_res;
-    TH1F* fh_mom_res_x;
-    TH1F* fh_mom_res_y;
-    TH1F* fh_mom_res_z;
-    TH1F* fh_mass_res;
+    
     TH1F* fh_chi2;
-    TH1F* fh_vz_res;
-    TH1F* fh_beta_res;
-    TH1F* fh_p;
-    TH1F* fh_px;
-    TH1F* fh_py;
-    TH1F* fh_pz;
-    TH1F* fh_px_l;
-    TH1F* fh_py_l;
-    TH1F* fh_pz_l;
-    TH1F* fh_px_r;
-    TH1F* fh_py_r;
-    TH1F* fh_pz_r;
-    TH2F* fh_p_vs_ch2;
-    TH2F* fh_xfi30_fi23a_track;
-    TH2F* fh_xfi30_fi32_track;
-    TH2F* fh_xfi30_tofd_track;
-    TH2F* fh_xfi31_fi23a_track;
-    TH2F* fh_xfi31_fi33_track;
-    TH2F* fh_xfi31_tofd_track;
-            
-    TH2F* fh_xfi30_fi23a_exp;
-    TH2F* fh_xfi30_fi32_exp;
-    TH2F* fh_xfi30_tofd_exp;
-    TH2F* fh_xfi31_fi23a_exp;
-    TH2F* fh_xfi31_fi33_exp;
-    TH2F* fh_xfi31_tofd_exp;   
-    TH2F* fh_yC_vs_yHe_Tofd;
-    TH2F* fh_yC_vs_yHe_Tofd_exp;
-    TH2F* fh_tofd_track_exp;
-    TH2F* fh_fi23b_track_exp;
-    TH2F* fh_yFi23b_tofd_track;
-    TH2F* fh_yFi23b_tofd_exp;
-    TH2F* fh_pyC_vs_pyHe; 
-    TH2F* fh_A_overZ;
-    TH2F* fh_theta_16O;
-    TH2F* fh_phi_16O;
-    TH2F* fh_xfi23a_target_track;
-    TH2F* fh_yfi23b_target_track;
-    TH2F* fh_xy_target_C;
-    TH2F* fh_xy_target_He;
-    TH2F* fh_dxdy;
-    TH2F* fh_mass_corel;
-    TH2F* fh_mass_vs_ch2;
+    TH1F* fh_Erel;
+    TH1F* fh_psum;
+
     
     ClassDef(R3BOptimizeGeometryS494, 1)
 };

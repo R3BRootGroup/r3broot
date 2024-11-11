@@ -73,18 +73,20 @@ class R3BIonGenerator : public FairGenerator
     void SetExcitationEnergy(Double_t eExc);
     void SetMass(Double_t mass);
 
-    void SetSpotRadius(Double32_t r = 0, Double32_t z = 0, Double32_t off = 0)
+    void SetSpotRadius(Double32_t r = 0, Double32_t z = 0, Double32_t offX = 0, Double32_t offY = 0)
     {
         fR = r;
         fz = z;
-        fOffset = off;
+        fOffsetX = offX;
+        fOffsetY = offY;
         fBeamSpotIsSet = kTRUE;
     }
 
-    void SetBeamParameter(Double32_t sigmaP = 0, Double32_t angle = 0)
+    void SetBeamParameter(Double32_t sigmaP = 0, Double32_t angleX = 0, Double32_t angleY = 0)
     {
         fSigmaP = sigmaP;
-        fAngle = angle;
+        fAngleX = angleX;
+        fAngleY = angleY;
     }
 
     /** Method ReadEvent
@@ -97,11 +99,11 @@ class R3BIonGenerator : public FairGenerator
     static Int_t fgNIon;        //! Number of the instance of this class
     Int_t fMult;                // Multiplicity per event
     Double_t fPx, fPy, fPz;     // Momentum components [GeV] per nucleon
-    Double32_t fR, fz, fOffset; // beam Spot radius [cm], z source, y source
+    Double32_t fR, fz, fOffsetX, fOffsetY; // beam Spot radius [cm], z source, x, y source
     Double_t fVx, fVy, fVz;     // Vertex coordinates [cm]
     FairIon* fIon;              // Pointer to the FairIon to be generated
     Int_t fQ;                   // Electric charge [e]
-    Double32_t fSigmaP, fAngle; // beam variation in momentum, angle of emittance
+    Double32_t fSigmaP, fAngleX, fAngleY; // beam variation in momentum, angle of emittance
 
     Bool_t fBeamSpotIsSet; // True if point beamspot is set
 

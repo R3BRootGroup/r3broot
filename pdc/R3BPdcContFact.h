@@ -28,7 +28,7 @@ class R3BPdcContFact : public FairContFact
     ~R3BPdcContFact() {}
     FairParSet* createContainer(FairContainer*);
     void activateParIo(FairParIo* io);
-    ClassDef(R3BPdcContFact, 0) // Factory for all Pdc parameter containers
+    ClassDef(R3BPdcContFact, 1) // Factory for all Pdc parameter containers
 };
 
 #endif /* !R3BPDCCONTFACT_H */

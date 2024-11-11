@@ -22,6 +22,7 @@ ${BASE_INCLUDE_DIRECTORIES}
 
 set(INCLUDE_DIRECTORIES
 #put here all directories where header files are located
+${R3BROOT_SOURCE_DIR}/atima
 ${R3BROOT_SOURCE_DIR}/tracking
 ${R3BROOT_SOURCE_DIR}/field
 ${R3BROOT_SOURCE_DIR}/tof
@@ -51,6 +52,7 @@ R3BTPropagator.cxx
 R3BTGeoPar.cxx
 R3BFragmentFitterGeneric.cxx
 R3BFragmentTrackerS494.cxx
+R3BFragmentTrajectoryS494.cxx
 #R3BFragmentTrackerPAS.cxx
 R3BFragmentFitterChi2S494.cxx
 #R3BFragmentFitterChi2PAS.cxx

@@ -23,7 +23,10 @@
 #include "Math/Minimizer.h"
 #include "Minuit2/Minuit2Minimizer.h"
 
-#define numPoints 1330
+//#define numPoints 1580      // 2023 data
+//#define numPoints 1596      // 2022 data
+#define numPoints 3176      // 2022+2023 data
+
 //#define numPoints 3432
 
 class TClonesArray;
@@ -51,6 +54,7 @@ class R3BOptimizeMagfieldS494 : public FairTask
     R3BFieldPar* fFieldPar;
    	Double_t totalChi2Mass = 0;
    	Double_t totalChi2P = 0;
+   	Double_t d0[numPoints][6] = {0};
    	Double_t d[numPoints][6] = {0};
 
 

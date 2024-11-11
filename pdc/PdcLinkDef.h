@@ -19,7 +19,7 @@
 #pragma link off all classes;
 #pragma link off all functions;
  
-#pragma link C++ class R3BGeoPdcPar;
+#pragma link C++ class R3BGeoPdcPar+;
 #pragma link C++ class R3BPdcMapped2CalPar+;
 #pragma link C++ class R3BPdcMapped2Cal+;
 #pragma link C++ class R3BPdcCal2Hit+;

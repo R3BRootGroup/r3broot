@@ -488,7 +488,9 @@ Int_t R3BFileSource::ReadEvent(UInt_t i)
      ** and set up the parameters for the analysis of the root files.
      ** std::cout << fEvtHeader->GetTimeStamp() << std::endl;
      **/
-    if (i > 0)
+    // if (i > 0)   //AKH March 2024 - if written for each event, log file at cluster very large
+    // if(i > 0 && (fCurrentEntryNo / 10000000. == (int)fCurrentEntryNo / 10000000))
+    if (i > 0 && (fCurrentEntryNo / 100000. == (int)fCurrentEntryNo / 1000))
     {
         printf("Processed: \033[32m %d \033[0m of \033[34m %d \033[0m (\033[33m %.2f \033[0m of 100), current RunId "
                "\033[31m %d \033[0m \r",

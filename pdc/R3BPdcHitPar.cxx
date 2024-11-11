@@ -12,9 +12,9 @@
  ******************************************************************************/
 
 #include "R3BPdcHitPar.h"
-
 #include "FairLogger.h"
 #include "FairParamList.h" // for FairParamList
+#include "R3BPdcHitModulePar.h"
 
 ClassImp(R3BPdcHitPar);
 
@@ -24,6 +24,7 @@ R3BPdcHitPar::R3BPdcHitPar(const char* name, const char* title, const char* cont
     , fMapInit(kFALSE)
 {
 }
+// ----  Destructor ------------------------------------------------------------
 
 R3BPdcHitPar::~R3BPdcHitPar()
 {

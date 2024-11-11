@@ -23,6 +23,8 @@ R3BCalifaClusterData::R3BCalifaClusterData()
 }
 
 R3BCalifaClusterData::R3BCalifaClusterData(std::vector<Int_t> crystalList,
+                                           std::vector<Double_t> energyList,
+                                           std::vector<ULong64_t> timeList,
                                            Double_t ene,
                                            Double_t nf,
                                            Double_t ns,
@@ -32,6 +34,8 @@ R3BCalifaClusterData::R3BCalifaClusterData(std::vector<Int_t> crystalList,
                                            Int_t clusterType)
     : FairMultiLinkedData()
     , fCrystalList(crystalList)
+    , fEnergyList(energyList)
+    , fTimeList(timeList)
     , fEnergy(ene)
     , fNf(nf)
     , fNs(ns)
@@ -45,6 +49,8 @@ R3BCalifaClusterData::R3BCalifaClusterData(std::vector<Int_t> crystalList,
 R3BCalifaClusterData::R3BCalifaClusterData(const R3BCalifaClusterData& right)
     : FairMultiLinkedData(right)
     , fCrystalList(right.fCrystalList)
+    , fEnergyList(right.fEnergyList)
+    , fTimeList(right.fTimeList)
     , fEnergy(right.fEnergy)
     , fNf(right.fNf)
     , fNs(right.fNs)

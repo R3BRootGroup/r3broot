@@ -24,10 +24,10 @@ class R3BGeoPdcPar : public FairParGenericSet
     TObjArray* fGeoSensNodes; // List of FairGeoNodes for sensitive volumes
     TObjArray* fGeoPassNodes; // List of FairGeoNodes for sensitive volumes
 
-    R3BGeoPdcPar(const char* name = "R3BGeoPdcPar",
-                  const char* title = "Pdc Geometry Parameters",
+    R3BGeoPdcPar(const char* name = "PdcGeoPar",
+                  const char* title = "Pdc geometry parameters",
                   const char* context = "TestDefaultContext");
-    ~R3BGeoPdcPar(void);
+    ~R3BGeoPdcPar(void); 
     void clear(void);
     void putParams(FairParamList*);
     Bool_t getParams(FairParamList*);

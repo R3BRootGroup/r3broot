@@ -72,12 +72,12 @@ Bool_t R3BCalifaTotCalPar::getParams(FairParamList* list)
         return kFALSE;
     }
 
-    if (!list->fill("califaCrystalNumberPar", &fNumCrystals))
+    if (!list->fill("califaTotNumberPar", &fNumCrystals))
     {
         return kFALSE;
     }
 
-    if (!list->fill("califaCrystalParamsFitPar", &fNumParamsFit))
+    if (!list->fill("califaTotParamsFitPar", &fNumParamsFit))
     {
         return kFALSE;
     }
@@ -86,9 +86,9 @@ Bool_t R3BCalifaTotCalPar::getParams(FairParamList* list)
     LOG(info) << "Array Size: " << array_size;
     fCryCalParams->Set(array_size);
 
-    if (!(list->fill("califaCrystalCalPar", fCryCalParams)))
+    if (!(list->fill("califaTotCalPar", fCryCalParams)))
     {
-        LOG(info) << "---Could not initialize califaCrystalCalPar";
+        LOG(info) << "---Could not initialize califaTotCalPar";
         return kFALSE;
     }
 

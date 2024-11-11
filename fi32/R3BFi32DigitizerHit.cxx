@@ -205,10 +205,10 @@ void R3BFi32DigitizerHit::Exec(Option_t* opt)
                     LOG(debug) << "Hit Fi32 out: fiber: " << i << " x: " << (x[i].at(&energyl - energy[i].data()))
                                << " y: " << (y[i].at(&energyl - energy[i].data())) << " Eloss: " << energyl
                                << " t: " << time[i].at(&energyl - energy[i].data());
-                    Double_t PositionX = -82.41713;
+                    Double_t PositionX = -83.07132;
                     Double_t PositionY = 0.;
-                    Double_t PositionZ = 632.9688;
-                    Double_t RotationY = -14.02967;
+                    Double_t PositionZ = 634.4884;
+                    Double_t RotationY = -13.99355;
 
                     TVector3 posGlobal;
                     posGlobal.SetX(x[i].at(&energyl - energy[i].data()));
@@ -228,12 +228,15 @@ void R3BFi32DigitizerHit::Exec(Option_t* opt)
                     Double_t x_local = local.X();
                     Double_t y_local = local.Y();
 
-                    Bool_t granularity = false;
+                    Bool_t granularity = true;
                     if (granularity)
                     {
                         LOG(debug) << "x before granularity: " << x_local;
-                        Double_t fiber_width = 0.1; // cm
-                        x_local = (int)((x_local + fiber_width / 2.) / fiber_width) * fiber_width;
+                        x_local = -detector_width / 2. + fiber_thickness * (1 + air_layer) / 2. +
+                                  double(fiber_id) * (1 + air_layer) * fiber_thickness;
+
+                        // Double_t fiber_width = 0.1; // cm
+                        // x_local = (int)((x_local + fiber_width / 2.) / fiber_width) * fiber_width;
                         LOG(debug) << "x after granularity: " << x_local;
                     }
 
@@ -245,7 +248,7 @@ void R3BFi32DigitizerHit::Exec(Option_t* opt)
                                              prnd->Gaus(y_local, ysigma),
                                              qcharge,
                                              prnd->Gaus(time[i].at(&energyl - energy[i].data()), tsigma),
-                                             i,
+                                             i + 1,
                                              0.,
                                              0.,
                                              0.,

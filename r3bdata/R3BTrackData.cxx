@@ -37,7 +37,7 @@ R3BTrackData::R3BTrackData(Double_t x,
                            Int_t quality,
                            std::vector<Double_t> detPos,
                            Double_t t)
-    : R3BTrack(x, x, z, px, py, pz, q, AoZ, chix, chiy, quality)
+    : R3BTrack(x, y, z, px, py, pz, q, AoZ, chix, chiy, quality)
     , fDetPos(detPos)
     , fTime(t)
 {

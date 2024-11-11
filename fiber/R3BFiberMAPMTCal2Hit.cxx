@@ -490,6 +490,8 @@ void R3BFiberMAPMTCal2Hit::Exec(Option_t* option)
                             x = -detector_width / 2. + fiber_thickness * (1 + air_layer) / 2. +
                                 double(fiber_id - 1.) * (1 + air_layer) * fiber_thickness;
 
+                            // if(fSimu) x = x + 0.028;
+
                             // x = -detector_width / 2. +
                             //   (double(fiber_id - 1) + (double(fiber_id - 1.) * air_layer)) * fiber_thickness;
                             y = (t_down - t_up) * veff;
@@ -503,6 +505,8 @@ void R3BFiberMAPMTCal2Hit::Exec(Option_t* option)
 
                             y = -detector_width / 2. + fiber_thickness * (1 + air_layer) / 2. +
                                 double(fiber_id - 1.) * (1 + air_layer) * fiber_thickness;
+
+                            // if (fSimu) y = y + 0.028;
                         }
                     }
                     if (fName == "Fi30" || fName == "Fi31" || fName == "Fi32" || fName == "Fi33")

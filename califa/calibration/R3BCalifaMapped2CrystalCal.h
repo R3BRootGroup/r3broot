@@ -31,8 +31,11 @@
 #include <TRandom.h>
 
 class TClonesArray;
+class TH1F;
+class TH2F;
 class R3BCalifaCrystalCalPar;
 class R3BCalifaTotCalPar;
+class R3BEventHeader;
 
 class R3BCalifaMapped2CrystalCal : public FairTask
 {
@@ -58,11 +61,20 @@ class R3BCalifaMapped2CrystalCal : public FairTask
     /** Virtual method ReInit **/
     virtual InitStatus ReInit();
 
+    /**
+     * A method for finish of processing of an event.
+     * Is called by the framework for each event after executing
+     * the tasks.
+     */
+    virtual void FinishTask();
+
     /** Accessor to select online mode **/
     void SetOnline(Bool_t option) { fOnline = option; }
 
   private:
     void SetParameter();
+    
+    R3BEventHeader* header; /**< Event header. */
 
     UInt_t fNumCrystals;
     UInt_t fNumParams;
@@ -84,6 +96,8 @@ class R3BCalifaMapped2CrystalCal : public FairTask
                                         Double_t Ns,
                                         uint64_t wrts,
                                         Double_t tot_energy);
+                                        
+    TH2F* fh_EvsT;
 
   public:
     // Class definition

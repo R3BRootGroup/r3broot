@@ -22,6 +22,10 @@
 #include "TH2F.h"
 #include "TLine.h"
 #include "TMath.h"
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+using namespace std;
 
 R3BTPropagator::R3BTPropagator(R3BGladFieldMap* field, Bool_t vis)
     : fFairProp(new FairRKPropagator(field))
@@ -50,7 +54,7 @@ R3BTPropagator::R3BTPropagator(R3BGladFieldMap* field, Bool_t vis)
     fNorm2 = ((fPlane2[1] - fPlane2[0]).Cross(fPlane2[2] - fPlane2[0])).Unit();
     //----------------------------------------------------------------------
 
-    // fVis = kTRUE;
+    //  fVis = kTRUE;
     if (fVis)
     {
         fc4 = new TCanvas("c4", "", 50, 50, 800, 800);
@@ -77,10 +81,11 @@ R3BTPropagator::~R3BTPropagator() {}
 
 Bool_t R3BTPropagator::PropagateToDetector(R3BTrackingParticle* particle, R3BTrackingDetector* detector)
 {
-    //  std::cout<<"In PropagateToDetector: "<<std::endl;
-    //  detector->pos0.Print();
-    //  detector->pos1.Print();
-    //   detector->pos2.Print();
+    // std::cout<<"In PropagateToDetector: "<<detector->GetDetectorName()<<std::endl;
+    // detector->pos0.Print();
+    // detector->pos1.Print();
+    // detector->pos2.Print();
+
     if (fVis)
     {
         detector->Draw();
@@ -141,7 +146,7 @@ Bool_t R3BTPropagator::PropagateToPlane(R3BTrackingParticle* particle,
             LOG(debug2) << "Propagating to end-plane and stop.";
             crossed = LineIntersectPlane(particle->GetPosition(), particle->GetMomentum(), v1, norm, intersect);
             step = (intersect - particle->GetPosition()).Mag();
-            // cout<<"Step 1: "<<step<<", intersect & particle: "<<endl;
+            //   cout<<"Step 1: "<<step<<", intersect & particle: "<<endl;
             // intersect.Print();
             // particle->GetPosition().Print();
             // particle->GetMomentum().Print();
@@ -201,11 +206,11 @@ Bool_t R3BTPropagator::PropagateToPlane(R3BTrackingParticle* particle,
             // particle->GetMomentum().Print();
             // LOG(info) << particle->GetCharge();
             result = PropagateToPlaneRK(particle, v1, v2, v3);
-            // cout<<"particle after propagaging: "<<endl;
+            //  cout<<"particle after propagaging: "<<endl;
             // particle->GetPosition().Print();
             // particle->GetMomentum().Print();
 
-            //    fVis = kTRUE;
+            //  fVis = kTRUE;
 
             if (fVis)
             {
@@ -408,7 +413,7 @@ Bool_t R3BTPropagator::PropagateToPlaneBackward(R3BTrackingParticle* particle,
         {
             LOG(debug2) << "Propagating to end-plane and stop.";
             crossed = LineIntersectPlane(particle->GetPosition(), particle->GetMomentum(), v1, norm, intersect);
-            fVis = kFALSE;
+            // fVis = kFALSE;
             if (fVis)
             {
                 TLine* l1 = new TLine(-particle->GetX(), particle->GetZ(), -intersect.X(), intersect.Z());
@@ -505,6 +510,10 @@ Bool_t R3BTPropagator::PropagateToPlaneRK(R3BTrackingParticle* particle,
     Double_t distance;
 
     particle->GetPosition(vecRKIn);
+
+    // cout<<"In R3BTPropagator::PropagateToPlaneRK: "<<endl;
+    // particle->GetPosition().Print();
+
     particle->GetCosines(&vecRKIn[3]);
 
     TVector3 norm = ((v2 - v1).Cross(v3 - v1)).Unit();
@@ -526,6 +535,11 @@ Bool_t R3BTPropagator::PropagateToPlaneRK(R3BTrackingParticle* particle,
 
     while (kTRUE)
     {
+
+        // cout<<"TEST0: "<<particle->GetPosition().Z()<<", "<<step<<"; "<<diff<<endl;
+
+        if (step > diff)
+            step = diff;
         length = fFairProp->OneStepRungeKutta(particle->GetCharge(), step, vecRKIn, vecOut);
         // length = length / 100.;
         // cout << "Length: " << length << endl;
@@ -538,6 +552,8 @@ Bool_t R3BTPropagator::PropagateToPlaneRK(R3BTrackingParticle* particle,
         particle->SetPosition(vecOut);
         particle->SetCosines(&vecOut[3]);
         particle->AddStep(length);
+
+        //   particle->GetPosition().Print();
 
         nStep += 1;
 
@@ -575,11 +591,16 @@ Bool_t R3BTPropagator::PropagateToPlaneRK(R3BTrackingParticle* particle,
             TVector3 pos = particle->GetPosition();
             Double_t field = ((R3BGladFieldMap*)FairRunAna::Instance()->GetField())->GetBy(pos.X(), pos.Y(), pos.Z());
 
+            // particle->GetPosition().Print();
+            // cout<<"By: "<<field<<endl;
+
             step = 20. / TMath::Abs(field); // 10.
             // if(step < 0.1) step = 0.1;
 
-            // cout << "x: " << pos.X() << " y: " << pos.Y() << " z: " << pos.Z() <<
-            //" Field:" << field << " step from Bfield: " << 10./ TMath::Abs(field) << endl;
+            //  cout << "x: " << pos.X() << " y: " << pos.Y() << " z: " << pos.Z() <<
+            // " Field:" << field << " step from Bfield: " << 10./ TMath::Abs(field) << endl;
+
+            //    cout <<  pos.X()<<" " <<  pos.Y()<<" " << pos.Z()<<" " << field <<  endl;
 
             if (step > TMath::Abs(distance))
             {
@@ -601,7 +622,9 @@ Bool_t R3BTPropagator::PropagateToPlaneRK(R3BTrackingParticle* particle,
             }
             //   step = 0.1;
 
-            // cout<<"Step final: "<<step<<endl;
+            //  cout<<"Step final: "<<step<<endl;
+
+            //  cout<<"TEST1: "<<particle->GetPosition().Z()<<", "<<step<<"; "<<diff<<endl;
         }
 
         if (nStep > 100000)

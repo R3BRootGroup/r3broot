@@ -17,7 +17,7 @@ To use it, copy c3w.conf.sample to R3BRoot/c3w.conf.
 
 Edit it to suite your needs. Run
 
- cd build ; rm -f CMakeCache.txt ; cmake ..
+ cd build ; rm -f CMakeCache.txt ; cmake ../R3BRoot
 
 to activate. Now, every time you build R3BRoot, a tar file with the
 locations listed in LOATIONS will be created on lustre.
