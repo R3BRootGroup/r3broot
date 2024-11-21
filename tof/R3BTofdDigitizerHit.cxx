@@ -254,6 +254,13 @@ void R3BTofdDigitizerHit::Exec(Option_t* opt)
 
                     Int_t qcharge = (int)(88.339847 * Energy_Loss[channel] + 1.5039877 + 0.5);
 
+                    gRandom->SetSeed(0);
+
+                    Double_t ysigma = 2.;
+                    if (qcharge < 3)
+                        ysigma = 4.;
+                    y_local = gRandom->Gaus(y_local, ysigma);
+
                     //  if(layer_label == 0)
                     {
                         MapOfHits.insert(pair<Int_t, R3BTofdHitData*>(

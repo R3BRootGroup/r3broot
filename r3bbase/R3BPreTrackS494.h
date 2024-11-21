@@ -268,13 +268,14 @@ class R3BPreTrackS494 : public FairTask
 	Double_t XHes, YHes, ZHes, XCs, YCs, ZCs, THes, TCs;
 	Double_t pHexs, pHeys, pHezs, pCxs, pCys, pCzs, pHes, pCs;
 	
-	Double_t amu = 931.49410242;
+	Double_t amu = 0.931494028e3; //931.49410242;
 	Double_t pHex, pHey, pHez, pCx, pCy, pCz;
 	Double_t Pxf, Pyf, Pzf, Xf, Yf, Zf, Pf_tot;
 //	Double_t mHe = 4.00260325413*amu;
 //	Double_t mC = 12. * amu;
-	Double_t mHe = 3727.409;
-	Double_t mC = 11174.950;
+	Double_t mHe = 3.7273791;//3727.409;
+	Double_t mC = 11.174862;//11174.950;
+                           
 	
 	Int_t Q = 0;
 	

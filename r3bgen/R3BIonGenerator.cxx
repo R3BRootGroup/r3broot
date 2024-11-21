@@ -239,9 +239,9 @@ Bool_t R3BIonGenerator::ReadEvent(FairPrimaryGenerator* primGen)
         fVy = fOffsetY + SpotR * sin(Phi); // gRandom->Uniform(-fy,fy);
         fVz = fz;
 
-		//cout << "x, y :" << fVx << "  "  << fVy << endl;
+        // cout << "x, y :" << fVx << "  "  << fVy << endl;
 
-		// Special for experiment s494. we make a focus on the hole of fib23
+        // Special for experiment s494. we make a focus on the hole of fib23
 
         Double_t p = sqrt(fPx * fPx + fPy * fPy + fPz * fPz);
         fPx = -atan(fVx / 245.05) * fPz;
@@ -338,11 +338,11 @@ Bool_t R3BIonGenerator::ReadEvent(FairPrimaryGenerator* primGen)
         // cout << "p alt: "<< p << " p neu: " << sqrt(fPx*fPx+fPy*fPy+fPz*fPz) << endl;
     }
 
-//      cout << "-I- FairIonGenerator: Generating " << fMult << " ions of type "
-//           << fIon->GetName() << " (PDG code " << pdgType << ")" << endl;
-//      cout << "    Momentum (" << fPx << ", " << fPy << ", " << fPz
-//           << ") Gev from vertex (" << fVx << ", " << fVy
-//           << ", " << fVz << ") cm" << endl;
+    //      cout << "-I- FairIonGenerator: Generating " << fMult << " ions of type "
+    //           << fIon->GetName() << " (PDG code " << pdgType << ")" << endl;
+    //      cout << "    Momentum (" << fPx << ", " << fPy << ", " << fPz
+    //           << ") Gev from vertex (" << fVx << ", " << fVy
+    //           << ", " << fVz << ") cm" << endl;
 
     for (Int_t i = 0; i < fMult; i++)
         primGen->AddTrack(pdgType, fPx, fPy, fPz, fVx, fVy, fVz);

@@ -320,6 +320,10 @@ InitStatus R3BFragmentTrackerS494::Init()
     fh_psum = new TH1F("h_psum", "psum / MeV/c", 500, 16000., 18000.);
     fh_theta = new TH1F("h_theta", "theta / deg", 500, 0., 5);
 
+    fh_Erel0 = new TH1F("h_Erel0", "Erel / MeV for iretrack=0", 600, -10., 50);
+    fh_psum0 = new TH1F("h_psum0", "psum / MeV/c for iretrack=0", 500, 16000., 18000.);
+    fh_theta0 = new TH1F("h_theta0", "theta / deg for iretrack=0", 500, 0., 5);
+
     fh_p_vs_ch2 = new TH2F("h_p_vs_chi2", "p.Mag vs chi2", 200, 0., 200., 200, 0., 20.);
     fh_mass_vs_ch2 = new TH2F("h_mass_vs_chi2", "mass vs chi2", 2000, 0., 200., 200, 0., 20.);
 
@@ -1246,6 +1250,8 @@ void R3BFragmentTrackerS494::Exec(const Option_t*)
             {
                 x0 = 0.0;
                 // y0 = 0.0;
+                // x0 = x0C;
+                // y0 = y0C;
             }
             if (iretrack == 1 && l < 2 && psum_mem > 0.)
             {
@@ -1443,11 +1449,11 @@ void R3BFragmentTrackerS494::Exec(const Option_t*)
                                 y0 = pos23b.Y() - pos23b.Z() * (y_tp - pos23b.Y()) / (z_tp - pos23b.Z());
 
                                 // reject fib23b hits that don't correspond to tofdy:
-                                /*  if(abs(y0) > 1.5)
-                                  {
-                                      ifi23b += 1;
-                                      continue;
-                                  } */
+                                if (abs(y0) > 1.4)
+                                {
+                                    ifi23b += 1;
+                                    continue;
+                                }
                                 do // fi23a
                                 {
                                     if (ifi23a >= 0)
@@ -1722,11 +1728,11 @@ void R3BFragmentTrackerS494::Exec(const Option_t*)
                                 y0 = pos23b.Y() - pos23b.Z() * (y_tp - pos23b.Y()) / (z_tp - pos23b.Z());
 
                                 // reject fib23b hits that don't correspond to tofdy:
-                                /*  if(abs(y0) > 1.5)
-                                  {
-                                      ifi23b += 1;
-                                      continue;
-                                  }  */
+                                if (abs(y0) > 1.4)
+                                {
+                                    ifi23b += 1;
+                                    continue;
+                                }
 
                                 do // fi23a
                                 {
@@ -2375,7 +2381,7 @@ void R3BFragmentTrackerS494::Exec(const Option_t*)
                         // if (iAoverZ == 2 && iAoverZmem == 2 && psum < 17416. && psum > 17384. ){
                         if (iAoverZ == 2 && iAoverZmem == 2 && Erel < 4.6 && Erel > 4.1 &&
                             ((pHex > 0. && pCx < 0.) || (pHex < 0. && pCx > 0.)))
-                        {   //&& psum > 17341. && psum < 17450.){
+                        { //&& psum > 17341. && psum < 17450.){
                             // if (sqrt(minChi2 * minChi2 + minChi2_12C * minChi2_12C) < 2. && iAoverZ == 2 &&
                             // iAoverZmem == 2 &&
                             //  abs(mom_res) < 0.5){
@@ -2668,7 +2674,7 @@ void R3BFragmentTrackerS494::Exec(const Option_t*)
                             fh_x_pull[iDet]->Fill(xres / det->res_x);
                         if (iDet == 7)
                         {
-                            if (iAoverZ == 2 && abs(det_hit_x[1]) > 0.21 && abs(det_hit_y[2] > 0.21) &&
+                            if (iAoverZ == 2 && abs(det_hit_x[1]) > 0.21 && abs(det_hit_y[2]) > 0.21 &&
                                 (iretrack == iretrack_max))
                             {
                                 pz_vs_x->Fill(det_hit_x[iDet], pzmemtarget);
@@ -2708,7 +2714,7 @@ void R3BFragmentTrackerS494::Exec(const Option_t*)
                             fh_y_pull[iDet]->Fill(yres / det->res_y);
                         if (iDet == 7 && (iretrack == iretrack_max))
                         {
-                            if (iAoverZ == 2 && abs(det_hit_x[1]) > 0.21 && abs(det_hit_y[2] > 0.21))
+                            if (iAoverZ == 2 && abs(det_hit_x[1]) > 0.21 && abs(det_hit_y[2]) > 0.21)
                             {
                                 pz_vs_y->Fill(det_hit_y[iDet], pzmemtarget);
                                 px_vs_y->Fill(det_hit_y[iDet], pxmemtarget * 1000.0);
@@ -2993,6 +2999,12 @@ void R3BFragmentTrackerS494::Exec(const Option_t*)
                  << ", Erel: " << Erel << ", psum: " << psum << ", x0: " << xmem << ", y0: " << ymem
                  << ", from selected NEvents: " << fNEvents_nonull << endl;
             cout << "pC: " << p12C.Mag() << ", pHe: " << p4He.Mag() << endl;
+            if (sqrt(minChi2 * minChi2 + minChi2_12C * minChi2_12C) < 10.)
+            {
+                fh_Erel0->Fill(Erel);
+                fh_psum0->Fill(psum);
+                fh_theta0->Fill(theta_26);
+            }
         }
         if ((alpha && carbon) && fPairs && (iretrack == iretrack_max))
         {
@@ -3199,6 +3211,9 @@ void R3BFragmentTrackerS494::Finish()
         fh_Erel->Write();
         fh_psum->Write();
         fh_theta->Write();
+        fh_Erel0->Write();
+        fh_psum0->Write();
+        fh_theta0->Write();
         px_vs_x->Write();
         py_vs_x->Write();
         pz_vs_x->Write();

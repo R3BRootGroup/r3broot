@@ -74,6 +74,7 @@ class R3BOptimizeGeometryS494 : public FairTask
     TClonesArray* fArrayFragments;
     std::vector<TClonesArray*> fArrayHits;
     Int_t fNEvents;
+    R3BTrackingParticle* candidate;
 
     R3BFragmentFitterGeneric* fFitter;
     Bool_t fEnergyLoss;

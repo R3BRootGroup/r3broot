@@ -299,7 +299,7 @@ double Chi2MomentumForward(const double* xx)
                 else
                 {
                     // cout << "Testcase: " << chi2temp << endl;
-                    chi2temp = chi2temp; //* 100. ;
+                    chi2temp = chi2temp;
                 }
             }
 

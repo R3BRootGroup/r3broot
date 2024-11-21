@@ -82,6 +82,7 @@ R3BOptimizeGeometryS494::R3BOptimizeGeometryS494(const char* name, Bool_t vis, I
     , fDetectorsLeft(new R3BTrackingSetup())
     , fDetectorsRight(new R3BTrackingSetup())
     , fArrayFragments(new TClonesArray("R3BTrackingParticle"))
+    , candidate(new R3BTrackingParticle())
     , fNEvents(0)
     , fVis(vis)
     , fForward(kTRUE)
@@ -637,35 +638,6 @@ double R3BOptimizeGeometryS494::Chi2()
             cout << "Tofd hits  : " << i << ", " << tof->hits.at(i)->GetX() << ", " << tof->hits.at(i)->GetY() << endl;
         }
     }
-    for (Int_t i = 0; i < fi23a->hits.size(); i++)
-    {
-        fi23a->free_hit[i] = true;
-    }
-    for (Int_t i = 0; i < fi23b->hits.size(); i++)
-    {
-        fi23b->free_hit[i] = true;
-    }
-    for (Int_t i = 0; i < fi30->hits.size(); i++)
-    {
-        fi30->free_hit[i] = true;
-    }
-    for (Int_t i = 0; i < fi32->hits.size(); i++)
-    {
-        fi32->free_hit[i] = true;
-    }
-    for (Int_t i = 0; i < fi31->hits.size(); i++)
-    {
-        fi31->free_hit[i] = true;
-    }
-    for (Int_t i = 0; i < fi33->hits.size(); i++)
-    {
-        fi33->free_hit[i] = true;
-    }
-
-    for (Int_t i = 0; i < tof->hits.size(); i++)
-    {
-        tof->free_hit[i] = true;
-    }
 
     // Start values
     Double_t beta = 0.0;
@@ -756,53 +728,18 @@ double R3BOptimizeGeometryS494::Chi2()
 
     Int_t nCand = 0;
 
-    Double_t mChi2 = -1.0;
+    Double_t m0Chi2 = -1.0;
+    Double_t m1Chi2 = -1.0;
     Double_t yChi2 = -1.0;
     Double_t zChi2 = -1.0;
     minChi2_12C = 1.e6;
     minChi2_4He = 1.e6;
 
-    Int_t ifi23a = 0;
-    Int_t ifi23b = 0;
-    Int_t ifi30 = 0;
-    Int_t ifi31 = 0;
-    Int_t ifi32 = 0;
-    Int_t ifi33 = 0;
-    Int_t itof = 0;
-    if (0 == fi23a->hits.size())
-    {
-        ifi23a = -1;
-    }
-    if (0 == fi23b->hits.size())
-    {
-        ifi23b = -1;
-    }
-    if (0 == fi30->hits.size())
-    {
-        ifi30 = -1;
-    }
-    if (0 == fi31->hits.size())
-    {
-        ifi31 = -1;
-    }
-    if (0 == fi32->hits.size())
-    {
-        ifi32 = -1;
-    }
-    if (0 == fi33->hits.size())
-    {
-        ifi33 = -1;
-    }
-    if (0 == tof->hits.size())
-    {
-        itof = -1;
-    }
     Int_t charge_mem = 0;
     Bool_t alpha = kFALSE;
     Bool_t carbon = kFALSE;
     Bool_t oxygen = kFALSE;
 
-    R3BTrackingParticle* candidate;
     // The idea is to loop twice over the ToF wall hits.
     // First we want to look for 12C particle and then for 4He
 
@@ -823,871 +760,983 @@ double R3BOptimizeGeometryS494::Chi2()
     }
     // cout << "Test l: " << lmin << "  " << lmax << "  " << fBfield << endl;
 
-    for (Int_t l = lmin; l < lmax; l++)
+    Int_t iretrack_max = 1;
+    Double_t psum_mem = -10000.;
+
+    for (Int_t iretrack = 0; iretrack < iretrack_max + 1; iretrack++)
     {
-        // l = 0: 16O
-        // l = 1: 12C
-        // l = 1: 4He
-
-        Int_t charge = 0;
-        Int_t charge_requested = 0;
-        Double_t Charge = 0.0;
-        Double_t m0 = 0.0;
-        Double_t p0 = 0.0;
-
-        if (l == 0)
+        Int_t ifi23a = 0;
+        Int_t ifi23b = 0;
+        Int_t ifi30 = 0;
+        Int_t ifi31 = 0;
+        Int_t ifi32 = 0;
+        Int_t ifi33 = 0;
+        Int_t itof = 0;
+        if (0 == fi23a->hits.size())
         {
-            charge_requested = 8;
+            ifi23a = -1;
         }
-        else if (l == 1)
+        if (0 == fi23b->hits.size())
         {
-            charge_requested = 6;
+            ifi23b = -1;
         }
-        else if (l == 2)
+        if (0 == fi30->hits.size())
         {
-            charge_requested = 2;
+            ifi30 = -1;
         }
-
-        // Loop over all combinations of hits
-        for (Int_t i = 0; i < tof->hits.size(); i++) // loop over all ToFD hits
+        if (0 == fi31->hits.size())
         {
-            if (fSimu)
-            {
-                // For tracking of simulations:
-                //   charge = sqrt(tof->hits.at(i)->GetEloss()) * 26.76 + 0.5;
-                //   Charge = sqrt(tof->hits.at(i)->GetEloss()) * 26.76;
-
-                // if digi used
-                // Charge = tof->hits.at(i)->GetEloss();
-                // charge = (int)(Charge + 0.5);
-
-                // if digiHit used
-                charge = (int)(tof->hits.at(i)->GetEloss() + 0.5);
-                Charge = tof->hits.at(i)->GetEloss();
-            }
-            else
-            {
-                // For tracking of exp. data:
-                charge = (int)(tof->hits.at(i)->GetEloss() + 0.5);
-                Charge = tof->hits.at(i)->GetEloss();
-            }
-            if (debug)
-                cout << "Charge: " << charge << " requested charge: " << charge_requested << endl;
-
-            if (charge != charge_requested)
-                continue;
-
-            beta0 = 0.7593; // velocity could eventually be calculated from ToF
-            tof->res_t = 0.03;
-            // Double_t m0 = charge * 2. * 0.931494028; // First guess of mass
-
-            // Masse wird nicht getreckt, nur momentum
-            if (charge == 8)
-            {
-                m0 = 14.895085;
-                if (fSimu)
-                    m0 = mO;  // has to have the same value as what geant uses
-                p0 = 17.3915; // in GeV/c2
-            }
-            if (charge == 6)
-            {
-                m0 = 11.174862;
-                if (fSimu)
-                    m0 = mC;
-                p0 = 13.043625;
-                if (!fSimu)
-                    pC = p0;
-                massC = m0 * 1.e3;
-            }
-            if (charge == 2)
-            {
-                m0 = 3.7273791;
-                if (fSimu)
-                    m0 = mHe;
-                p0 = 4.347875;
-                if (!fSimu)
-                    pHe = p0;
-                massHe = m0 * 1.e3;
-                if (fSimu)
-                {
-                    //  x0 = x0He;
-                    // y0 = y0He;
-                }
-            }
-
-            if (debug)
-            {
-                cout << "Mass: " << m0 << endl;
-                cout << "Position on TofD: " << tof->hits.at(i)->GetX() << endl;
-            }
-            // AKH /*
-            if (!tof->free_hit[i]) // if the hit was used already, continue
-            {
-                if (debug)
-                    cout << "ToFD hit already used" << endl;
-                continue;
-            }
-            // AKH */
-            tof->LocalToGlobal(postofd, tof->hits.at(i)->GetX(), tof->hits.at(i)->GetY());
-            Double_t ltofd = sqrt((postofd.Z() - z_tp) * (postofd.Z() - z_tp) + postofd.X() * postofd.X());
-
-            Double_t foffset = 0.4;
-            Double_t fslope = 1.0;
-            if (tof->hits.at(i)->GetX() > 0.)
-                fslope = 0.88; // fi30/32, tofdx_loc>0
-            if (tof->hits.at(i)->GetX() < 0.)
-                fslope = 0.901; // fi31/33, tofdx_loc<0
-
-            if (tof->hits.at(i)->GetX() > 0.0 && tof->hits.at(i)->GetX() != 4.11 && fi30->hits.size() > 0 &&
-                fi32->hits.size() > 0 && fi23a->hits.size() > 0 && fi23b->hits.size() > 0)
-            {
-                // left branch in beam direction, don't consider hits in the detectors of the other side
-
-                if (!fSimu)
-                {
-                    //( (R3BGladFieldMap*) FairRunAna::Instance()->GetField())->SetTrackerCorrectionScale(1.002);
-                }
-                // simu from 01/02/22:
-                if (fSimu)
-                {
-                    /*   ((R3BGladFieldMap*)FairRunAna::Instance()->GetField())->SetTrackerCorrectionAngleY(-14.);
-                       ((R3BGladFieldMap*)FairRunAna::Instance()->GetField())->SetTrackerCorrectionZ(174.95);
-                       ((R3BGladFieldMap*)FairRunAna::Instance()->GetField())->SetTrackerCorrectionY(1.08);
-                       ((R3BGladFieldMap*)FairRunAna::Instance()->GetField())->SetTrackerCorrectionAngleZ(0.);
-                       ((R3BGladFieldMap*)FairRunAna::Instance()->GetField())->SetTrackerCorrectionScale(1.00);*/
-                }
-
-                // R3BTrackingDetector* target = fDetectorsLeft->GetByName("target");
-                if (fNEventsLeft == 0)
-                {
-                    target->hits.push_back(new R3BHit(0, 0.0, 0.0, 0., 0., 0));
-                }
-
-                do // fi32
-                {
-
-                    if ((ifi32 >= 0 && !fi32->free_hit[ifi32]) ||
-                        charge_requested != fi32->hits.at(ifi32)->GetEloss()) // if the hit was used already, continue
-                    {
-
-                        ifi32 += 1;
-                        continue;
-                    }
-
-                    do // fi30
-                    {
-                        if ((ifi30 >= 0 && !fi30->free_hit[ifi30]) ||
-                            charge_requested !=
-                                fi30->hits.at(ifi30)->GetEloss()) // if the hit was used already, continue
-                        {
-                            ifi30 += 1;
-                            continue;
-                        }
-                        do // fi23b
-                        {
-                            if ((l > 0 && abs(fi23b->hits.at(ifi23b)->GetY()) < cut_yfib23) ||
-                                (l < 3 && ifi23b >= 0 &&
-                                 !fi23b->free_hit[ifi23b])) // if the hit was used already, continue
-                            {
-
-                                ifi23b += 1;
-                                continue;
-                            }
-                            fi23b->LocalToGlobal(pos23b, 0., fi23b->hits.at(ifi23b)->GetY());
-                            Double_t y_tp =
-                                (postofd.Y() - foffset + fslope * ltofd * pos23b.Y() / (z_tp - pos23b.Z())) /
-                                (1. + fslope * ltofd / (z_tp - pos23b.Z()));
-                            // y0 = pos23b.Y()-pos23b.Z()*(y_tp-pos23b.Y())/(z_tp-pos23b.Z());
-                            y0 = 0.0;
-                            // reject fib23b hits that don't correspond to tofdy:
-                            /*  if(abs(y0) > 1.5)
-                              {
-                                  ifi23b += 1;
-                                  continue;
-                              }*/
-                            do // fi23a
-                            {
-
-                                if ((l > 0 && abs(fi23a->hits.at(ifi23a)->GetX()) < cut_xfib23) ||
-                                    (l < 3 && ifi23a >= 0 && !fi23a->free_hit[ifi23a]))
-                                {
-
-                                    ifi23a += 1;
-                                    continue;
-                                }
-                                x0 = 0.0;
-                                z0 = 0.0;
-
-                                fi23a->LocalToGlobal(pos23a, fi23a->hits.at(ifi23a)->GetX(), 0.);
-                                if (l < 2)
-                                {
-                                    /*
-                                     py0_cand =
-                                         (pos23b.Y() - y0 + 0.000365) / pos23b.Z() * p0;
-                                     px0_cand =
-                                         (pos23a.X() - x0 - 0.0093 * 1.) / pos23a.Z() * p0;
-                                     pz0_cand = sqrt(p0*p0-py0_cand*py0_cand-px0_cand*px0_cand);
-                                     */
-                                    px0_cand = 0.0;
-                                    py0_cand = 0.0;
-                                    pz0_cand = p0;
-                                    Double_t ptot_cand =
-                                        sqrt(px0_cand * px0_cand + py0_cand * py0_cand + pz0_cand * pz0_cand);
-                                    beta0_cand = sqrt(1.0 / (1.0 + (m0 / ptot_cand) * (m0 / ptot_cand)));
-
-                                    candidate = new R3BTrackingParticle(
-                                        charge, x0, y0, z0, px0_cand, py0_cand, pz0_cand, beta0_cand, m0);
-                                }
-                                else if (l == 2)
-                                {
-                                    px0_cand = -pxmem;
-                                    py0_cand = -pymem;
-                                    pz0_cand = sqrt(p0 * p0 - pxmem * pxmem - pymem * pymem);
-                                    Double_t ptot_cand =
-                                        sqrt(px0_cand * px0_cand + py0_cand * py0_cand + pz0_cand * pz0_cand);
-                                    beta0_cand = sqrt(1.0 / (1.0 + (m0 / ptot_cand) * (m0 / ptot_cand)));
-
-                                    candidate = new R3BTrackingParticle(
-                                        charge, xmem, ymem, zmem, px0_cand, py0_cand, pz0_cand, beta0_cand, m0);
-                                }
-
-                                if (debug)
-                                {
-                                    cout << "left side of setup" << endl;
-                                    cout << "Charge requested: " << charge_requested << endl;
-                                    cout << "Start values to fit, x0: " << x0 << " y0: " << y0 << " z0: " << z0
-                                         << " p0: " << p0 << " beta0: " << beta0 << " m0: " << m0 << endl;
-                                    cout << "Hit Tofd # " << i << " x: " << tof->hits.at(i)->GetX()
-                                         << " y: " << tof->hits.at(i)->GetY() << endl;
-                                }
-                                if (ifi23a > -1 && debug)
-                                    cout << " Fi23a left # " << ifi23a << " x: " << fi23a->hits.at(ifi23a)->GetX()
-                                         << endl;
-                                if (ifi23b > -1 && debug)
-                                    cout << " left Fi23b # " << ifi23b << " y: " << fi23b->hits.at(ifi23b)->GetY()
-                                         << endl;
-                                if (ifi30 > -1 && debug)
-                                    cout << " fi30 # " << ifi30 << " x: " << fi30->hits.at(ifi30)->GetX() << endl;
-                                if (ifi32 > -1 && debug)
-                                    cout << " fi32 # " << ifi32 << " x: " << fi32->hits.at(ifi32)->GetX() << endl;
-                                // add points through which tracker has to go:
-                                candidate->AddHit("target", 0);
-                                candidate->AddHit("tofd", i);
-                                candidate->AddHit("fi23a", ifi23a);
-                                candidate->AddHit("fi23b", ifi23b);
-                                candidate->AddHit("fi32", ifi32);
-                                candidate->AddHit("fi30", ifi30);
-
-                                Int_t status = 10;
-                                if (fForward)
-                                {
-                                    status = fFitter->FitTrackMomentumForward(candidate, fDetectors);
-                                }
-                                else
-                                {
-                                    // status = fFitter->FitTrackBackward2D(candidate, fDetectors);
-                                    status = fFitter->FitTrackMomentumBackward(candidate, fDetectors);
-                                }
-                                if (debug)
-                                    cout << " Chi: " << candidate->GetChi2() << "  "
-                                         << candidate->GetStartMomentum().Mag() << "  "
-                                         << 1000. * (candidate->GetStartMomentum().Mag() - p0) *
-                                                (candidate->GetStartMomentum().Mag() - p0)
-                                         << endl;
-                                if (debug)
-                                    cout << "--------------------------------" << endl;
-                                nCand += 1;
-                                Icountleft += 1;
-
-                                //     cout << fNEvents<< ", LEFT SIDE: Charge: "<< charge<<", Momentum: " <<
-                                //     candidate->GetMomentum().Mag()<<
-                                //  ", Momentum Z: "<<candidate->GetMomentum().Z() <<
-                                //   ", Momentum X: "<<candidate->GetMomentum().X()<< endl;
-
-                                if (TMath::IsNaN(candidate->GetMomentum().Z()))
-                                {
-                                    delete candidate;
-                                    continue;
-                                }
-
-                                if (10 > status)
-                                {
-                                    if (fForward)
-                                    {
-                                        candidate->Reset();
-                                    }
-                                    else
-                                    {
-                                        candidate->SetStartPosition(candidate->GetPosition());
-                                        candidate->SetStartMomentum(-1. * candidate->GetMomentum());
-                                        candidate->SetStartBeta(beta0);
-                                        candidate->UpdateMomentum();
-
-                                        // candidate->SetStartPosition(candidate->GetPosition()); // @target
-                                        // candidate->SetStartMomentum(-1. * candidate->GetMomentum());
-                                        // candidate->SetStartBeta(0.8328);
-                                        // candidate->SetStartBeta(beta0);
-                                        // candidate->UpdateMomentum();
-                                        candidate->Reset();
-
-                                        // candidate->GetStartPosition().Print();
-                                        // candidate->GetStartMomentum().Print();
-                                        // cout << "chi2: " << candidate->GetChi2() << endl;
-                                        // status = FitFragment(candidate);
-                                    }
-                                    if (10 > status)
-                                    {
-                                        // if(candidate->GetChi2() < 3.)
-                                        {
-                                            fFragments.push_back(candidate);
-                                        }
-                                    }
-                                    else
-                                    {
-                                        delete candidate;
-                                    }
-                                }
-                                else
-                                {
-                                    delete candidate;
-                                }
-
-                                // return;
-                                ifi23a += 1;
-                            } while (ifi23a < fi23a->hits.size());
-                            ifi23a = 0;
-                            if (0 == fi23a->hits.size())
-                                ifi23a = -1;
-
-                            ifi23b += 1;
-                        } while (ifi23b < fi23b->hits.size());
-                        ifi23b = 0;
-                        if (0 == fi23b->hits.size())
-                            ifi23b = -1;
-
-                        ifi30 += 1;
-                    } while (ifi30 < fi30->hits.size());
-                    ifi30 = 0;
-                    if (0 == fi30->hits.size())
-                        ifi30 = -1;
-
-                    ifi32 += 1;
-                } while (ifi32 < fi32->hits.size());
-                ifi32 = 0;
-                if (0 == fi32->hits.size())
-                    ifi32 = -1;
-            } // end if left branch
-
-            if (tof->hits.at(i)->GetX() < 0.0 && fi31->hits.size() > 0 && fi33->hits.size() > 0 &&
-                fi23a->hits.size() > 0 && fi23b->hits.size() > 0)
-            {
-                // right branch in beam direction, don't consider hits in the detectors of the other side
-
-                if (!fSimu)
-                {
-                    //( (R3BGladFieldMap*) FairRunAna::Instance()->GetField())->SetTrackerCorrectionScale(1.004);
-                }
-                // simu from 01/02/22:
-                if (fSimu)
-                {
-                    /*  ((R3BGladFieldMap*)FairRunAna::Instance()->GetField())->SetTrackerCorrectionAngleY(-14.);
-                      ((R3BGladFieldMap*)FairRunAna::Instance()->GetField())->SetTrackerCorrectionZ(174.95);
-                      ((R3BGladFieldMap*)FairRunAna::Instance()->GetField())->SetTrackerCorrectionY(1.08);
-                      ((R3BGladFieldMap*)FairRunAna::Instance()->GetField())->SetTrackerCorrectionAngleZ(0.);
-                      ((R3BGladFieldMap*)FairRunAna::Instance()->GetField())->SetTrackerCorrectionScale(1.00);*/
-                }
-
-                if (fNEventsRight == 0)
-                {
-                    // R3BHit(detId, x,  y, eloss,  time, hitId = -1);
-                    target->hits.push_back(new R3BHit(0, 0.0, 0.0, 0., 0., 0));
-                }
-
-                do // fi33
-                {
-                    if ((ifi33 >= 0 && !fi33->free_hit[ifi33]) ||
-                        charge_requested != fi33->hits.at(ifi33)->GetEloss()) // if the hit was used already, continue
-                    {
-
-                        ifi33 += 1;
-                        continue;
-                    }
-                    do // fi31
-                    {
-                        if ((ifi31 >= 0 && !fi31->free_hit[ifi31]) ||
-                            charge_requested !=
-                                fi31->hits.at(ifi31)->GetEloss()) // if the hit was used already, continue
-                        {
-
-                            ifi31 += 1;
-                            continue;
-                        }
-                        do // fi23b
-                        {
-                            if ((l > 0 && abs(fi23b->hits.at(ifi23b)->GetY()) < cut_yfib23) ||
-                                (l < 3 && ifi23b >= 0 &&
-                                 !fi23b->free_hit[ifi23b])) // if the hit was used already, continue
-                            {
-                                ifi23b += 1;
-                                continue;
-                            }
-                            fi23b->LocalToGlobal(pos23b, 0., fi23b->hits.at(ifi23b)->GetY());
-                            Double_t y_tp =
-                                (postofd.Y() - foffset + fslope * ltofd * pos23b.Y() / (z_tp - pos23b.Z())) /
-                                (1. + fslope * ltofd / (z_tp - pos23b.Z()));
-                            // y0 = pos23b.Y()-pos23b.Z()*(y_tp-pos23b.Y())/(z_tp-pos23b.Z());
-                            y0 = 0.0;
-                            // reject fib23b hits that don't correspond to tofdy:
-                            /* if(abs(y0) > 1.5)
-                             {
-                                 ifi23b += 1;
-                                 continue;
-                             }    */
-                            do // fi23a
-                            {
-
-                                if ((l > 0 && abs(fi23a->hits.at(ifi23a)->GetX()) < cut_xfib23) ||
-                                    (l < 3 && ifi23a >= 0 && !fi23a->free_hit[ifi23a]))
-                                {
-                                    ifi23a += 1;
-                                    continue;
-                                }
-                                x0 = 0.0;
-                                z0 = 0.0;
-
-                                fi23a->LocalToGlobal(pos23a, fi23a->hits.at(ifi23a)->GetX(), 0.);
-                                if (l < 2)
-                                {
-                                    /*py0_cand =
-                                        (pos23b.Y() - y0 + 0.000365) / pos23b.Z() * p0;
-                                    px0_cand =
-                                        (pos23a.X() - x0 - 0.0093 * 1.) / pos23a.Z() * p0;
-                                    pz0_cand = sqrt(p0*p0-py0_cand*py0_cand-px0_cand*px0_cand);*/
-
-                                    px0_cand = 0.0;
-                                    py0_cand = 0.0;
-                                    pz0_cand = p0;
-                                    Double_t ptot_cand =
-                                        sqrt(px0_cand * px0_cand + py0_cand * py0_cand + pz0_cand * pz0_cand);
-                                    beta0_cand = sqrt(1.0 / (1.0 + (m0 / ptot_cand) * (m0 / ptot_cand)));
-
-                                    candidate = new R3BTrackingParticle(
-                                        charge, x0, y0, z0, px0_cand, py0_cand, pz0_cand, beta0_cand, m0);
-                                }
-                                else if (l == 2)
-                                {
-                                    px0_cand = -pxmem;
-                                    py0_cand = -pymem;
-                                    pz0_cand = sqrt(p0 * p0 - pxmem * pxmem - pymem * pymem);
-                                    Double_t ptot_cand =
-                                        sqrt(px0_cand * px0_cand + py0_cand * py0_cand + pz0_cand * pz0_cand);
-                                    beta0_cand = sqrt(1.0 / (1.0 + (m0 / ptot_cand) * (m0 / ptot_cand)));
-
-                                    candidate = new R3BTrackingParticle(
-                                        charge, xmem, ymem, zmem, px0_cand, py0_cand, pz0_cand, beta0_cand, m0);
-                                }
-
-                                if (debug)
-                                {
-                                    cout << "right side of setup" << endl;
-                                    cout << "Charge requested: " << charge_requested << endl;
-                                    cout << "Start values to fit, x0: " << x0 << " y0: " << y0 << " z0: " << z0
-                                         << " p0: " << p0 << " beta0: " << beta0 << " m0: " << m0 << endl;
-                                    cout << "Hit Tofd # " << i << " x: " << tof->hits.at(i)->GetX()
-                                         << " y: " << tof->hits.at(i)->GetY() << endl;
-                                }
-                                if (ifi23a > -1 && debug)
-                                    cout << "Fi23a # " << ifi23a << " x: " << fi23a->hits.at(ifi23a)->GetX() << endl;
-                                if (ifi23b > -1 && debug)
-                                    cout << "Fi23b # " << ifi23b << " y: " << fi23b->hits.at(ifi23b)->GetY() << endl;
-                                if (ifi33 > -1 && debug)
-                                    cout << "Fi33 # " << ifi33 << " x: " << fi33->hits.at(ifi33)->GetX() << endl;
-                                if (ifi31 > -1 && debug)
-                                    cout << "Fi31  # " << ifi31 << " x: " << fi31->hits.at(ifi31)->GetX() << endl;
-
-                                candidate->AddHit("target", 0);
-                                candidate->AddHit("tofd", i);
-                                candidate->AddHit("fi23a", ifi23a);
-                                candidate->AddHit("fi23b", ifi23b);
-                                candidate->AddHit("fi31", ifi31);
-                                candidate->AddHit("fi33", ifi33);
-
-                                Int_t status = 10;
-                                if (fForward)
-                                {
-                                    status = fFitter->FitTrackMomentumForward(candidate, fDetectors);
-                                }
-                                else
-                                {
-                                    // status = fFitter->FitTrackBackward2D(candidate, fDetectors);
-                                    status = fFitter->FitTrackMomentumBackward(candidate, fDetectors);
-                                }
-                                if (debug)
-                                    cout << "Chi: " << candidate->GetChi2() << "  pstart.Mag "
-                                         << candidate->GetStartMomentum().Mag() << " dp.Mag "
-                                         << 1000. * (candidate->GetStartMomentum().Mag() - p0) *
-                                                (candidate->GetStartMomentum().Mag() - p0)
-                                         << endl;
-                                if (debug)
-                                    cout << "--------------------------------" << endl;
-                                nCand += 1;
-                                Icountright += 1;
-
-                                //    cout <<fNEvents<<", RIGHT SIDE: Charge: "<< charge<<", Momentum: " <<
-                                //    candidate->GetMomentum().Mag()<<", Momentum Z:
-                                //    "<<candidate->GetMomentum().Z()<<
-                                //   ", Momentum X: "<<candidate->GetMomentum().X() << " status: "<<status<<endl;
-
-                                if (TMath::IsNaN(candidate->GetMomentum().Z()))
-                                {
-                                    delete candidate;
-                                    continue;
-                                }
-
-                                if (10 > status)
-                                {
-                                    if (fForward)
-                                    {
-                                        candidate->Reset();
-                                    }
-                                    else
-                                    {
-                                        candidate->SetStartPosition(candidate->GetPosition());
-                                        candidate->SetStartMomentum(-1. * candidate->GetMomentum());
-                                        candidate->SetStartBeta(beta0);
-                                        candidate->UpdateMomentum();
-
-                                        // candidate->SetStartPosition(candidate->GetPosition());
-                                        // candidate->SetStartMomentum(-1. * candidate->GetMomentum());
-                                        // candidate->SetStartBeta(0.8328);
-                                        // candidate->SetStartBeta(beta0);
-                                        // candidate->UpdateMomentum();
-
-                                        candidate->Reset();
-
-                                        // candidate->GetStartPosition().Print();
-                                        // candidate->GetStartMomentum().Print();
-                                        // cout << "chi2: " << candidate->GetChi2() << endl;
-                                        // status = FitFragment(candidate);
-                                    }
-                                    if (10 > status)
-                                    {
-                                        // if(candidate->GetChi2() < 3.)
-                                        {
-                                            fFragments.push_back(candidate);
-                                        }
-                                    }
-                                    else
-                                    {
-                                        delete candidate;
-                                    }
-                                }
-                                else
-                                {
-                                    delete candidate;
-                                }
-
-                                // return;
-                                ifi23a += 1;
-                            } while (ifi23a < fi23a->hits.size());
-                            ifi23a = 0;
-                            if (0 == fi23a->hits.size())
-                                ifi23a = -1;
-
-                            ifi23b += 1;
-                        } while (ifi23b < fi23b->hits.size());
-                        ifi23b = 0;
-                        if (0 == fi23b->hits.size())
-                            ifi23b = -1;
-
-                        ifi31 += 1;
-                    } while (ifi31 < fi31->hits.size());
-                    ifi31 = 0;
-                    if (0 == fi31->hits.size())
-                        ifi31 = -1;
-
-                    ifi33 += 1;
-                } while (ifi33 < fi33->hits.size());
-                ifi33 = 0;
-                if (0 == fi33->hits.size())
-                    ifi33 = -1;
-            } // end if right branch
-
-            charge_mem = charge;
-
-        } // end for TofD
-
-        charge = charge_mem;
-        Charge = double(charge_mem);
-
-        // if (candidate->GetSize() > 0 && !fSimu)
+            ifi31 = -1;
+        }
+        if (0 == fi32->hits.size())
         {
-            // candidate->Clear();
+            ifi32 = -1;
+        }
+        if (0 == fi33->hits.size())
+        {
+            ifi33 = -1;
+        }
+        if (0 == tof->hits.size())
+        {
+            itof = -1;
         }
 
-        //   if(candidate) delete candidate;
+        alpha = kFALSE;
+        carbon = kFALSE;
 
-        R3BTrackingParticle* bestcandidate =
-            new R3BTrackingParticle(-1000, -1000, -1000, -1000, -1000, -1000, -1000, -1000, -1000);
-
-        minChi2 = 1e10;
-        pChi2 = 1e10;
-        eChi2 = 1e10;
-        Double_t parChi2 = 1e10;
-        Double_t xChi2 = 1e10;
-        Double_t sigmap = 0.01 * p0;
-
-        if (fFragments.size() > 0)
+        for (Int_t i = 0; i < fi23a->hits.size(); i++)
         {
-            for (auto const& x : fFragments)
-            {
-                // pChi2 = (x->GetStartMomentum().Mag() - p0) * (x->GetStartMomentum().Mag() - p0) /
-                //       (p0 * p0 * 0.01 * 0.01);
+            fi23a->free_hit[i] = true;
+        }
+        for (Int_t i = 0; i < fi23b->hits.size(); i++)
+        {
+            fi23b->free_hit[i] = true;
+        }
+        for (Int_t i = 0; i < fi30->hits.size(); i++)
+        {
+            fi30->free_hit[i] = true;
+        }
+        for (Int_t i = 0; i < fi32->hits.size(); i++)
+        {
+            fi32->free_hit[i] = true;
+        }
+        for (Int_t i = 0; i < fi31->hits.size(); i++)
+        {
+            fi31->free_hit[i] = true;
+        }
+        for (Int_t i = 0; i < fi33->hits.size(); i++)
+        {
+            fi33->free_hit[i] = true;
+        }
 
-                pChi2 = (x->GetStartMomentum().Mag() - p0) * (x->GetStartMomentum().Mag() - p0) / (sigmap * sigmap);
+        for (Int_t i = 0; i < tof->hits.size(); i++)
+        {
+            tof->free_hit[i] = true;
+        }
 
-                xChi2 = x->GetChi2();
+        for (Int_t l = lmin; l < lmax; l++)
+        {
+            // l = 0: 16O
+            // l = 1: 12C
+            // l = 1: 4He
 
-                // cout<<"For l = "<<l<<" xChi2 = "<<xChi2 <<", pCHi2 = "<<pChi2<<", p =
-                // "<<x->GetStartMomentum().Mag()<<endl;
-                // parChi2 = xChi2;
-                // parChi2 = sqrt(pChi2 * pChi2 + xChi2 * xChi2);
-
-                if (l < 2) // 12C or 16O
-                {
-                    parChi2 = xChi2;
-                    // parChi2 = sqrt(pChi2 * pChi2 + xChi2 * xChi2);
-                    if (parChi2 < minChi2)
-                    {
-                        bestcandidate = x;
-                        minChi2 = parChi2;
-
-                        // cout << "New min chi2: " << minChi2 << endl;
-                        // cout << "Corresponding Mass   : " << x->GetMass() << endl;
-                        // cout << "Corresponding Mass   : " << bestcandidate->GetMass() << endl;
-                    }
-                }
-                if (l == 2) // 4He
-                {
-                    // parChi2 = xChi2;
-                    // parChi2 = sqrt(xChi2*xChi2 + eChi2*eChi2 + pChi2 * pChi2);
-                    pHex = x->GetStartMomentum().X() * 1000.0;
-                    pHey = x->GetStartMomentum().Y() * 1000.0;
-                    pHez = x->GetStartMomentum().Z() * 1000.0;
-                    alphaP.SetPxPyPzE(
-                        pHex, pHey, pHez, sqrt(pow(pHex, 2) + pow(pHey, 2) + pow(pHez, 2) + pow(massHe, 2)));
-                    p4He = alphaP.Vect();
-                    Double_t m_inva = (alphaP + carbonP).M(); // invariant mass
-                    Erel = m_inva - massHe - massC;           // relative Energy
-                    psum = (p12C + p4He).Mag();
-                    pChi2 = (psum - ps) * (psum - ps) / (ps * ps * 0.01 * 0.01);
-                    Double_t sigmaErel = 0.01 * 4.36;
-                    eChi2 = (Erel - 4.36) * (Erel - 4.36) / (sigmaErel * sigmaErel);
-                    parChi2 = sqrt(xChi2 * xChi2 + pChi2 * pChi2 + eChi2 * eChi2);
-                    //	cout<<"selected: "<<bestcandidate->GetStartMomentum().Z()<<",
-                    //"<<bestcandidate->GetStartPosition().X()<<", "<< 	bestcandidate->GetStartPosition().Y()<<",
-                    //"<<minChi2<<", "<<Erel<<endl;
-
-                    if (parChi2 < minChi2)
-                    {
-                        bestcandidate = x;
-                        minChi2 = parChi2;
-
-                        // cout << "For event: "<<fNEvents_nonull<<" new min chi2 for He: " << minChi2 << ", Erel:
-                        // "<<Erel<<", "<<Erel_check<<endl;
-                    }
-                    //	cout<<"selected: "<<bestcandidate->GetStartMomentum().Z()<<",
-                    //"<<bestcandidate->GetStartPosition().X()<<", "<< 	bestcandidate->GetStartPosition().Y()<<",
-                    //"<<minChi2<<", "<<Erel<<endl;
-                }
-            }
-
-            if (l == 1)
-            {
-                pCx = bestcandidate->GetStartMomentum().X() * 1000.0;
-                pCy = bestcandidate->GetStartMomentum().Y() * 1000.0;
-                pCz = bestcandidate->GetStartMomentum().Z() * 1000.0;
-                carbonP.SetPxPyPzE(pCx, pCy, pCz, sqrt(pow(pCx, 2) + pow(pCy, 2) + pow(pCz, 2) + pow(massC, 2)));
-                p12C = carbonP.Vect();
-                // cout << "For event: "<<fNEvents_nonull<<" new min chi2 for C: " << minChi2 <<endl;
-                minChi2_12C = minChi2;
-                pxmem = bestcandidate->GetStartMomentum().X();
-                pymem = bestcandidate->GetStartMomentum().Y();
-                pzmem = bestcandidate->GetStartMomentum().Z();
-                xmem = bestcandidate->GetStartPosition().X();
-                ymem = bestcandidate->GetStartPosition().Y();
-                zmem = bestcandidate->GetStartPosition().Z();
-            }
-            if (l == 2) // 4He
-            {
-                minChi2_4He = minChi2;
-            }
-
-            // if (minChi2 > 1.e5) continue;
-
-            if (bestcandidate->GetStartMomentum().X() < 0)
-            {
-                fi23a->free_hit[bestcandidate->GetHitIndexByName("fi23a")] = false;
-                fi23b->free_hit[bestcandidate->GetHitIndexByName("fi23b")] = false;
-                fi31->free_hit[bestcandidate->GetHitIndexByName("fi31")] = false;
-                fi33->free_hit[bestcandidate->GetHitIndexByName("fi33")] = false;
-            }
-            else
-            {
-                fi23a->free_hit[bestcandidate->GetHitIndexByName("fi23a")] = false;
-                fi23b->free_hit[bestcandidate->GetHitIndexByName("fi23b")] = false;
-                fi30->free_hit[bestcandidate->GetHitIndexByName("fi30")] = false;
-                fi32->free_hit[bestcandidate->GetHitIndexByName("fi32")] = false;
-            }
-            tof->free_hit[bestcandidate->GetHitIndexByName("tofd")] = false;
-
-            Double_t x0soll = 0.0;
-            Double_t y0soll = 0.0;
-            Double_t z0soll = 0.0;
-            Double_t psoll = 0.0;
-            Double_t px0soll = 0.0;
-            Double_t py0soll = 0.0;
-            Double_t pz0soll = 0.0;
-            Double_t beta0soll = 0.0;
-            Double_t m0soll = 0.0;
+            Int_t charge = 0;
+            Int_t charge_requested = 0;
+            Double_t Charge = 0.0;
+            Double_t m0 = 0.0;
+            Double_t p0 = 0.0;
 
             if (l == 0)
             {
-                if (debug)
-                    cout << "16O" << endl;
+                charge_requested = 8;
+            }
+            else if (l == 1)
+            {
+                charge_requested = 6;
+            }
+            else if (l == 2)
+            {
+                charge_requested = 2;
+            }
 
-                oxygen = kTRUE;
+            if (iretrack == 1 && psum_mem < 0.)
+                continue;
+
+            if (iretrack == 0)
+            {
+                x0 = 0.0;
+            }
+            if (iretrack == 1 && l < 2 && psum_mem > 0.)
+            {
+                x0 = xmem - (psum_mem - ps) / 978.518;
+            }
+            if (l == 2)
+            {
+                x0 = xmem;
+                y0 = ymem;
+            }
+
+            z0 = 0.0;
+
+            // Loop over all combinations of hits
+            for (Int_t i = 0; i < tof->hits.size(); i++) // loop over all ToFD hits
+            {
                 if (fSimu)
                 {
-                    x0soll = x0O;
-                    y0soll = y0O;
-                    z0soll = z0O;
-                    px0soll = px0O;
-                    py0soll = py0O;
-                    pz0soll = pz0O;
-                    psoll = pO;
-                    m0soll = massO;
-                    beta0soll = betaO;
+                    // For tracking of simulations:
+                    //   charge = sqrt(tof->hits.at(i)->GetEloss()) * 26.76 + 0.5;
+                    //   Charge = sqrt(tof->hits.at(i)->GetEloss()) * 26.76;
+
+                    // if digi used
+                    // Charge = tof->hits.at(i)->GetEloss();
+                    // charge = (int)(Charge + 0.5);
+
+                    // if digiHit used
+                    charge = (int)(tof->hits.at(i)->GetEloss() + 0.5);
+                    Charge = tof->hits.at(i)->GetEloss();
                 }
                 else
                 {
-                    x0soll = x0;
-                    y0soll = y0;
-                    z0soll = z0;
-                    px0soll = 0.0;
-                    py0soll = 0.0;
-                    pz0soll = 17.3915;
-                    psoll = 17.3915;
-                    m0soll = m0;
-                    beta0soll = 0.7593209;
+                    // For tracking of exp. data:
+                    charge = (int)(tof->hits.at(i)->GetEloss() + 0.5);
+                    Charge = tof->hits.at(i)->GetEloss();
                 }
-            }
-
-            if (l == 1)
-            {
                 if (debug)
-                    cout << "12C" << endl;
+                    cout << "Charge: " << charge << " requested charge: " << charge_requested << endl;
 
-                carbon = kTRUE;
-                x0soll = x0C;
-                y0soll = y0C;
-                z0soll = z0C;
-                px0soll = px0C;
-                py0soll = py0C;
-                pz0soll = pz0C;
-                psoll = pC;
-                m0soll = massC * 1.e-3;
-                beta0soll = betaC;
-                counterC += 1;
-                chargemem = Charge;
-            }
+                if (charge != charge_requested)
+                    continue;
 
-            if (l == 2)
-            {
+                beta0 = 0.7593; // velocity could eventually be calculated from ToF
+                tof->res_t = 0.03;
+                // Double_t m0 = charge * 2. * 0.931494028; // First guess of mass
+
+                // Masse wird nicht getreckt, nur momentum
+                if (charge == 8)
+                {
+                    m0 = 14.895085;
+                    if (fSimu)
+                        m0 = mO;  // has to have the same value as what geant uses
+                    p0 = 17.3915; // in GeV/c2
+                }
+                if (charge == 6)
+                {
+                    m0 = 11.174862;
+                    if (fSimu)
+                        m0 = mC;
+                    p0 = 13.043625;
+                    if (!fSimu)
+                        pC = p0;
+                    massC = m0 * 1.e3;
+                }
+                if (charge == 2)
+                {
+                    m0 = 3.7273791;
+                    if (fSimu)
+                        m0 = mHe;
+                    p0 = 4.347875;
+                    if (!fSimu)
+                        pHe = p0;
+                    massHe = m0 * 1.e3;
+                    if (fSimu)
+                    {
+                        //  x0 = x0He;
+                        // y0 = y0He;
+                    }
+                }
+
                 if (debug)
-                    cout << "4He" << endl;
-                alpha = kTRUE;
-                x0soll = xmem; // x0He;
-                y0soll = ymem; // y0He;
-                z0soll = zmem; // z0He;
-                px0soll = px0He;
-                py0soll = py0He;
-                pz0soll = pz0He;
-                psoll = pHe;
-                m0soll = massHe * 1.e-3;
-                beta0soll = betaHe;
-                counterHe += 1;
-            }
-            if (debug)
+                {
+                    cout << "Mass: " << m0 << endl;
+                    cout << "Position on TofD: " << tof->hits.at(i)->GetX() << endl;
+                }
+
+                if (!tof->free_hit[i]) // if the hit was used already, continue
+                {
+                    if (debug)
+                        cout << "ToFD hit already used" << endl;
+                    continue;
+                }
+
+                tof->LocalToGlobal(postofd, tof->hits.at(i)->GetX(), tof->hits.at(i)->GetY());
+                Double_t ltofd = sqrt((postofd.Z() - z_tp) * (postofd.Z() - z_tp) + postofd.X() * postofd.X());
+
+                Double_t foffset = 0.441;
+                Double_t fslope = 1.0;
+                if (tof->hits.at(i)->GetX() > 0.)
+                    fslope = 0.883; // fi30/32, tofdx_loc>0
+                if (tof->hits.at(i)->GetX() < 0.)
+                    fslope = 0.901; // fi31/33, tofdx_loc<0
+
+                if (tof->hits.at(i)->GetX() > 0.0 && tof->hits.at(i)->GetX() != 4.11 && fi30->hits.size() > 0 &&
+                    fi32->hits.size() > 0 && fi23a->hits.size() > 0 && fi23b->hits.size() > 0)
+                {
+                    // left branch in beam direction, don't consider hits in the detectors of the other side
+
+                    if (!fSimu)
+                    {
+                        //( (R3BGladFieldMap*) FairRunAna::Instance()->GetField())->SetTrackerCorrectionScale(1.002);
+                    }
+                    // simu from 01/02/22:
+                    if (fSimu)
+                    {
+                        /*   ((R3BGladFieldMap*)FairRunAna::Instance()->GetField())->SetTrackerCorrectionAngleY(-14.);
+                           ((R3BGladFieldMap*)FairRunAna::Instance()->GetField())->SetTrackerCorrectionZ(174.95);
+                           ((R3BGladFieldMap*)FairRunAna::Instance()->GetField())->SetTrackerCorrectionY(1.08);
+                           ((R3BGladFieldMap*)FairRunAna::Instance()->GetField())->SetTrackerCorrectionAngleZ(0.);
+                           ((R3BGladFieldMap*)FairRunAna::Instance()->GetField())->SetTrackerCorrectionScale(1.00);*/
+                    }
+
+                    // R3BTrackingDetector* target = fDetectorsLeft->GetByName("target");
+                    if (fNEventsLeft == 0)
+                    {
+                        target->hits.push_back(new R3BHit(0, 0.0, 0.0, 0., 0., 0));
+                    }
+
+                    do // fi32
+                    {
+
+                        if ((ifi32 >= 0 && !fi32->free_hit[ifi32]) ||
+                            charge_requested !=
+                                fi32->hits.at(ifi32)->GetEloss()) // if the hit was used already, continue
+                        {
+
+                            ifi32 += 1;
+                            continue;
+                        }
+
+                        do // fi30
+                        {
+                            if ((ifi30 >= 0 && !fi30->free_hit[ifi30]) ||
+                                charge_requested !=
+                                    fi30->hits.at(ifi30)->GetEloss()) // if the hit was used already, continue
+                            {
+                                ifi30 += 1;
+                                continue;
+                            }
+                            do // fi23b
+                            {
+                                if ((l > 0 && abs(fi23b->hits.at(ifi23b)->GetY()) < cut_yfib23) ||
+                                    (l < 3 && ifi23b >= 0 &&
+                                     !fi23b->free_hit[ifi23b])) // if the hit was used already, continue
+                                {
+
+                                    ifi23b += 1;
+                                    continue;
+                                }
+                                fi23b->LocalToGlobal(pos23b, 0., fi23b->hits.at(ifi23b)->GetY());
+                                Double_t y_tp =
+                                    (postofd.Y() - foffset + fslope * ltofd * pos23b.Y() / (z_tp - pos23b.Z())) /
+                                    (1. + fslope * ltofd / (z_tp - pos23b.Z()));
+                                y0 = pos23b.Y() - pos23b.Z() * (y_tp - pos23b.Y()) / (z_tp - pos23b.Z());
+
+                                // reject fib23b hits that don't correspond to tofdy:
+                                /*  if(abs(y0) > 1.5)
+                                  {
+                                      ifi23b += 1;
+                                      continue;
+                                  }*/
+                                do // fi23a
+                                {
+
+                                    if ((l > 0 && abs(fi23a->hits.at(ifi23a)->GetX()) < cut_xfib23) ||
+                                        (l < 3 && ifi23a >= 0 && !fi23a->free_hit[ifi23a]))
+                                    {
+
+                                        ifi23a += 1;
+                                        continue;
+                                    }
+
+                                    fi23a->LocalToGlobal(pos23a, fi23a->hits.at(ifi23a)->GetX(), 0.);
+                                    if (l < 2)
+                                    {
+                                        /*
+                                         py0_cand =
+                                             (pos23b.Y() - y0 + 0.000365) / pos23b.Z() * p0;
+                                         px0_cand =
+                                             (pos23a.X() - x0 - 0.0093 * 1.) / pos23a.Z() * p0;
+                                         pz0_cand = sqrt(p0*p0-py0_cand*py0_cand-px0_cand*px0_cand);
+                                         */
+                                        px0_cand = 0.0;
+                                        py0_cand = 0.0;
+                                        pz0_cand = p0;
+                                        Double_t ptot_cand =
+                                            sqrt(px0_cand * px0_cand + py0_cand * py0_cand + pz0_cand * pz0_cand);
+                                        beta0_cand = sqrt(1.0 / (1.0 + (m0 / ptot_cand) * (m0 / ptot_cand)));
+
+                                        candidate = new R3BTrackingParticle(
+                                            charge, x0, y0, z0, px0_cand, py0_cand, pz0_cand, beta0_cand, m0);
+                                    }
+                                    else if (l == 2)
+                                    {
+                                        px0_cand = -pxmem;
+                                        py0_cand = -pymem;
+                                        pz0_cand = sqrt(p0 * p0 - pxmem * pxmem - pymem * pymem);
+                                        Double_t ptot_cand =
+                                            sqrt(px0_cand * px0_cand + py0_cand * py0_cand + pz0_cand * pz0_cand);
+                                        beta0_cand = sqrt(1.0 / (1.0 + (m0 / ptot_cand) * (m0 / ptot_cand)));
+
+                                        candidate = new R3BTrackingParticle(
+                                            charge, xmem, ymem, zmem, px0_cand, py0_cand, pz0_cand, beta0_cand, m0);
+                                    }
+
+                                    if (debug)
+                                    {
+                                        cout << "left side of setup" << endl;
+                                        cout << "Charge requested: " << charge_requested << endl;
+                                        cout << "Start values to fit, x0: " << x0 << " y0: " << y0 << " z0: " << z0
+                                             << " p0: " << p0 << " beta0: " << beta0 << " m0: " << m0 << endl;
+                                        cout << "Hit Tofd # " << i << " x: " << tof->hits.at(i)->GetX()
+                                             << " y: " << tof->hits.at(i)->GetY() << endl;
+                                    }
+                                    if (ifi23a > -1 && debug)
+                                        cout << " Fi23a left # " << ifi23a << " x: " << fi23a->hits.at(ifi23a)->GetX()
+                                             << endl;
+                                    if (ifi23b > -1 && debug)
+                                        cout << " left Fi23b # " << ifi23b << " y: " << fi23b->hits.at(ifi23b)->GetY()
+                                             << endl;
+                                    if (ifi30 > -1 && debug)
+                                        cout << " fi30 # " << ifi30 << " x: " << fi30->hits.at(ifi30)->GetX() << endl;
+                                    if (ifi32 > -1 && debug)
+                                        cout << " fi32 # " << ifi32 << " x: " << fi32->hits.at(ifi32)->GetX() << endl;
+                                    // add points through which tracker has to go:
+                                    candidate->AddHit("target", 0);
+                                    candidate->AddHit("tofd", i);
+                                    candidate->AddHit("fi23a", ifi23a);
+                                    candidate->AddHit("fi23b", ifi23b);
+                                    candidate->AddHit("fi32", ifi32);
+                                    candidate->AddHit("fi30", ifi30);
+
+                                    Int_t status = 10;
+                                    if (fForward)
+                                    {
+                                        status = fFitter->FitTrackMomentumForward(candidate, fDetectors);
+                                    }
+                                    else
+                                    {
+                                        // status = fFitter->FitTrackBackward2D(candidate, fDetectors);
+                                        status = fFitter->FitTrackMomentumBackward(candidate, fDetectors);
+                                    }
+                                    if (debug)
+                                        cout << " Chi: " << candidate->GetChi2() << "  "
+                                             << candidate->GetStartMomentum().Mag() << "  "
+                                             << 1000. * (candidate->GetStartMomentum().Mag() - p0) *
+                                                    (candidate->GetStartMomentum().Mag() - p0)
+                                             << endl;
+                                    if (debug)
+                                        cout << "--------------------------------" << endl;
+                                    nCand += 1;
+                                    Icountleft += 1;
+
+                                    //     cout << fNEvents<< ", LEFT SIDE: Charge: "<< charge<<", Momentum: " <<
+                                    //     candidate->GetMomentum().Mag()<<
+                                    //  ", Momentum Z: "<<candidate->GetMomentum().Z() <<
+                                    //   ", Momentum X: "<<candidate->GetMomentum().X()<< endl;
+
+                                    if (TMath::IsNaN(candidate->GetMomentum().Z()))
+                                    {
+                                        delete candidate;
+                                        continue;
+                                    }
+
+                                    if (10 > status)
+                                    {
+                                        if (fForward)
+                                        {
+                                            candidate->Reset();
+                                        }
+                                        else
+                                        {
+                                            candidate->SetStartPosition(candidate->GetPosition());
+                                            candidate->SetStartMomentum(-1. * candidate->GetMomentum());
+                                            candidate->SetStartBeta(beta0);
+                                            candidate->UpdateMomentum();
+
+                                            // candidate->SetStartPosition(candidate->GetPosition()); // @target
+                                            // candidate->SetStartMomentum(-1. * candidate->GetMomentum());
+                                            // candidate->SetStartBeta(0.8328);
+                                            // candidate->SetStartBeta(beta0);
+                                            // candidate->UpdateMomentum();
+                                            candidate->Reset();
+
+                                            // candidate->GetStartPosition().Print();
+                                            // candidate->GetStartMomentum().Print();
+                                            // cout << "chi2: " << candidate->GetChi2() << endl;
+                                            // status = FitFragment(candidate);
+                                        }
+                                        if (10 > status)
+                                        {
+                                            // if(candidate->GetChi2() < 3.)
+                                            {
+                                                fFragments.push_back(candidate);
+                                            }
+                                        }
+                                        else
+                                        {
+                                            delete candidate;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        delete candidate;
+                                    }
+
+                                    // return;
+                                    ifi23a += 1;
+                                } while (ifi23a < fi23a->hits.size());
+                                ifi23a = 0;
+                                if (0 == fi23a->hits.size())
+                                    ifi23a = -1;
+
+                                ifi23b += 1;
+                            } while (ifi23b < fi23b->hits.size());
+                            ifi23b = 0;
+                            if (0 == fi23b->hits.size())
+                                ifi23b = -1;
+
+                            ifi30 += 1;
+                        } while (ifi30 < fi30->hits.size());
+                        ifi30 = 0;
+                        if (0 == fi30->hits.size())
+                            ifi30 = -1;
+
+                        ifi32 += 1;
+                    } while (ifi32 < fi32->hits.size());
+                    ifi32 = 0;
+                    if (0 == fi32->hits.size())
+                        ifi32 = -1;
+                } // end if left branch
+
+                if (tof->hits.at(i)->GetX() < 0.0 && fi31->hits.size() > 0 && fi33->hits.size() > 0 &&
+                    fi23a->hits.size() > 0 && fi23b->hits.size() > 0)
+                {
+                    // right branch in beam direction, don't consider hits in the detectors of the other side
+
+                    if (!fSimu)
+                    {
+                        //( (R3BGladFieldMap*) FairRunAna::Instance()->GetField())->SetTrackerCorrectionScale(1.004);
+                    }
+                    // simu from 01/02/22:
+                    if (fSimu)
+                    {
+                        /*  ((R3BGladFieldMap*)FairRunAna::Instance()->GetField())->SetTrackerCorrectionAngleY(-14.);
+                          ((R3BGladFieldMap*)FairRunAna::Instance()->GetField())->SetTrackerCorrectionZ(174.95);
+                          ((R3BGladFieldMap*)FairRunAna::Instance()->GetField())->SetTrackerCorrectionY(1.08);
+                          ((R3BGladFieldMap*)FairRunAna::Instance()->GetField())->SetTrackerCorrectionAngleZ(0.);
+                          ((R3BGladFieldMap*)FairRunAna::Instance()->GetField())->SetTrackerCorrectionScale(1.00);*/
+                    }
+
+                    if (fNEventsRight == 0)
+                    {
+                        // R3BHit(detId, x,  y, eloss,  time, hitId = -1);
+                        target->hits.push_back(new R3BHit(0, 0.0, 0.0, 0., 0., 0));
+                    }
+
+                    do // fi33
+                    {
+                        if ((ifi33 >= 0 && !fi33->free_hit[ifi33]) ||
+                            charge_requested !=
+                                fi33->hits.at(ifi33)->GetEloss()) // if the hit was used already, continue
+                        {
+
+                            ifi33 += 1;
+                            continue;
+                        }
+                        do // fi31
+                        {
+                            if ((ifi31 >= 0 && !fi31->free_hit[ifi31]) ||
+                                charge_requested !=
+                                    fi31->hits.at(ifi31)->GetEloss()) // if the hit was used already, continue
+                            {
+
+                                ifi31 += 1;
+                                continue;
+                            }
+                            do // fi23b
+                            {
+                                if ((l > 0 && abs(fi23b->hits.at(ifi23b)->GetY()) < cut_yfib23) ||
+                                    (l < 3 && ifi23b >= 0 &&
+                                     !fi23b->free_hit[ifi23b])) // if the hit was used already, continue
+                                {
+                                    ifi23b += 1;
+                                    continue;
+                                }
+                                fi23b->LocalToGlobal(pos23b, 0., fi23b->hits.at(ifi23b)->GetY());
+                                Double_t y_tp =
+                                    (postofd.Y() - foffset + fslope * ltofd * pos23b.Y() / (z_tp - pos23b.Z())) /
+                                    (1. + fslope * ltofd / (z_tp - pos23b.Z()));
+                                y0 = pos23b.Y() - pos23b.Z() * (y_tp - pos23b.Y()) / (z_tp - pos23b.Z());
+                                // y0 = 0.0;
+                                // reject fib23b hits that don't correspond to tofdy:
+                                /* if(abs(y0) > 1.5)
+                                 {
+                                     ifi23b += 1;
+                                     continue;
+                                 }    */
+                                do // fi23a
+                                {
+
+                                    if ((l > 0 && abs(fi23a->hits.at(ifi23a)->GetX()) < cut_xfib23) ||
+                                        (l < 3 && ifi23a >= 0 && !fi23a->free_hit[ifi23a]))
+                                    {
+                                        ifi23a += 1;
+                                        continue;
+                                    }
+
+                                    fi23a->LocalToGlobal(pos23a, fi23a->hits.at(ifi23a)->GetX(), 0.);
+                                    if (l < 2)
+                                    {
+                                        /*py0_cand =
+                                            (pos23b.Y() - y0 + 0.000365) / pos23b.Z() * p0;
+                                        px0_cand =
+                                            (pos23a.X() - x0 - 0.0093 * 1.) / pos23a.Z() * p0;
+                                        pz0_cand = sqrt(p0*p0-py0_cand*py0_cand-px0_cand*px0_cand);*/
+
+                                        px0_cand = 0.0;
+                                        py0_cand = 0.0;
+                                        pz0_cand = p0;
+                                        Double_t ptot_cand =
+                                            sqrt(px0_cand * px0_cand + py0_cand * py0_cand + pz0_cand * pz0_cand);
+                                        beta0_cand = sqrt(1.0 / (1.0 + (m0 / ptot_cand) * (m0 / ptot_cand)));
+
+                                        candidate = new R3BTrackingParticle(
+                                            charge, x0, y0, z0, px0_cand, py0_cand, pz0_cand, beta0_cand, m0);
+                                    }
+                                    else if (l == 2)
+                                    {
+                                        px0_cand = -pxmem;
+                                        py0_cand = -pymem;
+                                        pz0_cand = sqrt(p0 * p0 - pxmem * pxmem - pymem * pymem);
+                                        Double_t ptot_cand =
+                                            sqrt(px0_cand * px0_cand + py0_cand * py0_cand + pz0_cand * pz0_cand);
+                                        beta0_cand = sqrt(1.0 / (1.0 + (m0 / ptot_cand) * (m0 / ptot_cand)));
+
+                                        candidate = new R3BTrackingParticle(
+                                            charge, xmem, ymem, zmem, px0_cand, py0_cand, pz0_cand, beta0_cand, m0);
+                                    }
+
+                                    if (debug)
+                                    {
+                                        cout << "right side of setup" << endl;
+                                        cout << "Charge requested: " << charge_requested << endl;
+                                        cout << "Start values to fit, x0: " << x0 << " y0: " << y0 << " z0: " << z0
+                                             << " p0: " << p0 << " beta0: " << beta0 << " m0: " << m0 << endl;
+                                        cout << "Hit Tofd # " << i << " x: " << tof->hits.at(i)->GetX()
+                                             << " y: " << tof->hits.at(i)->GetY() << endl;
+                                    }
+                                    if (ifi23a > -1 && debug)
+                                        cout << "Fi23a # " << ifi23a << " x: " << fi23a->hits.at(ifi23a)->GetX()
+                                             << endl;
+                                    if (ifi23b > -1 && debug)
+                                        cout << "Fi23b # " << ifi23b << " y: " << fi23b->hits.at(ifi23b)->GetY()
+                                             << endl;
+                                    if (ifi33 > -1 && debug)
+                                        cout << "Fi33 # " << ifi33 << " x: " << fi33->hits.at(ifi33)->GetX() << endl;
+                                    if (ifi31 > -1 && debug)
+                                        cout << "Fi31  # " << ifi31 << " x: " << fi31->hits.at(ifi31)->GetX() << endl;
+
+                                    candidate->AddHit("target", 0);
+                                    candidate->AddHit("tofd", i);
+                                    candidate->AddHit("fi23a", ifi23a);
+                                    candidate->AddHit("fi23b", ifi23b);
+                                    candidate->AddHit("fi31", ifi31);
+                                    candidate->AddHit("fi33", ifi33);
+
+                                    Int_t status = 10;
+                                    if (fForward)
+                                    {
+                                        status = fFitter->FitTrackMomentumForward(candidate, fDetectors);
+                                    }
+                                    else
+                                    {
+                                        // status = fFitter->FitTrackBackward2D(candidate, fDetectors);
+                                        status = fFitter->FitTrackMomentumBackward(candidate, fDetectors);
+                                    }
+                                    if (debug)
+                                        cout << "Chi: " << candidate->GetChi2() << "  pstart.Mag "
+                                             << candidate->GetStartMomentum().Mag() << " dp.Mag "
+                                             << 1000. * (candidate->GetStartMomentum().Mag() - p0) *
+                                                    (candidate->GetStartMomentum().Mag() - p0)
+                                             << endl;
+                                    if (debug)
+                                        cout << "--------------------------------" << endl;
+                                    nCand += 1;
+                                    Icountright += 1;
+
+                                    //    cout <<fNEvents<<", RIGHT SIDE: Charge: "<< charge<<", Momentum: " <<
+                                    //    candidate->GetMomentum().Mag()<<", Momentum Z:
+                                    //    "<<candidate->GetMomentum().Z()<<
+                                    //   ", Momentum X: "<<candidate->GetMomentum().X() << " status: "<<status<<endl;
+
+                                    if (TMath::IsNaN(candidate->GetMomentum().Z()))
+                                    {
+                                        delete candidate;
+                                        continue;
+                                    }
+
+                                    if (10 > status)
+                                    {
+                                        if (fForward)
+                                        {
+                                            candidate->Reset();
+                                        }
+                                        else
+                                        {
+                                            candidate->SetStartPosition(candidate->GetPosition());
+                                            candidate->SetStartMomentum(-1. * candidate->GetMomentum());
+                                            candidate->SetStartBeta(beta0);
+                                            candidate->UpdateMomentum();
+
+                                            // candidate->SetStartPosition(candidate->GetPosition());
+                                            // candidate->SetStartMomentum(-1. * candidate->GetMomentum());
+                                            // candidate->SetStartBeta(0.8328);
+                                            // candidate->SetStartBeta(beta0);
+                                            // candidate->UpdateMomentum();
+
+                                            candidate->Reset();
+
+                                            // candidate->GetStartPosition().Print();
+                                            // candidate->GetStartMomentum().Print();
+                                            // cout << "chi2: " << candidate->GetChi2() << endl;
+                                            // status = FitFragment(candidate);
+                                        }
+                                        if (10 > status)
+                                        {
+                                            // if(candidate->GetChi2() < 3.)
+                                            {
+                                                fFragments.push_back(candidate);
+                                            }
+                                        }
+                                        else
+                                        {
+                                            delete candidate;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        delete candidate;
+                                    }
+
+                                    // return;
+                                    ifi23a += 1;
+                                } while (ifi23a < fi23a->hits.size());
+                                ifi23a = 0;
+                                if (0 == fi23a->hits.size())
+                                    ifi23a = -1;
+
+                                ifi23b += 1;
+                            } while (ifi23b < fi23b->hits.size());
+                            ifi23b = 0;
+                            if (0 == fi23b->hits.size())
+                                ifi23b = -1;
+
+                            ifi31 += 1;
+                        } while (ifi31 < fi31->hits.size());
+                        ifi31 = 0;
+                        if (0 == fi31->hits.size())
+                            ifi31 = -1;
+
+                        ifi33 += 1;
+                    } while (ifi33 < fi33->hits.size());
+                    ifi33 = 0;
+                    if (0 == fi33->hits.size())
+                        ifi33 = -1;
+                } // end if right branch
+
+                charge_mem = charge;
+
+            } // end for TofD
+
+            charge = charge_mem;
+            Charge = double(charge_mem);
+
+            // if (candidate->GetSize() > 0 && !fSimu)
             {
-                cout << "Results after tracking :" << endl;
-                cout << "Charge   : " << charge << endl;
-                cout << "Position (soll) x: " << x0soll << " y: " << y0soll << " z: " << z0soll << endl;
-                cout << "Position (ist)  x: " << bestcandidate->GetStartPosition().X()
-                     << " y: " << bestcandidate->GetStartPosition().Y()
-                     << " z: " << bestcandidate->GetStartPosition().Z() << endl;
-
-                cout << "Momentum (soll): " << psoll << " px : " << px0soll << " py: " << py0soll << " pz: " << pz0soll
-                     << endl;
-                cout << "Momentum (ist) : " << bestcandidate->GetStartMomentum().Mag()
-                     << " px : " << bestcandidate->GetStartMomentum().X()
-                     << " py: " << bestcandidate->GetStartMomentum().Y()
-                     << " pz: " << bestcandidate->GetStartMomentum().Z() << endl;
-                cout << "chi2 " << minChi2 << endl;
-
-                //   cout << "Beta   : " << bestcandidate->GetStartBeta() << endl;
+                // candidate->Clear();
             }
 
-            if (minChi2 < 1.e4)
+            //   if(candidate) delete candidate;
+
+            R3BTrackingParticle* bestcandidate;
+            //	= new R3BTrackingParticle(-1000, -1000, -1000, -1000, -1000, -1000, -1000, -1000, -1000);
+
+            minChi2 = 1e10;
+            pChi2 = 1e10;
+            eChi2 = 1e10;
+            Double_t parChi2 = 1e10;
+            Double_t xChi2 = 1e10;
+            Double_t sigmap = 0.01 * p0;
+
+            if (fFragments.size() > 0)
             {
-                totalChi2Mass += minChi2;
-                totalEvents++;
-            }
-            totalChi2P += minChi2;
+                for (auto const& x : fFragments)
+                {
+                    // pChi2 = (x->GetStartMomentum().Mag() - p0) * (x->GetStartMomentum().Mag() - p0) /
+                    //       (p0 * p0 * 0.01 * 0.01);
 
-            fPropagator->SetVis(fVis);
-            bestcandidate->Reset();
-        }
-        // delete all stored fragments
-        fArrayFragments->Clear();
-        if (fFragments.size() > 0)
+                    pChi2 = (x->GetStartMomentum().Mag() - p0) * (x->GetStartMomentum().Mag() - p0) / (sigmap * sigmap);
+
+                    xChi2 = x->GetChi2();
+
+                    // cout<<"For l = "<<l<<" xChi2 = "<<xChi2 <<", pCHi2 = "<<pChi2<<", p =
+                    // "<<x->GetStartMomentum().Mag()<<endl;
+                    // parChi2 = xChi2;
+                    // parChi2 = sqrt(pChi2 * pChi2 + xChi2 * xChi2);
+
+                    if (l < 2) // 12C or 16O
+                    {
+                        parChi2 = xChi2;
+                        // parChi2 = sqrt(pChi2 * pChi2 + xChi2 * xChi2);
+                        if (parChi2 < minChi2)
+                        {
+                            bestcandidate = x;
+                            minChi2 = parChi2;
+
+                            // cout << "New min chi2 for 12C: " << minChi2 << endl;
+                            // cout << "Corresponding Mass   : " << x->GetMass() << endl;
+                            // cout << "Corresponding Mass   : " << bestcandidate->GetMass() << endl;
+                        }
+                    }
+                    if (l == 2) // 4He
+                    {
+                        // parChi2 = xChi2;
+                        // parChi2 = sqrt(xChi2*xChi2 + eChi2*eChi2 + pChi2 * pChi2);
+                        pHex = x->GetStartMomentum().X() * 1000.0;
+                        pHey = x->GetStartMomentum().Y() * 1000.0;
+                        pHez = x->GetStartMomentum().Z() * 1000.0;
+                        alphaP.SetPxPyPzE(
+                            pHex, pHey, pHez, sqrt(pow(pHex, 2) + pow(pHey, 2) + pow(pHez, 2) + pow(massHe, 2)));
+                        p4He = alphaP.Vect();
+                        Double_t m_inva = (alphaP + carbonP).M(); // invariant mass
+                        Erel = m_inva - massHe - massC;           // relative Energy
+                        psum = (p12C + p4He).Mag();
+                        pChi2 = (psum - ps) * (psum - ps) / (ps * ps * 0.01 * 0.01);
+                        Double_t sigmaErel = 0.01 * 4.36;
+                        eChi2 = (Erel - 4.36) * (Erel - 4.36) / (sigmaErel * sigmaErel);
+
+                        // parChi2 = sqrt(xChi2 * xChi2 + pChi2 * pChi2 + eChi2 * eChi2);
+
+                        if (iretrack == 0)
+                            parChi2 = xChi2;
+                        if (iretrack == iretrack_max)
+                            parChi2 = sqrt(xChi2 * xChi2 + eChi2 * eChi2);
+
+                        // cout<<"New 4He candidate: "<<iretrack<<", "<<psum<<", "<<Erel<<", "<<eChi2<<", "<<xChi2<<",
+                        // "<<parChi2<<endl; 	cout<<"selected: "<<bestcandidate->GetStartMomentum().Z()<<",
+                        //"<<bestcandidate->GetStartPosition().X()<<", "<< 	bestcandidate->GetStartPosition().Y()<<",
+                        //"<<minChi2<<", "<<Erel<<endl;
+
+                        if (parChi2 < minChi2)
+                        {
+                            bestcandidate = x;
+                            minChi2 = parChi2;
+
+                            if (l == 2)
+                                psum_mem = psum;
+
+                            // cout << "For event: "<<fNEvents_nonull<<" new min chi2 for He: " << minChi2 << ", Erel:
+                            // "<<Erel<<", "<<Erel_check<<endl;
+                        }
+                        //	cout<<"selected: "<<bestcandidate->GetStartMomentum().Z()<<",
+                        //"<<bestcandidate->GetStartPosition().X()<<", "<< 	bestcandidate->GetStartPosition().Y()<<",
+                        //"<<minChi2<<", "<<Erel<<endl;
+                    }
+                }
+
+                if (l == 1)
+                {
+                    pCx = bestcandidate->GetStartMomentum().X() * 1000.0;
+                    pCy = bestcandidate->GetStartMomentum().Y() * 1000.0;
+                    pCz = bestcandidate->GetStartMomentum().Z() * 1000.0;
+                    carbonP.SetPxPyPzE(pCx, pCy, pCz, sqrt(pow(pCx, 2) + pow(pCy, 2) + pow(pCz, 2) + pow(massC, 2)));
+                    p12C = carbonP.Vect();
+                    // cout << "For event: "<<fNEvents_nonull<<" new min chi2 for C: " << minChi2 <<endl;
+                    minChi2_12C = minChi2;
+                    pxmem = bestcandidate->GetStartMomentum().X();
+                    pymem = bestcandidate->GetStartMomentum().Y();
+                    pzmem = bestcandidate->GetStartMomentum().Z();
+                    xmem = bestcandidate->GetStartPosition().X();
+                    ymem = bestcandidate->GetStartPosition().Y();
+                    zmem = bestcandidate->GetStartPosition().Z();
+                }
+                if (l == 2) // 4He
+                {
+                    minChi2_4He = minChi2;
+                }
+
+                // if (minChi2 > 1.e5) continue;
+
+                if (bestcandidate->GetStartMomentum().X() < 0)
+                {
+                    fi23a->free_hit[bestcandidate->GetHitIndexByName("fi23a")] = false;
+                    fi23b->free_hit[bestcandidate->GetHitIndexByName("fi23b")] = false;
+                    fi31->free_hit[bestcandidate->GetHitIndexByName("fi31")] = false;
+                    fi33->free_hit[bestcandidate->GetHitIndexByName("fi33")] = false;
+                }
+                else
+                {
+                    fi23a->free_hit[bestcandidate->GetHitIndexByName("fi23a")] = false;
+                    fi23b->free_hit[bestcandidate->GetHitIndexByName("fi23b")] = false;
+                    fi30->free_hit[bestcandidate->GetHitIndexByName("fi30")] = false;
+                    fi32->free_hit[bestcandidate->GetHitIndexByName("fi32")] = false;
+                }
+                tof->free_hit[bestcandidate->GetHitIndexByName("tofd")] = false;
+
+                Double_t x0soll = 0.0;
+                Double_t y0soll = 0.0;
+                Double_t z0soll = 0.0;
+                Double_t psoll = 0.0;
+                Double_t px0soll = 0.0;
+                Double_t py0soll = 0.0;
+                Double_t pz0soll = 0.0;
+                Double_t beta0soll = 0.0;
+                Double_t m0soll = 0.0;
+
+                if (l == 0)
+                {
+                    if (debug)
+                        cout << "16O" << endl;
+
+                    oxygen = kTRUE;
+                    if (fSimu)
+                    {
+                        x0soll = x0O;
+                        y0soll = y0O;
+                        z0soll = z0O;
+                        px0soll = px0O;
+                        py0soll = py0O;
+                        pz0soll = pz0O;
+                        psoll = pO;
+                        m0soll = massO;
+                        beta0soll = betaO;
+                    }
+                    else
+                    {
+                        x0soll = x0;
+                        y0soll = y0;
+                        z0soll = z0;
+                        px0soll = 0.0;
+                        py0soll = 0.0;
+                        pz0soll = 17.3915;
+                        psoll = 17.3915;
+                        m0soll = m0;
+                        beta0soll = 0.7593209;
+                    }
+                }
+
+                if (l == 1)
+                {
+                    if (debug)
+                        cout << "12C" << endl;
+
+                    carbon = kTRUE;
+                    x0soll = x0C;
+                    y0soll = y0C;
+                    z0soll = z0C;
+                    px0soll = px0C;
+                    py0soll = py0C;
+                    pz0soll = pz0C;
+                    psoll = pC;
+                    m0soll = massC * 1.e-3;
+                    beta0soll = betaC;
+                    counterC += 1;
+                    chargemem = Charge;
+                }
+
+                if (l == 2)
+                {
+                    if (debug)
+                        cout << "4He" << endl;
+                    alpha = kTRUE;
+                    x0soll = xmem; // x0He;
+                    y0soll = ymem; // y0He;
+                    z0soll = zmem; // z0He;
+                    px0soll = px0He;
+                    py0soll = py0He;
+                    pz0soll = pz0He;
+                    psoll = pHe;
+                    m0soll = massHe * 1.e-3;
+                    beta0soll = betaHe;
+                    counterHe += 1;
+                }
+                if (debug)
+                {
+                    cout << "Results after tracking :" << endl;
+                    cout << "Charge   : " << charge << endl;
+                    cout << "Position (soll) x: " << x0soll << " y: " << y0soll << " z: " << z0soll << endl;
+                    cout << "Position (ist)  x: " << bestcandidate->GetStartPosition().X()
+                         << " y: " << bestcandidate->GetStartPosition().Y()
+                         << " z: " << bestcandidate->GetStartPosition().Z() << endl;
+
+                    cout << "Momentum (soll): " << psoll << " px : " << px0soll << " py: " << py0soll
+                         << " pz: " << pz0soll << endl;
+                    cout << "Momentum (ist) : " << bestcandidate->GetStartMomentum().Mag()
+                         << " px : " << bestcandidate->GetStartMomentum().X()
+                         << " py: " << bestcandidate->GetStartMomentum().Y()
+                         << " pz: " << bestcandidate->GetStartMomentum().Z() << endl;
+                    cout << "chi2 " << minChi2 << endl;
+
+                    //   cout << "Beta   : " << bestcandidate->GetStartBeta() << endl;
+                }
+
+                if (minChi2 < 1.e6 && l == 2 && (carbon && alpha))
+                {
+                    totalChi2Mass += (minChi2 + minChi2_12C);
+                    totalEvents++;
+                }
+
+                if (l == 2)
+                    totalChi2P += sqrt(minChi2_12C * minChi2_12C + minChi2 * minChi2);
+
+                if (l == 2 && (carbon && alpha))
+                {
+                    if (iretrack == 0)
+                        m0Chi2 = sqrt(minChi2_12C * minChi2_12C + minChi2_4He * minChi2_4He);
+                    if (iretrack == iretrack_max)
+                        m1Chi2 = sqrt(minChi2_12C * minChi2_12C + minChi2_4He * minChi2_4He);
+                }
+
+                fPropagator->SetVis(fVis);
+                bestcandidate->Reset();
+            }
+            // delete all stored fragments
+            fArrayFragments->Clear();
+            if (fFragments.size() > 0)
+            {
+                for (auto const& x : fFragments)
+                {
+                    delete x;
+                }
+                fFragments.clear();
+            }
+
+        } // end for two particle (12C and 4He)
+        /*
+       if ((alpha && carbon ))
+       {
+           fh_Erel->Fill(Erel);
+           fh_psum->Fill(psum);
+           fh_chi2->Fill(minChi2_12C);
+           fh_chi2->Fill(minChi2_4He);
+       }
+     */
+
+        if (debug)
         {
-            for (auto const& x : fFragments)
-            {
-                delete x;
-            }
-            fFragments.clear();
+            cout << "For iretrack = " << iretrack << endl;
+            cout << "chi2 12C: " << minChi2_12C << endl;
+            cout << "Momentum 12C: " << pCx << "  " << pCy << "  " << pCz << endl;
+            cout << "chi2 4He: " << minChi2 << endl;
+            cout << "Momentum 4He: " << pHex << "  " << pHey << "  " << pHez << endl;
+            cout << "Found Tracks with chi2 He/C= " << minChi2 << " / " << minChi2_12C << ", Erel: " << Erel
+                 << ", and psum: " << psum << ", x0: " << xmem << ", y0: " << ymem << endl;
         }
 
-    } // end for two particle (12C and 4He)
-      /*
-         if ((alpha && carbon ))
-         {
-             fh_Erel->Fill(Erel);
-             fh_psum->Fill(psum);
-             fh_chi2->Fill(minChi2_12C);
-             fh_chi2->Fill(minChi2_4He);
-         }
-       */
+    } // end for iretrack
 
-    mChi2 = sqrt(minChi2_12C * minChi2_12C + minChi2_4He * minChi2_4He);
-
-    // cout<<"chi2: "<<mChi2<<", minChi2_12C: "<<minChi2_12C<<", minChi2_4He: "<< minChi2_4He<<", pChi2: "<<pChi2<<",
-    // eChi2: "<<eChi2<<endl; cout<<"  "<<endl;
-
-    // mChi2 = (minChi2_12C + minChi2_4He)/2.0;
-    /*
-        cout << "chi2 12C: " << minChi2_12C  << endl;
-        cout << "Momentum 12C: " << pCx << "  " << pCy << "  " << pCz << endl;
-        cout << "chi2 4He: " << minChi2 << endl;
-        cout << "Momentum 4He: " << pHex << "  " << pHey << "  " << pHez << endl;
-    */
-    //   cout << "Found Tracks with chi2 He/C= " << minChi2 << " / " << minChi2_12C<< ", Erel: " << Erel<<", and psum:
-    //   "<<psum <<", x0: "<<xmem<<", y0: "<<ymem << endl;
-
-    if (mChi2 < 1000000.0)
+    if (m1Chi2 < 1000000.0)
     {
-        return mChi2;
+        return m1Chi2;
     }
     return -1.;
 }
@@ -1711,8 +1760,8 @@ void R3BOptimizeGeometryS494::Finish()
     // Minimum = ROOT::Math::Factory::CreateMinimizer("Minuit2", "Migrad");
     // Migrad, Simplex, Scan,
     // set tolerance , etc...
-    mini->SetMaxFunctionCalls(100000); // for Minuit/Minuit2
-    mini->SetMaxIterations(100);       // for GSL
+    mini->SetMaxFunctionCalls(1); // for Minuit/Minuit2
+    mini->SetMaxIterations(100);  // for GSL
     mini->SetTolerance(10);
     mini->SetStrategy(1);
     mini->SetPrintLevel(1);
@@ -1740,113 +1789,71 @@ void R3BOptimizeGeometryS494::Finish()
     //   Double_t variable_mem[16] =
     //   {0.,0.,91.2,-62.8664,570.7671,-82.8087,-111.1057,537.8183,-131.0650,-129.9365,0,685.4,-14.0,-194.0,-14.0,-194.0};
     // 23rd optim
-    //    Double_t variable_default[16] = {0.007419462, 0.007327982, 91.02052, -62.59230, 571.7103, -83.07132,
-    //    -112.4498, 538.1335, -132.5532, -129.6732, 1.492008, 686.1278, -13.89355, -193.8936, -13.99355, -193.9936}; //
-    //    23rd
-    //  Double_t variable_mem[16] = {0.007419462, 0.007327982, 91.02052, -62.59230, 571.7103, -83.07132, -112.4498,
-    //  538.1335, -132.5532, -129.6732, 1.492008, 686.1278, -13.89355, -193.8936, -13.99355, -193.9936}; // 23rd
+    Double_t variable_default[16] = { 0.007419462, 0.007327982, 91.02052,  -62.59230, 571.7103, -83.07132,
+                                      -112.4498,   538.1335,    -132.5532, -129.6732, 0.492008, 686.1278,
+                                      -13.89355,   -193.8936,   -13.99355, -193.9936 }; // 23rd
+
+    Double_t variable_mem[16] = { 0.007419462, 0.007327982, 91.02052,  -62.59230, 571.7103, -83.07132,
+                                  -112.4498,   538.1335,    -132.5532, -129.6732, 0.492008, 686.1278,
+                                  -13.89355,   -193.8936,   -13.99355, -193.9936 }; // 23rd
     // Nov 2024
     // Double_t variable_default[16] = {0.007419462, 0.007327982, 90.972, -62.59230, 571.7103, -83.07132, -112.4498,
     // 538.1335, -132.5532, -129.6732, 1.492008, 686.1278, -13.66355, -193.8936, -13.89355, -193.9936}; // 23rd Double_t
     // variable_mem[16]     = {0.007419462, 0.007327982, 90.972, -62.59230, 571.7103, -83.07132, -112.4498, 538.1335,
     // -132.5532, -129.6732, 1.492008, 686.1278, -13.66355, -193.8936, -13.89355, -193.9936}; // 23rd
     // Nov 2024
-    Double_t variable_default[16] = { 0.007419462, 0.007327982, 90.972,    -62.59230, 571.7103, -83.07132,
-                                      -112.4498,   538.1335,    -132.5532, -129.6732, 1.492008, 686.1278,
-                                      -13.89355,   -193.8936,   -13.99355, -193.9936 }; // 23rd
-    Double_t variable_mem[16] = { 0.007419462, 0.007327982, 90.972,    -62.59230, 571.7103, -83.07132,
-                                  -112.4498,   538.1335,    -132.5532, -129.6732, 1.492008, 686.1278,
-                                  -13.66355,   -193.8936,   -13.89355, -193.9936 }; // 23rd
+    // Double_t variable_default[16] = { 0.007419462, 0.007327982, 90.972,    -62.59230, 571.7103, -83.07132,
+    //                                 -112.4498,   538.1335,    -132.5532, -129.6732, 1.492008, 686.1278,
+    //                               -13.89355,   -193.8936,   -13.99355, -193.9936 }; // 23rd
+    // Double_t variable_mem[16] = { 0.007419462, 0.007327982, 90.972,    -62.59230, 571.7103, -83.07132,
+    //                             -112.4498,   538.1335,    -132.5532, -129.6732, 1.492008, 686.1278,
+    //                           -13.89355,   -193.8936,   -13.99355, -193.9936 }; // 23rd
 
-    Double_t variable_sigma[16] = { 0.2, 0.2, 0.5, 2., 2., 2., 2., 2., 2., 2., 1., 2., 0.2, 0.2, 0.2, 0.2 };
+    Double_t variable_sigma[16] = { 0.2, 0.2, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 1., 0.5, 0.1, 0.1, 0.1, 0.1 };
 
-    Double_t chi2mem = 1e6;
-
-    /*
-        cout<<"**** START VALUES *****"<<endl;
-        for (Int_t i = 0; i < nvariables; i++)
-        {
-            cout<<"variable_start["<<i<<"] = "<<variable_mem[i]<<", step = "<<step[i]<<endl;
-        }
-    */
     Double_t variable[16];
 
-    Int_t nroundsmax = 10; // 4;//000;
+    Int_t nroundsmax = 1; // 4;//000;
     Int_t nstepchi2 = 0;
+    Int_t status = 0;
+
     for (Int_t i = 0; i < nroundsmax; i++)
     {
 
-        /*
-           Double_t variable[16];
-           gRandom->SetSeed(0);
-           variable[0] = 0. ;								// xfi23
-           variable[1] = 0.;								// yfi23
-           variable[2] = 91.2;								// zfi23
-           variable[3] = gRandom->Gaus(-62.8664, 2.);		// xfi30
-           variable[4] = gRandom->Gaus(570.7671, 2.);		// zfi30
-           variable[5] = gRandom->Gaus(-82.8087, 2.);		// xfi32
-           variable[6] = gRandom->Gaus(-111.1057, 2.);		// xfi31
-           variable[7] = gRandom->Gaus(537.8183,  2.);		// zfi31
-           variable[8] = gRandom->Gaus(-131.0650, 2.);		// xfi33
-           variable[9] = -129.9365;						// xtofd
-           variable[10] = 0;								// ytofd
-           variable[11] = 685.3931;						// ztofd
-           variable[12] = -14. ;						// thetafi30
-           variable[13] = -194.;						// thetafi31
-           variable[14] = -14.;						// thetafi32
-           variable[15] = -194.;						// thetafi33
-          */
+        // Idea - first calculate chi2 for start values; if i is too large, skip these values and try new set of start
+        // values
 
-        // variable_mem[3]=variable_default[3]+0.1;     // xfi30
-        // variable_mem[4]=variable_default[4]+0.4*(double)(i-5);		// zfi30
-        // variable_mem[5]=variable_default[5]+0.1;		// xfi32
-
+        // ********************************************************************************************
         gRandom->SetSeed(0);
-        // variable_mem[2] = gRandom->Gaus(variable_default[2], variable_sigma[2]);		// zfi23
-        // variable_mem[2] = 90.99;//89.0 + 0.4 * 10.;
 
-        // variable_mem[2] = 89.0 + (double)i*0.4;
-        // variable_mem[2] = 90.6 + (double)i*0.4;
-        // variable_mem[2] = 92.2 + (double)i*0.4;
-
-        variable_mem[3] = gRandom->Gaus(variable_default[3], variable_sigma[3]);    // xfi30
-        variable_mem[4] = gRandom->Gaus(variable_default[4], variable_sigma[4]);    // zfi30
-        variable_mem[5] = gRandom->Gaus(variable_default[5], variable_sigma[5]);    // xfi32
-        variable_mem[12] = gRandom->Gaus(variable_default[12], variable_sigma[12]); // thetafi30
-        variable_mem[14] = gRandom->Gaus(variable_default[14], variable_sigma[14]); // thetafi32
+        //   variable_mem[3] = gRandom->Gaus(variable_default[3], variable_sigma[3]);    // xfi30
+        //   variable_mem[4] = gRandom->Gaus(variable_default[4], variable_sigma[4]);    // zfi30
+        //  variable_mem[5] = gRandom->Gaus(variable_default[5], variable_sigma[5]);    // xfi32
+        //  variable_mem[12] = gRandom->Gaus(variable_default[12], variable_sigma[12]); // thetafi30
+        //  variable_mem[14] = gRandom->Gaus(variable_default[14], variable_sigma[14]); // thetafi32
 
         /*
 
-                        variable_mem[0] = gRandom->Gaus(variable_default[0], variable_sigma[0]) ;		// xfi23
-                        variable_mem[1] = gRandom->Gaus(variable_default[1], variable_sigma[1]);		// yfi23
-                        variable_mem[2] = gRandom->Gaus(variable_default[2], variable_sigma[2]);		// zfi23
-                        variable_mem[3] = gRandom->Gaus(variable_default[3], variable_sigma[3]);		// xfi30
-                        variable_mem[4] = gRandom->Gaus(variable_default[4], variable_sigma[4]);		// zfi30
-                        variable_mem[5] = gRandom->Gaus(variable_default[5], variable_sigma[5]);		// xfi32
-                        variable_mem[6] = gRandom->Gaus(variable_default[6], variable_sigma[6]);		// xfi31
-                        variable_mem[7] = gRandom->Gaus(variable_default[7],  variable_sigma[7]);		// zfi31
-                        variable_mem[8] = gRandom->Gaus(variable_default[8], variable_sigma[8]);		// xfi33
-                        variable_mem[9] = gRandom->Gaus(variable_default[9], variable_sigma[9]);		// xtofd
-                        variable_mem[10] = gRandom->Gaus(variable_default[10], variable_sigma[10]);		// ytofd
-                        variable_mem[11] = gRandom->Gaus(variable_default[11],variable_sigma[11]);		// ztofd
-                        variable_mem[12] = gRandom->Gaus(variable_default[12],variable_sigma[12]);   	// thetafi30
-                        variable_mem[13] = gRandom->Gaus(variable_default[13],variable_sigma[13]);  	// thetafi31
-                        if(nvariables == 16){
-                            variable_mem[14] = gRandom->Gaus(variable_default[14],variable_sigma[14]);	// thetafi32
-                            variable_mem[15] = gRandom->Gaus(variable_default[15],variable_sigma[15]);	// thetafi33
-                        }
+                          variable_mem[0] = gRandom->Gaus(variable_default[0], variable_sigma[0]) ;		// xfi23
+                          variable_mem[1] = gRandom->Gaus(variable_default[1], variable_sigma[1]);		// yfi23
+                          variable_mem[2] = gRandom->Gaus(variable_default[2], variable_sigma[2]);		// zfi23
+                          variable_mem[3] = gRandom->Gaus(variable_default[3], variable_sigma[3]);		// xfi30
+                          variable_mem[4] = gRandom->Gaus(variable_default[4], variable_sigma[4]);		// zfi30
+                          variable_mem[5] = gRandom->Gaus(variable_default[5], variable_sigma[5]);		// xfi32
+                          variable_mem[6] = gRandom->Gaus(variable_default[6], variable_sigma[6]);		// xfi31
+                          variable_mem[7] = gRandom->Gaus(variable_default[7],  variable_sigma[7]);		// zfi31
+                          variable_mem[8] = gRandom->Gaus(variable_default[8], variable_sigma[8]);		// xfi33
+                          variable_mem[9] = gRandom->Gaus(variable_default[9], variable_sigma[9]);		// xtofd
+                          variable_mem[10] = gRandom->Gaus(variable_default[10], variable_sigma[10]);		// ytofd
+                          variable_mem[11] = gRandom->Gaus(variable_default[11],variable_sigma[11]);		// ztofd
+                          variable_mem[12] = gRandom->Gaus(variable_default[12],variable_sigma[12]);   	// thetafi30
+                          variable_mem[13] = gRandom->Gaus(variable_default[13],variable_sigma[13]);  	// thetafi31
+                          if(nvariables == 16){
+                              variable_mem[14] = gRandom->Gaus(variable_default[14],variable_sigma[14]);	// thetafi32
+                              variable_mem[15] = gRandom->Gaus(variable_default[15],variable_sigma[15]);	// thetafi33
+                          }
 
-         */
-        // Double_t variable[16] = {0, 0, 91.2, -62.8664, 570.7671, -82.8087, -111.1057, 537.8183, -131.065, -129.9365,
-        // 0, 685.3931, -13., -193., -13., -193.}; // chi2= 3.474880
-        // Double_t variable[16] = {0, 0, 91.04, -62.18069, 570.59330, -82.41713, -112.6733, 537.9038, -131.8124,
-        // -130.487, 0, 685.4, -13.68626, -193.8265, -14.02967, -193.886990};
-
-        // Double_t variable[16] = {0.007419462, 0.007327982, 91.02552, -62.59230, 571.7103, -83.07132, -112.4498,
-        // 538.1335, -132.5532, -129.6732, 1.492008, 686.1278, -13.89355, -193.8936, -13.99355, -193.9936}; // 23rd
-
-        // Double_t variable[16] = {0.05242090, 0.05805132, 91.04061, -62.60678, 571.5501, -83.10044, -112.4452,
-        // 538.5381, -132.5500, -130.8368, 2.263945, 685.7456, -13.85543, -193.8466, -13.95070, -193.9429};
+           */
 
         for (Int_t ivar = 0; ivar < nvariables; ivar++)
         {
@@ -1866,33 +1873,9 @@ void R3BOptimizeGeometryS494::Finish()
             cout << "Start values = {" << variable[0] << ", " << variable[1] << ", " << variable[2] << ", "
                  << variable[3] << ", " << variable[4] << ", " << variable[5] << ", " << variable[6] << ", "
                  << variable[7] << ", " << variable[8] << ", " << variable[9] << ", " << variable[10] << ", "
-                 << variable[11] << ", " << variable[12] << ", " << variable[13] << variable[14] << ", " << variable[15]
-                 << "}; " << endl;
+                 << variable[11] << ", " << variable[12] << ", " << variable[13] << ", " << variable[14] << ", "
+                 << variable[15] << "}; " << endl;
         }
-        /* if(nroundsmax > 1)
-         {
-
-              srand((unsigned) time(NULL));
-              variable[0] = (1.+rand()%10)/10.-0.5 ;		        // xfi23, uniform (-0.5,0.5)
-              variable[1] = (1.+rand()%10)/10.-0.5;			    // yfi23, uniform (-0.5,0.5)
-              variable[2] = 91.2+(1.+rand()%20)/10.-1.;		    // zfi23, z0+-1
-              variable[3] = -62.8664 + (1.+rand()%40)/10.-2.;		// xfi30
-              variable[4] = 570.7671 + (1.+rand()%40)/10.-2.;		// zfi30
-              variable[5] = -82.8087 + (1.+rand()%40)/10.-2.;		// xfi32
-              variable[6] = -111.1057 + (1.+rand()%40)/10.-2.;		// xfi31
-              variable[7] =  537.8183 + (1.+rand()%40)/10.-2.;		// zfi31
-              variable[8] =-131.0650 + (1.+rand()%40)/10.-2.;		// xfi33
-              variable[9] =-129.9365 + (1.+rand()%40)/10.-2.;			// xtofd
-              variable[10] = 0 + (1.+rand()%40)/10.-2.;			// ytofd
-              variable[11] = 685.3931 + (1.+rand()%40)/10.-2.;		// ztofd
-              variable[12] = -14.  + (1.+rand()%40)/10.-2.;		// thetafi30
-              variable[13] = -194. + (1.+rand()%40)/10.-2.;		// thetafi31
-              variable[14] = -14.  + (1.+rand()%40)/10.-2.;		// thetafi32
-              variable[15] = -194. + (1.+rand()%40)/10.-2.;		// thetafi33
-
-          } */
-
-        // step[0] = 0.5 + 0.1*i;
 
         mini->SetLimitedVariable(0, "xfi23", variable[0], step[0], variable[0] - 2.0, variable[0] + 2.0);
         mini->SetLimitedVariable(1, "yfi23", variable[1], step[1], variable[1] - 2.0, variable[1] + 2.0);
@@ -1914,457 +1897,118 @@ void R3BOptimizeGeometryS494::Finish()
             mini->SetLimitedVariable(15, "a33", variable[15], step[15], variable[15] - 2.5, variable[15] + 2.5);
         }
 
-        /*
-          mini->SetVariable(0, "xfi23", variable[0], step[0]);
-          mini->SetVariable(1, "yfi23", variable[1], step[1]);
-          mini->SetVariable(2, "zfi23", variable[2], step[2]);
-          mini->SetVariable(3, "x30", variable[3], step[3]);
-          mini->SetVariable(4, "z30", variable[4], step[4]);
-          mini->SetVariable(5, "x32", variable[5], step[5]);
-          mini->SetVariable(6, "x31", variable[6], step[6]);
-          mini->SetVariable(7, "z31", variable[7], step[7]);
-          mini->SetVariable(8, "x33", variable[8], step[8]);
-          mini->SetVariable(9, "xtofd", variable[9], step[9]);
-          mini->SetVariable(10, "ytofd", variable[10], step[10]);
-          mini->SetVariable(11, "ztofd", variable[11], step[11]);
-          mini->SetVariable(12, "a30", variable[12], step[12]);
-          mini->SetVariable(13, "a31", variable[13], step[13]);
-          mini->SetVariable(14, "a32", variable[14], step[14]);
-          mini->SetVariable(15, "a33", variable[15], step[15]);
-         */
-
         mini->FixVariable(0);
         mini->FixVariable(1);
         mini->FixVariable(2);
-        // mini->FixVariable(3);
-        //  mini->FixVariable(4);
-        //  mini->FixVariable(5);
+        mini->FixVariable(3);
+        mini->FixVariable(4);
+        mini->FixVariable(5);
         mini->FixVariable(6);
         mini->FixVariable(7);
         mini->FixVariable(8);
         mini->FixVariable(9);
         mini->FixVariable(10);
         mini->FixVariable(11);
-        // mini->FixVariable(12);
+        mini->FixVariable(12);
         mini->FixVariable(13);
         if (nvariables == 16)
         {
-            //    mini->FixVariable(14);
+            mini->FixVariable(14);
             mini->FixVariable(15);
         }
 
-        /*
-           unsigned int npoints = 20;
-              std::vector<double> x(20);
-              std::vector<double> y(20);
-           mini->Scan(0,npoints,&x[0], &y[0],-2.,2.);
-         */
-        Int_t status = 0;
         // do the minimization
         mini->Minimize();
 
         status = mini->Status();
         cout << "Attempt: " << i << endl;
         cout << "Status: " << status << endl;
-        cout << "optimized values: " << endl;
-        cout.precision(7);
+        cout << "Start chi2: " << mini->MinValue() << endl;
+        Double_t chi2_start = mini->MinValue();
 
-        if (nvariables == 16)
+        // *************************************************************************************************
+
+        if (chi2_start > 1000.)
         {
-            cout << "{" << mini->X()[0] << ", " << mini->X()[1] << ", " << mini->X()[2] << ", " << mini->X()[3] << ", "
-                 << mini->X()[4] << ", " << mini->X()[5] << ", " << mini->X()[6] << ", " << mini->X()[7] << ", "
-                 << mini->X()[8] << ", " << mini->X()[9] << ", " << mini->X()[10] << ", " << mini->X()[11] << ", "
-                 << mini->X()[12] << ", " << mini->X()[13] << ", " << mini->X()[14] << ", " << mini->X()[15]
-                 << "}; // chi2= " << mini->MinValue() << endl;
-        }
-        else if (nvariables == 14)
-        {
-            cout << "{" << mini->X()[0] << ", " << mini->X()[1] << ", " << mini->X()[2] << ", " << mini->X()[3] << ", "
-                 << mini->X()[4] << ", " << mini->X()[5] << ", " << mini->X()[6] << ", " << mini->X()[7] << ", "
-                 << mini->X()[8] << ", " << mini->X()[9] << ", " << mini->X()[10] << ", " << mini->X()[11] << ", "
-                 << mini->X()[12] << ", " << mini->X()[13] << "}; // chi2= " << mini->MinValue() << endl;
-        }
-
-        /*
-          Double_t jump;
-          for(Int_t ivar = 0; ivar < 12; ivar++)   // 12 instead of 16, angles are fixed
-          {
-              if(abs(mini->MinValue()-chi2mem) > 0.01)
-              {
-                   jump = 0;
-               }
-              else
-              {
-                  cout<<"*** mini->MinValue() == chi2mem we will jump ***"<<endl;
-                  if((mini->X()[ivar]-4.*step[ivar]) > (variable_default[ivar]-variable_sigma[ivar]))
-                  {
-                     jump = mini->X()[ivar]-4.*step[ivar];
-                  }
-                  else
-                  {
-                     jump = mini->X()[ivar]+4.*step[ivar];
-                  }
-              }
-              variable_mem[ivar] = mini->X()[ivar] + jump;
-          }
-          */
-
-        /*  if(abs(mini->MinValue()-chi2mem) < 0.1)
-          {
-
-
-             if(nstepchi2%2 == 0)
-             {
-                 mini->FixVariable(0);
-                 mini->FixVariable(1);
-                 mini->FixVariable(2);
-                 mini->FixVariable(3);
-                 mini->FixVariable(4);
-                 mini->FixVariable(5);
-                 mini->FixVariable(6);
-                 mini->FixVariable(7);
-                 mini->FixVariable(8);
-                 mini->FixVariable(9);
-                 mini->FixVariable(10);
-                 mini->FixVariable(11);
-                 mini->ReleaseVariable(12);
-                 mini->ReleaseVariable(13);
-                 mini->ReleaseVariable(14);
-                 mini->ReleaseVariable(15);
-             }
-             else
-             {
-                 mini->ReleaseVariable(0);
-                 mini->ReleaseVariable(1);
-                 mini->ReleaseVariable(2);
-                 mini->ReleaseVariable(3);
-                 mini->ReleaseVariable(4);
-                 mini->ReleaseVariable(5);
-                 mini->ReleaseVariable(6);
-                 mini->ReleaseVariable(7);
-                 mini->ReleaseVariable(8);
-                 mini->ReleaseVariable(9);
-                 mini->ReleaseVariable(10);
-                 mini->ReleaseVariable(11);
-                 mini->FixVariable(12);
-                 mini->FixVariable(13);
-                 mini->FixVariable(14);
-                 mini->FixVariable(15);
-
-             }
-
-
-             nstepchi2 += 1;
-          } */
-
-        Double_t dzeven, dzodd;
-        if (!fSimu)
-        {
-            dzeven = 62.77813349;
-            dzodd = 62.77813349;
+            cout << "Start chi2 to large: " << chi2_start << ", new start values will be chosen" << endl;
         }
         else
         {
-            // simu
-            dzeven = 632.9688 - 570.59330;
-            dzodd = 597.7741 - 537.9038;
+            cout << "Start chi2 ok: " << chi2_start << ", optimization will start" << endl;
+
+            mini->ReleaseVariable(3);  // xfi30
+            mini->ReleaseVariable(4);  // zfi30
+            mini->ReleaseVariable(5);  // xfi32
+            mini->ReleaseVariable(12); // thetafi30
+            mini->ReleaseVariable(14); // thetafi32
+
+            // do the minimization
+            mini->Minimize();
+
+            status = mini->Status();
+            cout << "Attempt: " << i << endl;
+            cout << "Status: " << status << endl;
+            cout << "optimized values: " << endl;
+            cout.precision(7);
+
+            if (nvariables == 16)
+            {
+                cout << "{" << mini->X()[0] << ", " << mini->X()[1] << ", " << mini->X()[2] << ", " << mini->X()[3]
+                     << ", " << mini->X()[4] << ", " << mini->X()[5] << ", " << mini->X()[6] << ", " << mini->X()[7]
+                     << ", " << mini->X()[8] << ", " << mini->X()[9] << ", " << mini->X()[10] << ", " << mini->X()[11]
+                     << ", " << mini->X()[12] << ", " << mini->X()[13] << ", " << mini->X()[14] << ", " << mini->X()[15]
+                     << "}; // chi2= " << mini->MinValue() << endl;
+            }
+            else if (nvariables == 14)
+            {
+                cout << "{" << mini->X()[0] << ", " << mini->X()[1] << ", " << mini->X()[2] << ", " << mini->X()[3]
+                     << ", " << mini->X()[4] << ", " << mini->X()[5] << ", " << mini->X()[6] << ", " << mini->X()[7]
+                     << ", " << mini->X()[8] << ", " << mini->X()[9] << ", " << mini->X()[10] << ", " << mini->X()[11]
+                     << ", " << mini->X()[12] << ", " << mini->X()[13] << "}; // chi2= " << mini->MinValue() << endl;
+            }
+
+            Double_t dzeven, dzodd;
+            if (!fSimu)
+            {
+                dzeven = 62.77813349;
+                dzodd = 62.77813349;
+            }
+            else
+            {
+                // simu
+                dzeven = 632.9688 - 570.59330;
+                dzodd = 597.7741 - 537.9038;
+            }
+            if (nvariables == 16)
+            {
+                cout << "fi23x = " << mini->X()[0] << ", fi23y = " << mini->X()[1] << ", fi23z = " << mini->X()[2]
+                     << ", fi30x = " << mini->X()[3] << ", fi30z = " << mini->X()[4] << ", fi31x = " << mini->X()[6]
+                     << ", fi31z = " << mini->X()[7] << ", fi32x = " << mini->X()[5]
+                     << ", fi32z = " << mini->X()[4] + dzeven << ", fi33x = " << mini->X()[8]
+                     << ", fi33z = " << mini->X()[7] + dzodd << ", tofdx = " << mini->X()[9]
+                     << ", tofdy = " << mini->X()[10] << ", tofdz = " << mini->X()[11] << ", fi30a = " << mini->X()[12]
+                     << ", fi31a = " << mini->X()[13] << ", fi32a = " << mini->X()[14] << ", fi33a = " << mini->X()[15]
+                     << endl;
+            }
+            else if (nvariables == 14)
+            {
+                cout << "fi23x = " << mini->X()[0] << ", fi23y = " << mini->X()[1] << ", fi23z = " << mini->X()[2]
+                     << ", fi30x = " << mini->X()[3] << ", fi30z = " << mini->X()[4] << ", fi31x = " << mini->X()[6]
+                     << ", fi31z = " << mini->X()[7] << ", fi32x = " << mini->X()[5]
+                     << ", fi32z = " << mini->X()[4] + dzeven << ", fi33x = " << mini->X()[8]
+                     << ", fi33z = " << mini->X()[7] + dzodd << ", tofdx = " << mini->X()[9]
+                     << ", tofdy = " << mini->X()[10] << ", tofdz = " << mini->X()[11] << ", fi30a = " << mini->X()[12]
+                     << ", fi31a = " << mini->X()[13] << ", fi32a = " << mini->X()[12] << ", fi33a = " << mini->X()[13]
+                     << endl;
+            }
         }
-        if (nvariables == 16)
-        {
-            cout << "fi23x = " << mini->X()[0] << ", fi23y = " << mini->X()[1] << ", fi23z = " << mini->X()[2]
-                 << ", fi30x = " << mini->X()[3] << ", fi30z = " << mini->X()[4] << ", fi31x = " << mini->X()[6]
-                 << ", fi31z = " << mini->X()[7] << ", fi32x = " << mini->X()[5]
-                 << ", fi32z = " << mini->X()[4] + dzeven << ", fi33x = " << mini->X()[8]
-                 << ", fi33z = " << mini->X()[7] + dzodd << ", tofdx = " << mini->X()[9]
-                 << ", tofdy = " << mini->X()[10] << ", tofdz = " << mini->X()[11] << ", fi30a = " << mini->X()[12]
-                 << ", fi31a = " << mini->X()[13] << ", fi32a = " << mini->X()[14] << ", fi33a = " << mini->X()[15]
-                 << endl;
-        }
-        else if (nvariables == 14)
-        {
-            cout << "fi23x = " << mini->X()[0] << ", fi23y = " << mini->X()[1] << ", fi23z = " << mini->X()[2]
-                 << ", fi30x = " << mini->X()[3] << ", fi30z = " << mini->X()[4] << ", fi31x = " << mini->X()[6]
-                 << ", fi31z = " << mini->X()[7] << ", fi32x = " << mini->X()[5]
-                 << ", fi32z = " << mini->X()[4] + dzeven << ", fi33x = " << mini->X()[8]
-                 << ", fi33z = " << mini->X()[7] + dzodd << ", tofdx = " << mini->X()[9]
-                 << ", tofdy = " << mini->X()[10] << ", tofdz = " << mini->X()[11] << ", fi30a = " << mini->X()[12]
-                 << ", fi31a = " << mini->X()[13] << ", fi32a = " << mini->X()[12] << ", fi33a = " << mini->X()[13]
-                 << endl;
-        }
-
-        Double_t par_dev = 0;
-
-        chi2mem = mini->MinValue();
-
-        // cout<<" for step = "<<step[0]<<" fi23x = " << mini->X()[0] << endl;
-
-        /*
-         // for simu
-           for(Int_t ic=0;ic<16;ic++)
-           {
-               par_dev = par_dev + (variable_true[ic]-mini->X()[ic])*(variable_true[ic]-mini->X()[ic]);
-           }
-           cout<<"Squared par dev: "<<par_dev<<endl;
-          */
-
-        /* for(Int_t ip1=0; ip1<16; ip1++)
-         {
-             for(Int_t ip2=0; ip2<16; ip2++)
-             {
-                 if(ip1 < ip2) cout<<"Correlation between par "<<ip1<<" and par "<<ip2<<" is
-         "<<mini->Correlation(ip1,ip2)<<endl;
-             }
-         }*/
 
         mini->Clear();
     }
 
-    /*
-        Double_t v[14];
-        for(Int_t i=0; i<100000;i++)
-        {
-            //{0.0000, 0.0000, 91.2000, -62.8664, 570.7671, -82.8087, 632.4669, -111.1057, 537.8183, -131.0650,
-       599.5703, -129.9365, 0.0000, 685.3931 }; // Startwerte
-
-            v[0] = 0.;
-            v[1] = 0.;
-            v[2] = 91.2;
-            v[3] = gRandom->Gaus(-62.8664, 1.);
-            v[4] = gRandom->Gaus(570.7671, 1.);
-            v[5] = gRandom->Gaus(-82.8087, 1.);
-            v[6] = v[4] + 62.77813349;
-            v[7] = gRandom->Gaus(-111.1057, 1.);
-            v[8] = gRandom->Gaus(537.8183, 1.);
-            v[9] = gRandom->Gaus(-131.0650, 1.);
-            v[10] = v[8] + 62.77813349;
-            v[11] = -129.9365;
-            v[12] = 0;
-            v[13] = 685.3931;
-
-        Double_t chi2_all = 0;
-        Double_t fi23x, fi23y, fi23z, fi30x, fi30z, fi30a, fi31x,
-        fi31z, fi31a, fi32x, fi32z, fi32a, fi33x, fi33z, fi33a,
-        tofdx, tofdy, tofdz;
-
-        Int_t nof = 0;
-        cout.precision(7);
-        cout << "new correction: "
-             << v[0] << "  " << v[1] << "  " << v[2] << "  "
-             << v[3] << "  " << v[4] << "  " << v[5] << "  "
-             << v[6] << "  " << v[7] << "  " << v[8] << "  "
-             << v[9] << "  " << v[10] << "  " << v[11] << "  "
-             << v[12] << "  " << v[13] << endl;
-
-        fi23x = 0.00000000;
-        fi23y = 0.0000000;
-        //fi23z = 91.2;
-        fi23z = 91.04;
-
-        fi30x = -62.18069;
-        fi30z = 570.59330;
-        //fi30a = -13.68626;
-        fi30a = -14.;
-
-        fi31x = -112.67330;
-        fi31z = 537.9038;
-        //fi31a = -193.8265;
-        fi31a = -194.;
-
-
-
-        fi32x = -82.41713;
-        fi32z = 632.9688;
-        //fi32a = -14.02967;
-        fi32a = -14.;
-
-        fi33x = -131.8124;
-        fi33z = 597.7741;
-        //fi33a = -193.8699;
-        fi33a = -194.;
-
-        tofdx = -129.300;
-        tofdy = 0.0;
-        tofdz = 685.4;
-
-        fi23x = v[0];
-        fi23y = v[1];
-        fi23z = v[2];
-        fi30x = v[3];
-        fi30z = v[4];
-        fi32x = v[5];
-        fi32z = v[6];
-        fi31x = v[7];
-        fi31z = v[8];
-        fi33x = v[9];
-        fi33z = v[10];
-        tofdx = v[11];
-        tofdy = v[12];
-        tofdz = v[13];
-
-        //for break-up run we need this line
-        //((R3BGladFieldMap*)FairRunAna::Instance()->GetField())->SetTrackerCorrectionScale(v[6]);
-
-        //((R3BGladFieldMap*)FairRunAna::Instance()->GetField())->SetTrackerCorrectionScale(v[15]);
-        //Double_t scale = ((R3BGladFieldMap *) FairRunAna::Instance()->GetField())->GetScale();
-        //Double_t field = ((R3BGladFieldMap *) FairRunAna::Instance()->GetField())->GetBy(0.,0.,240.);
-        //cout << "Field:" << field << " scale: " << scale << endl;
-
-
-        R3BTrackingDetector* fi23a = gSetup->GetByName("fi23a");
-
-        fi23a->pos0 = TVector3(0., 0., 0.);
-        fi23a->pos1 = TVector3(5., 5., 0.);
-        fi23a->pos2 = TVector3(-5., 5., 0.);
-
-        fi23a->pos0.RotateY(0. * TMath::DegToRad());
-        fi23a->pos1.RotateY(0. * TMath::DegToRad());
-        fi23a->pos2.RotateY(0. * TMath::DegToRad());
-
-        TVector3 trans3a(fi23x, 0., fi23z - 0.015);
-
-        fi23a->pos0 += trans3a;
-        fi23a->pos1 += trans3a;
-        fi23a->pos2 += trans3a;
-        fi23a->norm = ((fi23a->pos1 - fi23a->pos0).Cross(fi23a->pos2 - fi23a->pos0)).Unit();
-
-        R3BTrackingDetector* fi23b = gSetup->GetByName("fi23b");
-
-        fi23b->pos0 = TVector3(0., 0., 0.);
-        fi23b->pos1 = TVector3(5., 5., 0.);
-        fi23b->pos2 = TVector3(-5., 5., 0.);
-
-        fi23b->pos0.RotateY(0. * TMath::DegToRad());
-        fi23b->pos1.RotateY(0. * TMath::DegToRad());
-        fi23b->pos2.RotateY(0. * TMath::DegToRad());
-
-        TVector3 trans3b(0., fi23y, fi23z + 0.015);
-
-        fi23b->pos0 += trans3b;
-        fi23b->pos1 += trans3b;
-        fi23b->pos2 += trans3b;
-        fi23b->norm = ((fi23b->pos1 - fi23b->pos0).Cross(fi23b->pos2 - fi23b->pos0)).Unit();
-
-
-        R3BTrackingDetector* fi30 = gSetup->GetByName("fi30");
-        fi30->pos0 = TVector3(0., 0., 0.);
-        fi30->pos1 = TVector3(25., 25., 0.);
-        fi30->pos2 = TVector3(-25., 25., 0.);
-
-        fi30->pos0.RotateY(fi30a * TMath::DegToRad());
-        fi30->pos1.RotateY(fi30a * TMath::DegToRad());
-        fi30->pos2.RotateY(fi30a * TMath::DegToRad());
-
-        TVector3 trans30(fi30x, 0., fi30z);
-
-        fi30->pos0 += trans30;
-        fi30->pos1 += trans30;
-        fi30->pos2 += trans30;
-        fi30->norm = ((fi30->pos1 - fi30->pos0).Cross(fi30->pos2 - fi30->pos0)).Unit();
-
-
-        R3BTrackingDetector* fi31 = gSetup->GetByName("fi31");
-
-        fi31->pos0 = TVector3(0., 0., 0.);
-        fi31->pos1 = TVector3(25., 25., 0.);
-        fi31->pos2 = TVector3(-25., 25., 0.);
-
-        fi31->pos0.RotateY(fi31a * TMath::DegToRad());
-        fi31->pos1.RotateY(fi31a * TMath::DegToRad());
-        fi31->pos2.RotateY(fi31a * TMath::DegToRad());
-        TVector3 trans31(fi31x, 0., fi31z);
-
-        fi31->pos0 += trans31;
-        fi31->pos1 += trans31;
-        fi31->pos2 += trans31;
-        fi31->norm = ((fi31->pos1 - fi31->pos0).Cross(fi31->pos2 - fi31->pos0)).Unit();
-
-        R3BTrackingDetector* fi32 = gSetup->GetByName("fi32");
-
-        fi32->pos0 = TVector3(0., 0., 0.);
-        fi32->pos1 = TVector3(25., 25., 0.);
-        fi32->pos2 = TVector3(-25., 25., 0.);
-
-        fi32->pos0.RotateY(fi32a * TMath::DegToRad());
-        fi32->pos1.RotateY(fi32a * TMath::DegToRad());
-        fi32->pos2.RotateY(fi32a * TMath::DegToRad());
-
-        TVector3 trans32(fi32x, 0., fi32z);
-
-        fi32->pos0 += trans32;
-        fi32->pos1 += trans32;
-        fi32->pos2 += trans32;
-        fi32->norm = ((fi32->pos1 - fi32->pos0).Cross(fi32->pos2 - fi32->pos0)).Unit();
-
-
-        R3BTrackingDetector* fi33 = gSetup->GetByName("fi33");
-        fi33->pos0 = TVector3(0., 0., 0.);
-        fi33->pos1 = TVector3(25., 25., 0.);
-        fi33->pos2 = TVector3(-25., 25., 0.);
-
-        fi33->pos0.RotateY(fi33a * TMath::DegToRad());
-        fi33->pos1.RotateY(fi33a * TMath::DegToRad());
-        fi33->pos2.RotateY(fi33a * TMath::DegToRad());
-
-        TVector3 trans33(fi33x, 0., fi33z);
-
-        fi33->pos0 += trans33;
-        fi33->pos1 += trans33;
-        fi33->pos2 += trans33;
-        fi33->norm = ((fi33->pos1 - fi33->pos0).Cross(fi33->pos2 - fi33->pos0)).Unit();
-
-
-        R3BTrackingDetector* tofd = gSetup->GetByName("tofd");
-
-        tofd->pos0 = TVector3(0., 0., 0.);
-        tofd->pos1 = TVector3(60., 60., 0.);
-        tofd->pos2 = TVector3(-50., 50., 0.);
-
-        tofd->pos0.RotateY(18. * TMath::DegToRad());
-        tofd->pos1.RotateY(18. * TMath::DegToRad());
-        tofd->pos2.RotateY(18. * TMath::DegToRad());
-
-        TVector3 transtofd(tofdx, tofdy, tofdz);
-
-        tofd->pos0 += transtofd;
-        tofd->pos1 += transtofd;
-        tofd->pos2 += transtofd;
-        tofd->norm = ((tofd->pos1 - tofd->pos0).Cross(tofd->pos2 - tofd->pos0)).Unit();
-
-        for (Int_t iev = 0; iev < gThisTask->GetNEvents(); iev++)
-        {
-            gSetup->TakeHitsFromBuffer(iev);
-            Double_t fieldScale;
-
-            // für break-up events wieder rein
-
-            //((R3BGladFieldMap*)FairRunAna::Instance()->GetField())->SetTrackerCorrectionScale(v[15]);
-            // Double_t scale = ((R3BGladFieldMap *) FairRunAna::Instance()->GetField())->GetScale();
-            // Double_t field = ((R3BGladFieldMap *) FairRunAna::Instance()->GetField())->GetBy(0.,0.,240.);
-            // cout << "Field:" << field << " scale: " << scale << endl;
-
-
-            Double_t chi2 = gThisTask->Chi2();
-            // cout << "Chi2 value: " << chi2 << endl;
-            if (chi2 > 0)
-            {
-                chi2_all += chi2;
-                nof++;
-            }
-        }
-        // cout << "Test: " << nof << endl;
-        chi2_all = chi2_all / nof;
-
-        cout << "Chi2 all: " << chi2_all << endl;
-
-
-
-
-        }
-    */
-
-    fh_Erel->Write();
-    fh_psum->Write();
-    fh_chi2->Write();
+    //   fh_Erel->Write();
+    //   fh_psum->Write();
+    //   fh_chi2->Write();
 }
 
 Bool_t R3BOptimizeGeometryS494::InitPropagator()

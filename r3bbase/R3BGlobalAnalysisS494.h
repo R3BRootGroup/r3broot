@@ -323,7 +323,7 @@ class R3BGlobalAnalysisS494 : public FairTask
     TH2F* fh_pz_pz;
     TH2F* fh_p_p;
     TH2F* fh_Erel_vs_phibcMC;
-    TH2F* fh_psum_vs_event;  
+    TH2F* fh_Erel_vs_event;  
     
     TH2F* fh_thetax_px;
     TH2F* fh_thetay_py;

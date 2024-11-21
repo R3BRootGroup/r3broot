@@ -107,10 +107,10 @@ R3BOnlineSpectraFiber23.cxx
 R3BOnlineSpectraToFD_S494.cxx
 R3BOnlineSpectraToFI_S494.cxx
 R3BOnlineSpectraBMON_S494.cxx
-R3BDataCheckToFDS494.cxx
-R3BDataCheckToFDHitS494.cxx
-R3BDataCheckToFIS494.cxx
-R3BDataCheckFibS494.cxx
+#R3BDataCheckToFDS494.cxx
+#R3BDataCheckToFDHitS494.cxx
+#R3BDataCheckToFIS494.cxx
+#R3BDataCheckFibS494.cxx
 )
 
 # fill list of header files from list of source files

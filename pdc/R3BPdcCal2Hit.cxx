@@ -1396,7 +1396,6 @@ void R3BPdcCal2Hit::FinishTask()
                                 }
                             }
 
-
                             int content_low = proj->GetBinContent(index_low);
                             int content_high = proj->GetBinContent(index_high);
                             Double_t tlow = proj->GetBinCenter(index_low);

@@ -52,7 +52,7 @@ void SetCuts()
     MC->SetProcess("RAYL",1); // Rayleigh scattering
 
 // for geant3
-
+/*
 	MC->SetProcess("DCAY",0); // Particle decay
 	MC->SetProcess("PAIR",0); // Pair production
 	MC->SetProcess("COMP",0); // Compton scattering
@@ -67,7 +67,7 @@ void SetCuts()
 	MC->SetProcess("LOSS",4); // Energy loss (2=complete fluct.; 4=kein straggling)
 	MC->SetProcess("MULS",0); // Multiple scattering
 	MC->SetProcess("RAYL",0); // Rayleigh scattering
-
+*/
     const Double_t cut1 = 1.0E-4; // GeV --> 100 keV
     const Double_t cut2 = 1.0E-2; // GeV --> 10 MeV
     const Double_t tofmax = 1.e1; // seconds

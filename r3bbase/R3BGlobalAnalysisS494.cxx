@@ -659,11 +659,11 @@ InitStatus R3BGlobalAnalysisS494::Init()
     fh_pz_pz_nc->GetYaxis()->SetTitle("pz / MeV/c");
 
     // Analysis
-    fh_chi2 = new TH1F("chi2", "chi2 ", 500, 0., 500);
+    fh_chi2 = new TH1F("chi2", "chi2 ", 1000, 0., 1000);
     fh_chi2->GetXaxis()->SetTitle("Chi2");
     fh_chi2->GetYaxis()->SetTitle("counts");
 
-    fh_chiy_vs_chix_nc = new TH2F("chiC_vs_chiHe", "chi2 C vs chi2 He", 1000, 0., 50000., 1000, 0., 50000.);
+    fh_chiy_vs_chix_nc = new TH2F("chiC_vs_chiHe", "chi2 C vs chi2 He", 100, 0., 50000., 100, 0., 50000.);
     fh_chiy_vs_chix_nc->GetXaxis()->SetTitle("chi2 He");
     fh_chiy_vs_chix_nc->GetYaxis()->SetTitle("chi2 C");
 
@@ -719,7 +719,7 @@ InitStatus R3BGlobalAnalysisS494::Init()
     fh_Erel->GetXaxis()->SetTitle("Erel / MeV");
     fh_Erel->GetYaxis()->SetTitle("counts");
 
-    fh_Erel_vs_chi = new TH2F("Erel_vs_chi", "Erel vs chi", 50, 0, 50, 300, 0., 30);
+    fh_Erel_vs_chi = new TH2F("Erel_vs_chi", "Erel vs chi", 1000, 0, 1000, 150, 0., 15);
     fh_Erel_vs_chi->GetYaxis()->SetTitle("Erel / MeV");
     fh_Erel_vs_chi->GetXaxis()->SetTitle("chi2");
 
@@ -839,13 +839,13 @@ InitStatus R3BGlobalAnalysisS494::Init()
     fh_psum_nc->GetXaxis()->SetTitle("p / MeV/c");
     fh_psum_nc->GetYaxis()->SetTitle("count");
 
-    fh_psum_vs_chi = new TH2F("sum_p_vs_chi", "ptot vs chi2", 50, 0, 50, 400, 16800., 17800.);
+    fh_psum_vs_chi = new TH2F("sum_p_vs_chi", "ptot vs chi2", 1000, 0, 1000, 400, 16800., 17800.);
     fh_psum_vs_chi->GetYaxis()->SetTitle("p / MeV/c");
     fh_psum_vs_chi->GetXaxis()->SetTitle("chi2");
 
-    fh_psum_vs_event = new TH2F("psum_vs_event", "psum vs. event number", 100, 0, 1e6, 80, 17000., 17800.);
-    fh_psum_vs_event->GetXaxis()->SetTitle("Event number");
-    fh_psum_vs_event->GetYaxis()->SetTitle("p / MeV/c");
+    fh_Erel_vs_event = new TH2F("Erel_vs_event", "Erel vs. event number", 10000, 0, 1e6, 250, 0., 10.);
+    fh_Erel_vs_event->GetXaxis()->SetTitle("Event number");
+    fh_Erel_vs_event->GetYaxis()->SetTitle("Erel / MeV");
 
     fh_psum_vs_event_nc =
         new TH2F("psum_vs_event_nc", "psum vs. event number all chi2", 100, 0, 1e6, 80, 17000., 17800.);
@@ -2219,7 +2219,7 @@ void R3BGlobalAnalysisS494::Exec(Option_t* option)
 
                 fh_mass->Fill(mtrackC, mtrackHe);
 
-                fh_psum_vs_event->Fill(fNeventstrack, (pa + pc).Mag());
+                fh_Erel_vs_event->Fill(fNEvents, Erel);
 
                 fh_px_He->Fill(alpha.Px());
                 fh_py_He->Fill(alpha.Py());
@@ -2416,7 +2416,7 @@ void R3BGlobalAnalysisS494::Exec(Option_t* option)
             fh_py_O->Fill(Pyf);
             fh_pz_O->Fill(Pzf);
             fh_p_O->Fill(Pf_tot);
-            fh_psum_vs_event->Fill(fNEvents, Pf_tot);
+            // fh_psum_vs_event->Fill(fNEvents, Pf_tot);
             fh_py_pz->Fill(Pf_tot, Pyf);
 
         } // end if chi2
@@ -2860,7 +2860,7 @@ void R3BGlobalAnalysisS494::FinishTask()
     fh_py_pz->Write();
     fh_psum->Write();
     fh_pzsum->Write();
-    fh_psum_vs_event->Write();
+    fh_Erel_vs_event->Write();
     fh_pHe_vs_theta26->Write();
     fh_psum_vs_theta26_nc->Write();
     fh_py_yfi23->Write();
