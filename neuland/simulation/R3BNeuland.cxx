@@ -23,29 +23,27 @@
 #include "TParticle.h"
 #include "TVirtualMC.h"
 #include <FairRootManager.h>
-#include <fmt/format.h>
 
 // Initialize variables from Birk' s Law
-constexpr auto seconds_to_nanoseconds = 1e9;
-constexpr auto BirkdP = 1.032;
-constexpr auto BirkC1 = 0.013 / BirkdP;
-constexpr auto BirkC2 = 9.6e-6 / (BirkdP * BirkdP);
+static constexpr Double_t BirkdP = 1.032;
+static constexpr Double_t BirkC1 = 0.013 / BirkdP;
+static constexpr Double_t BirkC2 = 9.6e-6 / (BirkdP * BirkdP);
 
-inline auto GetLightYield(const int charge, const double length, const double edep) -> double
+inline Double_t GetLightYield(const Int_t charge, const Double_t length, const Double_t edep)
 {
     // Apply Birk's law ( Adapted from G3BIRK/Geant3)
     if (charge != 0 && length > 0)
     {
-        auto birkC1Mod = BirkC1;
+        Double_t birkC1Mod = BirkC1;
 
         // Apply correction for higher charge states
         if (TMath::Abs(charge) >= 2)
         {
-            birkC1Mod *= 7.2 / 12.6; // NOLINT
+            birkC1Mod *= 7.2 / 12.6;
         }
 
-        const double dedxcm = 1000. * edep / length;
-        const double lightYield = edep / (1. + birkC1Mod * dedxcm + BirkC2 * dedxcm * dedxcm);
+        Double_t dedxcm = 1000. * edep / length;
+        Double_t lightYield = edep / (1. + birkC1Mod * dedxcm + BirkC2 * dedxcm * dedxcm);
         return lightYield;
     }
     return edep; // Rarely very small energy depositions have no length?
@@ -63,86 +61,96 @@ R3BNeuland::R3BNeuland(const TString& geoFile, const TGeoTranslation& trans, con
 
 R3BNeuland::R3BNeuland(const TString& geoFile, const TGeoCombiTrans& combi)
     : R3BDetector("R3BNeuland", kNEULAND, geoFile, combi)
+    , fNeulandPoints(new TClonesArray("R3BNeulandPoint"))
 {
 }
 
-R3BNeuland::R3BNeuland(int nDP, const TGeoTranslation& trans, const TGeoRotation& rot)
+R3BNeuland::R3BNeuland(Int_t nDP, const TGeoTranslation& trans, const TGeoRotation& rot)
     : R3BNeuland(nDP, { trans, rot })
 {
 }
 
-R3BNeuland::R3BNeuland(const int nDP, const TGeoCombiTrans& combi)
-    : R3BNeuland(fmt::format("neuland_v3_{}dp.geo.root", nDP), combi)
+R3BNeuland::R3BNeuland(const Int_t nDP, const TGeoCombiTrans& combi)
+    : R3BNeuland(TString::Format("neuland_v3_%ddp.geo.root", nDP), combi)
 {
 }
 
-auto R3BNeuland::ProcessHits(FairVolume* /*v*/) -> bool
+R3BNeuland::~R3BNeuland()
+{
+    if (fNeulandPoints)
+    {
+        fNeulandPoints->Delete();
+        delete fNeulandPoints;
+    }
+}
+
+void R3BNeuland::Initialize()
+{
+    LOG(info) << "R3BNeuland initialization ...";
+
+    FairDetector::Initialize();
+
+    WriteParameterFile();
+    ResetValues();
+}
+
+Bool_t R3BNeuland::ProcessHits(FairVolume*)
 {
     // New hit in detector
     if (gMC->IsTrackEntering())
     {
-        if (!is_last_hit_done_)
+        if (!fLastHitDone)
         {
             LOG(warn) << "R3BNeuland: Incomplete hit discarded";
             ResetValues();
         }
 
-        is_last_hit_done_ = kFALSE;
-        energy_loss_ = 0.;
-        light_yield_ = 0.;
-        time_ = gMC->TrackTime() * seconds_to_nanoseconds;
-        length_ = gMC->TrackLength();
-        gMC->TrackPosition(pos_in_);
-        gMC->TrackMomentum(mom_in_);
-        gMC->CurrentVolOffID(1, paddle_id_);
-
-        particle_id_ = gMC->TrackPid();
-        trackid_pid_map_.emplace(gMC->GetStack()->GetCurrentTrackNumber(), gMC->TrackPid());
-        if (auto search = trackid_pid_map_.find(gMC->GetStack()->GetCurrentParentTrackNumber());
-            search != trackid_pid_map_.end())
-        {
-            partent_particle_id_ = search->first;
-        }
+        fLastHitDone = kFALSE;
+        fELoss = 0.;
+        fLightYield = 0.;
+        fTime = gMC->TrackTime() * 1.0e09;
+        fLength = gMC->TrackLength();
+        gMC->TrackPosition(fPosIn);
+        gMC->TrackMomentum(fMomIn);
+        gMC->CurrentVolOffID(1, fPaddleID);
     }
 
     // Sum energy loss for all steps in the active volume
-    energy_loss_ += gMC->Edep();
-    light_yield_ += GetLightYield(gMC->TrackCharge(), gMC->TrackStep(), gMC->Edep());
+    fELoss += gMC->Edep();
+    fLightYield += GetLightYield(gMC->TrackCharge(), gMC->TrackStep(), gMC->Edep());
 
     // Set additional parameters at exit of active volume. Create R3BNeulandPoint.
     if (gMC->IsTrackExiting() || gMC->IsTrackStop() || gMC->IsTrackDisappeared())
     {
         // Do not save a hit if no energy deposited
-        constexpr auto minimum_energy_cutoff = 1e-20;
-        if (energy_loss_ < minimum_energy_cutoff || light_yield_ < minimum_energy_cutoff)
+        if (fELoss < 1e-20 || fLightYield < 1e-20)
         {
             ResetValues();
             return kTRUE;
         }
 
-        track_id_ = gMC->GetStack()->GetCurrentTrackNumber();
-        gMC->TrackPosition(pos_out_);
-        gMC->TrackMomentum(mom_out_);
+        fTrackID = gMC->GetStack()->GetCurrentTrackNumber();
+        gMC->TrackPosition(fPosOut);
+        gMC->TrackMomentum(fMomOut);
 
         // Add Point
-        LOG(debug) << "R3BNeuland: Adding Point at (" << pos_in_.X() << ", " << pos_in_.Y() << ", " << pos_in_.Z()
-                   << ") cm,  paddle " << paddle_id_ << ", track " << track_id_ << ", energy loss " << energy_loss_
-                   << " GeV " << gMC->GetStack()->GetCurrentParentTrackNumber();
+        LOG(debug) << "R3BNeuland: Adding Point at (" << fPosIn.X() << ", " << fPosIn.Y() << ", " << fPosIn.Z()
+                   << ") cm,  paddle " << fPaddleID << ", track " << fTrackID << ", energy loss " << fELoss << " GeV "
+                   << gMC->GetStack()->GetCurrentParentTrackNumber();
 
-        neuland_points_.get().emplace_back(track_id_,
-                                           paddle_id_,
-                                           pos_in_.Vect(),
-                                           mom_in_.Vect(),
-                                           time_,
-                                           length_,
-                                           energy_loss_,
-                                           gMC->CurrentEvent(),
-                                           light_yield_,
-                                           particle_id_,
-                                           partent_particle_id_);
+        Int_t size = fNeulandPoints->GetEntriesFast();
+        new ((*fNeulandPoints)[size]) R3BNeulandPoint(fTrackID,
+                                                      fPaddleID,
+                                                      fPosIn.Vect(),
+                                                      fMomIn.Vect(),
+                                                      fTime,
+                                                      fLength,
+                                                      fELoss,
+                                                      gMC->CurrentEvent(),
+                                                      fLightYield);
 
         // Increment number of LandPoints for this track
-        auto* stack = dynamic_cast<R3BStack*>(gMC->GetStack());
+        auto stack = dynamic_cast<R3BStack*>(gMC->GetStack());
         stack->AddPoint(kNEULAND);
         ResetValues();
     }
@@ -150,49 +158,62 @@ auto R3BNeuland::ProcessHits(FairVolume* /*v*/) -> bool
     return kTRUE;
 }
 
-auto R3BNeuland::CheckIfSensitive(std::string name) -> bool { return name == "volBC408"; }
+Bool_t R3BNeuland::CheckIfSensitive(std::string name) { return name == "volBC408"; }
 
 void R3BNeuland::EndOfEvent()
 {
-    if (fVerboseLevel != 0)
+    if (fVerboseLevel)
     {
         Print();
     }
     Reset();
 }
 
-void R3BNeuland::Print(Option_t* /*unused*/) const
+TClonesArray* R3BNeuland::GetCollection(Int_t iColl) const
 {
-    LOG(info) << "R3BNeuland: " << neuland_points_.get_constref().size() << " Neuland Points registered in this event";
+    if (iColl == 0)
+    {
+        return fNeulandPoints;
+    }
+    return nullptr;
+}
+
+void R3BNeuland::Register()
+{
+    FairRootManager::Instance()->Register("NeulandPoints", GetName(), fNeulandPoints, kTRUE);
+}
+
+void R3BNeuland::Print(Option_t*) const
+{
+    LOG(info) << "R3BNeuland: " << fNeulandPoints->GetEntries() << " Neuland Points registered in this event";
 }
 
 void R3BNeuland::Reset()
 {
-    neuland_points_.clear();
+    fNeulandPoints->Clear();
     ResetValues();
-    trackid_pid_map_.clear();
 }
 
 void R3BNeuland::ResetValues()
 {
-    is_last_hit_done_ = kTRUE;
-    track_id_ = 0;
-    paddle_id_ = -1;
-    pos_in_.Clear();
-    pos_out_.Clear();
-    mom_in_.Clear();
-    mom_out_.Clear();
-    time_ = length_ = energy_loss_ = light_yield_ = 0;
+    fLastHitDone = kTRUE;
+    fTrackID = 0;
+    fPaddleID = -1;
+    fPosIn.Clear();
+    fPosOut.Clear();
+    fMomIn.Clear();
+    fMomOut.Clear();
+    fTime = fLength = fELoss = fLightYield = 0;
 }
 
 void R3BNeuland::WriteParameterFile()
 {
     FairRuntimeDb* rtdb = FairRun::Instance()->GetRuntimeDb();
-    neuland_geo_par_ = dynamic_cast<R3BNeulandGeoPar*>(rtdb->getContainer("R3BNeulandGeoPar"));
+    fNeulandGeoPar = dynamic_cast<R3BNeulandGeoPar*>(rtdb->getContainer("R3BNeulandGeoPar"));
 
     // Really bad way to find the Neuland *node* (not the volume!)
     TGeoNode* geoNodeNeuland = nullptr;
-    for (int i = 0; i < gGeoManager->GetTopNode()->GetNdaughters(); i++)
+    for (Int_t i = 0; i < gGeoManager->GetTopNode()->GetNdaughters(); i++)
     {
         if (TString(gGeoManager->GetTopNode()->GetDaughter(i)->GetVolume()->GetName()) == "volNeuland")
         {
@@ -201,23 +222,13 @@ void R3BNeuland::WriteParameterFile()
         }
     }
 
-    if (geoNodeNeuland == nullptr)
+    if (!geoNodeNeuland)
     {
         LOG(fatal) << "volNeuland not found";
     }
 
-    neuland_geo_par_->SetNeulandGeoNode(geoNodeNeuland);
-    neuland_geo_par_->setChanged();
-}
-
-void R3BNeuland::Register()
-{
-    LOG(info) << "R3BNeuland initialization ...";
-
-    neuland_points_.init();
-
-    WriteParameterFile();
-    ResetValues();
+    fNeulandGeoPar->SetNeulandGeoNode(geoNodeNeuland);
+    fNeulandGeoPar->setChanged();
 }
 
 ClassImp(R3BNeuland);

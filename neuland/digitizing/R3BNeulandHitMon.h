@@ -24,11 +24,8 @@
  */
 
 #include "FairTask.h"
-#include "R3BDataMonitor.h"
-#include "R3BIOConnector.h"
 #include "R3BNeulandHit.h"
 #include "TCAConnector.h"
-#include <string>
 
 class TH1D;
 class TH2D;
@@ -38,46 +35,55 @@ class TH1I;
 class R3BNeulandHitMon : public FairTask
 {
   public:
-    explicit R3BNeulandHitMon(const Option_t* option = "");
+    explicit R3BNeulandHitMon(TString input = "NeulandHits",
+                              TString output = "NeulandHitMon",
+                              const Option_t* option = "");
 
-    void Exec(Option_t* /*option*/) override;
+    ~R3BNeulandHitMon() override = default;
 
-    void SetDistanceToTarget(double distance) { distance_to_target_ = distance; }
+    // No copy and no move is allowed (Rule of three/five)
+    R3BNeulandHitMon(const R3BNeulandHitMon&) = delete;            // copy constructor
+    R3BNeulandHitMon(R3BNeulandHitMon&&) = delete;                 // move constructor
+    R3BNeulandHitMon& operator=(const R3BNeulandHitMon&) = delete; // copy assignment
+    R3BNeulandHitMon& operator=(R3BNeulandHitMon&&) = delete;      // move assignment
 
   protected:
-    auto Init() -> InitStatus override;
-    void Finish() override { data_monitor_.save_to_sink(); }
+    InitStatus Init() override;
+    void Finish() override;
+
+  public:
+    void Exec(Option_t* /*option*/) override;
+
+    void SetDistanceToTarget(double distance) { fDistanceToTarget = distance; }
 
   private:
-    std::string output_{ "NeulandHitMon" };
+    TString fOutput;
 
-    R3B::InputVectorConnector<R3BNeulandHit> neuland_hits_{ "NeulandHits" };
+    TCAInputConnector<R3BNeulandHit> fHits;
 
-    double distance_to_target_ = 0.;
+    double fDistanceToTarget = 0.;
 
-    bool is_3d_track_enabled_ = false;
+    Bool_t fIs3DTrackEnabled = false;
+    TH3D* fh3 = nullptr;
 
-    R3B::DataMonitor data_monitor_;
-
-    TH3D* hist_3_ = nullptr;
-    TH1D* hist_time_ = nullptr;
-    TH1D* hist_time_adj_ = nullptr;
-    TH1I* hist_mult_ = nullptr;
-    TH1D* hist_depth_ = nullptr;
-    TH1D* hist_foremost_energy_ = nullptr;
-    TH1D* hist_sternmost_energy_ = nullptr;
-    TH2D* hist_depth_vs_foremost_energy_ = nullptr;
-    TH2D* hist_depth_vs_sternmost_energy_ = nullptr;
-    TH1D* hist_energy_tot_ = nullptr;
-    TH1D* hist_energy_ = nullptr;
-    TH1D* hist_x_ = nullptr;
-    TH1D* hist_y_ = nullptr;
+    TH1D* hTime = nullptr;
+    TH1D* hTimeAdj = nullptr;
+    TH1I* hMult = nullptr;
+    TH1D* hDepth = nullptr;
+    TH1D* hForemostEnergy = nullptr;
+    TH1D* hSternmostEnergy = nullptr;
+    TH2D* hDepthVSForemostEnergy = nullptr;
+    TH2D* hDepthVSSternmostEnergy = nullptr;
+    TH1D* hEtot = nullptr;
+    TH1D* hE = nullptr;
+    TH1D* hX = nullptr;
+    TH1D* hY = nullptr;
     TH1D* hT = nullptr;
     TH1D* hTNeigh = nullptr;
-    TH2D* hist_depth_vs_energy_tot_ = nullptr;
-    TH2D* hist_pos_vs_energy_ = nullptr;
+    TH2D* hDepthVSEtot = nullptr;
+    TH2D* hPosVSEnergy = nullptr;
     TH2D* hdeltaEE = nullptr;
-    TH1D* hist_beta_ = nullptr;
+    TH1D* hBeta = nullptr;
 
     ClassDefOverride(R3BNeulandHitMon, 0); // NOLINT
 };

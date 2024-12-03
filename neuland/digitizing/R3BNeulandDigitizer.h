@@ -15,13 +15,10 @@
 
 #include "FairTask.h"
 #include "Filterable.h"
-#include "NeulandPointFilter.h"
-#include "R3BDataMonitor.h"
 #include "R3BDigitizingEngine.h"
 #include "R3BDigitizingPaddleNeuland.h"
 #include "R3BDigitizingTacQuila.h"
 #include "R3BDigitizingTamex.h"
-#include "R3BIOConnector.h"
 #include "R3BNeulandGeoPar.h"
 #include "R3BNeulandHit.h"
 #include "R3BNeulandHitPar.h"
@@ -63,36 +60,42 @@ class R3BNeulandDigitizer : public FairTask
     template <typename Type>
     using UsePaddle = Digitizing::UsePaddle<Type>;
 
-    R3BNeulandDigitizer();
-    explicit R3BNeulandDigitizer(std::unique_ptr<Digitizing::DigitizingEngineInterface> engine);
+    explicit R3BNeulandDigitizer(TString input = "NeulandPoints", TString output = "NeulandHits");
+    explicit R3BNeulandDigitizer(std::unique_ptr<Digitizing::DigitizingEngineInterface> engine,
+                                 TString input = "NeulandPoints",
+                                 TString output = "NeulandHits");
+
+    ~R3BNeulandDigitizer() override = default;
+
+    // No copy and no move is allowed (Rule of three/five)
+    R3BNeulandDigitizer(const R3BNeulandDigitizer&) = delete;            // copy constructor
+    R3BNeulandDigitizer(R3BNeulandDigitizer&&) = delete;                 // move constructor
+    R3BNeulandDigitizer& operator=(const R3BNeulandDigitizer&) = delete; // copy assignment
+    R3BNeulandDigitizer& operator=(R3BNeulandDigitizer&&) = delete;      // move assignment
 
   protected:
-    auto Init() -> InitStatus override;
-    void Finish() override { data_monitor_.save_to_sink(); }
+    InitStatus Init() override;
+    void Finish() override;
     void SetParContainers() override;
 
   public:
     void Exec(Option_t* /*option*/) override;
     void SetEngine(std::unique_ptr<Digitizing::DigitizingEngineInterface> engine);
-    void AddFilter(const Filterable<R3BNeulandHit&>::Filter& filter) { neuland_hit_filters_.Add(filter); }
-    void SetNeulandPointFilter(R3B::Neuland::BitSetParticle particle);
-    void SetNeulandPointFilter(R3B::Neuland::BitSetParticle particle, double minimum_allowed_energy_gev);
+    void AddFilter(const Filterable<R3BNeulandHit&>::Filter& filter) { fHitFilters.Add(filter); }
 
   private:
-    R3B::InputVectorConnector<R3BNeulandPoint> neuland_points_{ "NeulandPoints" };
-    R3B::OutputVectorConnector<R3BNeulandHit> neuland_hits_{ "NeulandHits" };
+    TCAInputConnector<R3BNeulandPoint> fPoints;
+    TCAOutputConnector<R3BNeulandHit> fHits;
 
-    std::unique_ptr<Digitizing::DigitizingEngineInterface> digitizing_engine_; // owning
+    std::unique_ptr<Digitizing::DigitizingEngineInterface> fDigitizingEngine; // owning
 
-    Filterable<R3BNeulandHit&> neuland_hit_filters_;
+    Filterable<R3BNeulandHit&> fHitFilters;
 
-    R3BNeulandGeoPar* neuland_geo_par_ = nullptr; // non-owning
-    NeulandPointFilter neuland_point_filter_;
+    R3BNeulandGeoPar* fNeulandGeoPar = nullptr; // non-owning
 
-    R3B::DataMonitor data_monitor_;
-    TH1I* mult_one_ = nullptr;
-    TH1I* mult_two_ = nullptr;
-    TH1F* rl_time_to_trig_ = nullptr;
+    TH1I* hMultOne = nullptr;
+    TH1I* hMultTwo = nullptr;
+    TH1F* hRLTimeToTrig = nullptr;
 
   public:
     template <typename... Args>
@@ -102,12 +105,12 @@ class R3BNeulandDigitizer : public FairTask
         switch (option)
         {
             case Options::neulandTamex:
-                digitizing_engine_ = Digitizing::CreateEngine(UsePaddle<NeulandPaddle>(),
-                                                              UseChannel<TamexChannel>(std::forward<Args>(args)...));
+                fDigitizingEngine = Digitizing::CreateEngine(UsePaddle<NeulandPaddle>(),
+                                                             UseChannel<TamexChannel>(std::forward<Args>(args)...));
                 break;
             case Options::neulandTacquila:
-                digitizing_engine_ = Digitizing::CreateEngine(UsePaddle<NeulandPaddle>(),
-                                                              UseChannel<TacquilaChannel>(std::forward<Args>(args)...));
+                fDigitizingEngine = Digitizing::CreateEngine(UsePaddle<NeulandPaddle>(),
+                                                             UseChannel<TacquilaChannel>(std::forward<Args>(args)...));
                 break;
         }
     }
