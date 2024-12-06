@@ -5,28 +5,58 @@
             "orcid": "0000-0002-8071-4497"
         },
         {
+            "name": "Chatillon, Audrey"
+        },
+        {
+            "name": "Garcia-Jimenez, Gabriel"
+        },
+        {
             "name": "Alvarez Pol, Hector",
             "orcid": "0000-0001-9643-6252"
         },
         {
+            "name": "Kelic-Heil, Aleksandra"
+        },
+        {
             "name": "Heil, Michael"
+        },
+        {
+            "name": "Loeher, Bastian"
         },
         {
             "name": "Kresan, Dmytro",
             "orcid": "0000-0002-7537-2875"
         },
         {
+            "name": "Mozumdar, Nikhil"
+        },
+        {
             "name": "Mayer, Jan"
+        },
+        {
+            "name": "Panin, Valerii"
         },
         {
             "name": "Rodriguez Sanchez, Jose Luis",
             "orcid": "0000-0002-4702-5294"
         },
         {
-            "name": "Wagner, Vadim"
+            "name": "Taniuchi, Ryo"
+        },
+        {
+            "name": "Wang, Yanzhao",
+            "orcid": "0000-0002-7006-7986"
+        },
+        {
+            "name": "Xarepe, Manuel"
         }
     ],
     "contributors": [
+        {
+            "type": "Other",
+            "name": "Al-Turany, Mohammad",
+            "orcid": "0000-0002-8071-4497"
+        },
         {
             "type": "Other",
             "name": "Boretzky, Konstanze"
@@ -45,11 +75,15 @@
         },
         {
             "type": "Other",
+            "name": "Feijoo-Fontan, Martina"
+        },
+        {
+            "type": "Other",
             "name": "Falduto, Ashton"
         },
         {
             "type": "Other",
-            "name": "Feijoo, Martina"
+            "name": "Gra\u00f1a-Gonzalez, Antia"
         },
         {
             "type": "Other",
@@ -57,15 +91,11 @@
         },
         {
             "type": "Other",
-            "name": "Garcia, Gabriel"
+            "name": "Jedele, Andrea"
         },
         {
             "type": "Other",
             "name": "Gasparic, Igor"
-        },
-        {
-            "type": "Other",
-            "name": "Gra\u00f1a, Antia"
         },
         {
             "type": "Other",
@@ -82,10 +112,6 @@
         {
             "type": "Other",
             "name": "Inglessi, Alexander"
-        },
-        {
-            "type": "Other",
-            "name": "Kelic-Heil, Aleksandra"
         },
         {
             "type": "Other",
@@ -113,19 +139,11 @@
         },
         {
             "type": "Other",
-            "name": "Loeher, Bastian"
-        },
-        {
-            "type": "Other",
             "name": "Milhomens da Fonseca, Leandro"
         },
         {
             "type": "Other",
-            "name": "Mozumdar, Nikhil"
-        },
-        {
-            "type": "Other",
-            "name": "Panin, Valerii"
+            "name": "Wagner, Vadim"
         },
         {
             "type": "Other",
@@ -149,15 +167,7 @@
         },
         {
             "type": "Other",
-            "name": "Taniuchi, Ryo"
-        },
-        {
-            "type": "Other",
             "name": "Tscheuschner, Joachim"
-        },
-        {
-            "type": "Other",
-            "name": "Wang, Yanzhao"
         },
         {
             "type": "Other",
@@ -166,10 +176,6 @@
         {
             "type": "Other",
             "name": "Wongel, Alicia"
-        },
-        {
-            "type": "Other",
-            "name": "Xarepe, Manuel"
         },
         {
             "type": "Other",

@@ -62,8 +62,23 @@
     },
     {
       "@type": "Person",
+      "givenName": "Audrey",
+      "familyName": "Chatillon"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Gabriel",
+      "familyName": "Garcia-Jimenez"
+    },
+    {
+      "@type": "Person",
       "givenName": "Michael",
       "familyName": "Heil"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Aleksandra",
+      "familyName": "Kelic-Heil"
     },
     {
       "@type": "Person",
@@ -73,8 +88,23 @@
     },
     {
       "@type": "Person",
+      "givenName": "Bastian",
+      "familyName": "Loeher"
+    },
+    {
+      "@type": "Person",
       "givenName": "Jan",
       "familyName": "Mayer"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Nikhil",
+      "familyName": "Mozumdar"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Valerii",
+      "familyName": "Panin"
     },
     {
       "@type": "Person",
@@ -84,26 +114,37 @@
     },
     {
       "@type": "Person",
-      "givenName": "Vadim",
-      "familyName": "Wagner"
+      "givenName": "Ryo",
+      "familyName": "Taniuchi"
     },
     {
       "@type": "Person",
-      "givenName": "Mohammad",
-      "familyName": "Al-Turany",
-      "@id": "https://orcid.org/0000-0002-8071-4497"
+      "@id": "https://orcid.org/0000-0002-7006-7986",
+      "givenName": "Yanzhao",
+      "familyName": "Wang"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Manuel",
+      "familyName": "Xarepe"
     }
   ],
   "contributor": [
     {
       "@type": "Person",
-      "givenName": "Pablo",
-      "familyName": "Cabanelas"
+      "@id": "https://orcid.org/0000-0002-8071-4497",
+      "givenName": "Mohammad",
+      "familyName": "Al-Turany"
     },
     {
       "@type": "Person",
-      "givenName": "Audrey",
-      "familyName": "Chatillon"
+      "givenName": "Konstanze",
+      "familyName": "Boretzky"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Pablo",
+      "familyName": "Cabanelas"
     },
     {
       "@type": "Person",
@@ -118,17 +159,12 @@
     {
       "@type": "Person",
       "givenName": "Martina",
-      "familyName": "Feijoo"
+      "familyName": "Feijoo-Fontan"
     },
     {
       "@type": "Person",
       "givenName": "Elisabet",
       "familyName": "Galiana"
-    },
-    {
-      "@type": "Person",
-      "givenName": "Gabriel",
-      "familyName": "Garcia"
     },
     {
       "@type": "Person",
@@ -138,7 +174,12 @@
     {
       "@type": "Person",
       "givenName": "Antia",
-      "familyName": "Gra\u00f1a"
+      "familyName": "Gra\u00f1a-Gonzalez"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Andrea",
+      "familyName": "Jedele"
     },
     {
       "@type": "Person",
@@ -159,11 +200,6 @@
       "@type": "Person",
       "givenName": "Alexander",
       "familyName": "Inglessi"
-    },
-    {
-      "@type": "Person",
-      "givenName": "Aleksandra",
-      "familyName": "Kelic-Heil"
     },
     {
       "@type": "Person",
@@ -197,13 +233,8 @@
     },
     {
       "@type": "Person",
-      "givenName": "Bastian",
-      "familyName": "Loeher"
-    },
-    {
-      "@type": "Person",
-      "givenName": "Valerii",
-      "familyName": "Panin"
+      "givenName": "Leandro",
+      "familyName": "Milhomens da Fonseca"
     },
     {
       "@type": "Person",
@@ -232,33 +263,13 @@
     },
     {
       "@type": "Person",
-      "givenName": "Ryo",
-      "familyName": "Taniuchi"
-    },
-    {
-      "@type": "Person",
       "givenName": "Joachim",
       "familyName": "Tscheuschner"
     },
     {
       "@type": "Person",
-      "givenName": "Yanzhao",
-      "familyName": "Wang"
-    },
-    {
-      "@type": "Person",
-      "givenName": "Alicia",
-      "familyName": "Wongel"
-    },
-    {
-      "@type": "Person",
-      "givenName": "Manuel",
-      "familyName": "Xarepe"
-    },
-    {
-      "@type": "Person",
-      "givenName": "Lorenzo",
-      "familyName": "Zanetti"
+      "givenName": "Vadim",
+      "familyName": "Wagner"
     },
     {
       "@type": "Person",
@@ -267,18 +278,13 @@
     },
     {
       "@type": "Person",
-      "givenName": "Konstanze",
-      "familyName": "Boretzky"
+      "givenName": "Alicia",
+      "familyName": "Wongel"
     },
     {
       "@type": "Person",
-      "givenName": "Leandro",
-      "familyName": "Milhomens da Fonseca"
-    },
-    {
-      "@type": "Person",
-      "givenName": "Nikhil",
-      "familyName": "Mozumdar"
+      "givenName": "Lorenzo",
+      "familyName": "Zanetti"
     }
   ]
 }
