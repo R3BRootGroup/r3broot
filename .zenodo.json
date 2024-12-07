@@ -1,105 +1,275 @@
 {
+    "description": "The R3BRoot software is based on the FairRoot framework and can be used to perform Monte Carlo simulations and experimental data analysis of the R3B (Reactions with Relativistic Radioactive Beams) nuclear physics experiments at the GSI-FAIR research center (Facility for Antiproton and Ion Research). The user can create simulated data and/or perform analysis with the same framework. Geant3 and Geant4 transport engines are supported, however, the implemented tasks that create simulated data do not depend on a particular Monte Carlo engine. The framework delivers base classes which enable the users to construct their detectors and/or analysis tasks in a simple way, it also delivers some general functionality like track visualization. Moreover, an interface for reading experimental and/or simulated magnetic field maps is also implemented.",
+    "maintainers": [
+        {
+            "name": "Rodriguez-Sánchez, Jose Luis",
+            "orcid": "0000-0002-4702-5294",
+            "email": "j.l.rodriguez.sanchez@udc.es",
+            "affiliation": "CITENI, Industrial Campus of Ferrol, University of Coruña, 15403 Ferrol, Spain"
+        }
+    ],
+    "related_identifiers": [
+        {
+            "identifier": "https://github.com/FairRootGroup/FairRoot/",
+            "relation": "isDerivedFrom",
+            "resource_type": "software",
+            "scheme": "url"
+        },
+        {
+            "identifier": "https://github.com/R3BRootGroup/R3BRoot/blob/dev/README.md",
+            "relation": "isDocumentedBy",
+            "resource_type": "documentation",
+            "scheme": "url"
+        }
+    ],
+    "title": "R3BRoot Software",
+    "upload_type": "software",
+    "softwareRequirements": [
+        "FairSoft, FairRoot"
+    ],
+    "programmingLanguage": [
+        "C",
+        "C++"
+    ],
+    "runtimePlatform": [
+        "ROOT"
+    ],
+    "operatingSystem": [
+        "Linux",
+        "macOS"
+    ],
+    "license": "LGPL-3.0-only",
+    "keywords": [
+        "Geant4",
+        "c-plus-plus",
+        "cmake",
+        "vmc",
+        "modular",
+        "Track reconstruction",
+        "Simulation",
+        "Data analysis",
+        "Structure and dynamics of nuclei",
+        "Nuclear reactions",
+        "Equation of state",
+        "Nuclear fission",
+        "Hypernuclei",
+        "R3B experiments",
+        "GSI/FAIR facility"
+    ],
     "creators": [
         {
-            "name": "Al-Turany, Mohammad",
-            "orcid": "0000-0002-8071-4497"
-        },
-        {
-            "name": "Chatillon, Audrey"
-        },
-        {
-            "name": "Garcia-Jimenez, Gabriel"
+            "name": "Rodríguez-Sánchez, Jose Luis",
+            "orcid": "0000-0002-4702-5294",
+            "email": "j.l.rodriguez.sanchez@udc.es",
+            "affiliation": "CITENI, Industrial Campus of Ferrol, University of Coruña, 15403 Ferrol, Spain"
         },
         {
             "name": "Alvarez Pol, Hector",
-            "orcid": "0000-0001-9643-6252"
+            "orcid": "0000-0001-9643-6252",
+            "email": "hector.alvarez@usc.es",
+            "affiliation": "IGFAE, University of Santiago de Compostela, 15782 Santiago de Compostela, Spain"
         },
         {
-            "name": "Kelic-Heil, Aleksandra"
+            "name": "Atar, Leyla",
+            "orcid": "0000-0001-6919-8869",
+            "affiliation": "GSI Helmholtzzentrum für Schwerionenforschung, 64291 Darmstadt, Germany"
         },
         {
-            "name": "Heil, Michael"
+            "name": "Bott, Lukas",
+            "orcid": "0000-0002-9554-6246",
+            "affiliation": "Goethe University Frankfurt, 60629 Frankfurt am Main, Germany"
         },
         {
-            "name": "Loeher, Bastian"
+            "name": "Chatillon, Audrey",
+            "affiliation": "CEA, DAM, DIF, 91297 Arpajon, France"
+        },
+        {
+            "name": "Feijoo-Fontán, Martina",
+            "orcid": "0000-0002-8507-5137",
+            "affiliation": "IGFAE, University of Santiago de Compostela, 15782 Santiago de Compostela, Spain"
+        },
+        {
+            "name": "García-Jiménez, Gabriel",
+            "orcid": "0000-0002-4435-0163",
+            "affiliation": "IGFAE, University of Santiago de Compostela, 15782 Santiago de Compostela, Spain"
+        },
+        {
+            "name": "Gasparic, Igor",
+            "orcid": "0000-0002-5022-3312",
+            "affiliation": "RBI Zagreb, HR10000 Zagreb, Croatia"
+        },
+        {
+            "name": "Graña-González, Antia",
+            "orcid": "0000-0002-0842-4110",
+            "affiliation": "CITENI, Industrial Campus of Ferrol, University of Coruña, 15403 Ferrol, Spain"
+        },
+        {
+            "name": "Heil, Michael",
+            "orcid": "0009-0000-9562-6644",
+            "affiliation": "GSI Helmholtzzentrum für Schwerionenforschung, 64291 Darmstadt, Germany"
+        },
+        {
+            "name": "Horvat, Andrea",
+            "orcid": "0009-0004-6882-5591",
+            "affiliation": "RBI Zagreb, HR10000 Zagreb, Croatia"
+        },
+        {
+            "name": "Jedele, Andrea",
+            "orcid": "0000-0002-6728-404X",
+            "affiliation": "Technische Universität Darmstadt, Fachbereich Physik, Institut für Kernphysik, 64289 Darmstadt, Germany"
+        },
+        {
+            "name": "Johansson, Håkan",
+            "orcid": "0000-0001-7978-8336",
+            "affiliation": "Institutionen för Fysik, Chalmers Tekniska Högskola, 412 96 Göteborg, Sweden"
+        },
+        {
+            "name": "Kelic-Heil, Aleksandra",
+            "orcid": "0000-0001-6830-8253",
+            "affiliation": "GSI Helmholtzzentrum für Schwerionenforschung, 64291 Darmstadt, Germany"
+        },
+        {
+            "name": "Klenze, Philipp",
+            "orcid": "0000-0001-5709-7315",
+            "affiliation": "GSI Helmholtzzentrum für Schwerionenforschung, 64291 Darmstadt, Germany"
         },
         {
             "name": "Kresan, Dmytro",
-            "orcid": "0000-0002-7537-2875"
+            "orcid": "0000-0002-7537-2875",
+            "email": "d.kresan@gsi.de",
+            "affiliation": "GSI Helmholtzzentrum für Schwerionenforschung, 64291 Darmstadt, Germany"
         },
         {
-            "name": "Mozumdar, Nikhil"
+            "name": "Kudaibergenova, Eleonora",
+            "affiliation": "Technische Universität Darmstadt, Fachbereich Physik, Institut für Kernphysik, 64289 Darmstadt, Germany"
         },
         {
-            "name": "Mayer, Jan"
+            "name": "Lagni, Andrea",
+            "orcid": "0009-0001-4189-7876",
+            "affiliation": "IGFAE, University of Santiago de Compostela, 15782 Santiago de Compostela, Spain"
         },
         {
-            "name": "Panin, Valerii"
+            "name": "Lihtar, Ivana",
+            "orcid": "0009-0006-6538-4377",
+            "affiliation": "RBI Zagreb, HR10000 Zagreb, Croatia"
         },
         {
-            "name": "Rodriguez Sanchez, Jose Luis",
-            "orcid": "0000-0002-4702-5294"
+            "name": "Milhomens da Fonseca, Leandro",
+            "orcid": "0000-0002-7930-6592",
+            "affiliation": "Technische Universität Darmstadt, Fachbereich Physik, Institut für Kernphysik, 64289 Darmstadt, Germany"
         },
         {
-            "name": "Taniuchi, Ryo"
+            "name": "Morfouace, Pierre",
+            "orcid": "0000-0002-2131-2199",
+            "affiliation": "CEA, DAM, DIF, 91297 Arpajon, France"
+        },
+        {
+            "name": "Loeher, Bastian",
+            "affiliation": "GSI Helmholtzzentrum für Schwerionenforschung, 64291 Darmstadt, Germany"
+        },
+        {
+            "name": "Mayer, Jan",
+            "affiliation": "Technical University of Berlin, 10587 Berlin, Germany"
+        },
+        {
+            "name": "Mozumdar, Nikhil",
+            "affiliation": "Technische Universität Darmstadt, Fachbereich Physik, Institut für Kernphysik, 64289 Darmstadt, Germany"
+        },
+        {
+            "name": "Panin, Valerii",
+            "orcid": "0000-0003-3551-5058",
+            "affiliation": "GSI Helmholtzzentrum für Schwerionenforschung, 64291 Darmstadt, Germany"
+        },
+        {
+            "name": "Taniuchi, Ryo",
+            "orcid": "0000-0002-8057-7074",
+            "affiliation": "School of Physics, Engineering and Technology, University of York, YO10 5DD York, United Kingdom"
+        },
+        {
+            "name": "Törnqvist, Hans",
+            "orcid": "0000-0001-9283-8430",
+            "affiliation": "Institutionen för Fysik, Chalmers Tekniska Högskola, 412 96 Göteborg, Sweden"
+        },
+        {
+            "name": "Wagner, Vadim",
+            "affiliation": "Technische Universität Darmstadt, Fachbereich Physik, Institut für Kernphysik, 64289 Darmstadt, Germany"
         },
         {
             "name": "Wang, Yanzhao",
-            "orcid": "0000-0002-7006-7986"
+            "orcid": "0000-0002-7006-7986",
+            "affiliation": "Universität zu Köln, 50923 Köln, Germany"
         },
         {
-            "name": "Xarepe, Manuel"
+            "name": "Whitehead, Matthew",
+            "affiliation": "School of Physics, Engineering and Technology, University of York, YO10 5DD York, United Kingdom"
+        },
+        {
+            "name": "Xarepe, Manuel",
+            "orcid": "0000-0003-1966-2234",
+            "affiliation": "Faculty of Science of the University of Lisbon, 1749-016 Lisboa, Portugal"
         }
     ],
     "contributors": [
         {
             "type": "Other",
             "name": "Al-Turany, Mohammad",
-            "orcid": "0000-0002-8071-4497"
+            "orcid": "0000-0002-8071-4497",
+            "affiliation": "GSI Helmholtzzentrum für Schwerionenforschung, 64291 Darmstadt, Germany"
         },
         {
             "type": "Other",
-            "name": "Boretzky, Konstanze"
+            "name": "Audouin, Laurent",
+            "orcid": "0000-0001-9899-6923",
+            "affiliation": "IPN Orsay, 91406 Orsay, France"
         },
         {
             "type": "Other",
-            "name": "Cabanelas, Pablo"
+            "name": "Bajzek, Martin",
+            "affiliation": "GSI Helmholtzzentrum für Schwerionenforschung, 64291 Darmstadt, Germany"
         },
         {
             "type": "Other",
-            "name": "Chatillon, Audrey"
+            "name": "Barriere, Antoine",
+            "orcid": "0009-0005-2204-3516",
+            "affiliation": "GANIL, 14000 Caen, France"
         },
         {
             "type": "Other",
-            "name": "Douma, Christiaan"
+            "name": "Boretzky, Konstanze",
+            "affiliation": "GSI Helmholtzzentrum für Schwerionenforschung, 64291 Darmstadt, Germany"
         },
         {
             "type": "Other",
-            "name": "Feijoo-Fontan, Martina"
+            "name": "Cabanelas, Pablo",
+            "orcid": "0000-0002-5416-4647",
+            "affiliation": "IGFAE, University of Santiago de Compostela, 15782 Santiago de Compostela, Spain"
         },
         {
             "type": "Other",
-            "name": "Falduto, Ashton"
+            "name": "Douma, Christiaan",
+            "affiliation": "University of Gronningen, 9712 Gronningen, The Netherlands"
         },
         {
             "type": "Other",
-            "name": "Gra\u00f1a-Gonzalez, Antia"
+            "name": "Falduto, Ashton",
+            "affiliation": "Technische Universität Darmstadt, Fachbereich Physik, Institut für Kernphysik, 64289 Darmstadt, Germany"
         },
         {
             "type": "Other",
-            "name": "Galiana, Elisabet"
+            "name": "Galaviz, Daniel",
+            "orcid": "0000-0003-2992-4496",
+            "affiliation": "Faculty of Science of the University of Lisbon, 1749-016 Lisboa, Portugal"
         },
         {
             "type": "Other",
-            "name": "Jedele, Andrea"
+            "name": "Galiana, Elisabet",
+            "affiliation": "IGFAE, University of Santiago de Compostela, 15782 Santiago de Compostela, Spain"
         },
         {
             "type": "Other",
-            "name": "Gasparic, Igor"
-        },
-        {
-            "type": "Other",
-            "name": "Johansson, H\u00e5kan"
+            "name": "Gernhäuser, Roman",
+            "orcid": "0000-0003-1778-4262",
+            "affiliation": "Technische Universität München, 85748 Garching, Germany"
         },
         {
             "type": "Other",
@@ -107,15 +277,17 @@
         },
         {
             "type": "Other",
-            "name": "Horvat, Andrea"
-        },
-        {
-            "type": "Other",
             "name": "Inglessi, Alexander"
         },
         {
             "type": "Other",
-            "name": "Klenze, Philipp"
+            "name": "Jelavic-Malenica, Deša",
+            "affiliation": "RBI Zagreb, HR10000 Zagreb, Croatia"
+        },
+        {
+            "type": "Other",
+            "name": "Jenegger, Tobias",
+            "affiliation": "Technische Universität München, 85748 Garching, Germany"
         },
         {
             "type": "Other",
@@ -123,35 +295,30 @@
         },
         {
             "type": "Other",
-            "name": "Kudaibergenova, Eleonora"
+            "name": "Labiche, Marc",
+            "orcid": "0000-0002-6506-8562",
+            "affiliation": "STFC Daresbury Laboratory, Warrington, United Kingdom"
         },
         {
             "type": "Other",
-            "name": "Labiche, Marc"
+            "name": "Paschalis, Stefanos",
+            "orcid": "0000-0002-9113-3778",
+            "affiliation": "School of Physics, Engineering and Technology, University of York, YO10 5DD York, United Kingdom"
         },
         {
             "type": "Other",
-            "name": "Lagni, Andrea"
+            "name": "Perea, Angel",
+            "affiliation": "Instituto de Estructura de la Materia, CSIC, 28006 Madrid, Spain"
         },
         {
             "type": "Other",
-            "name": "Lihtar, Ivana"
+            "name": "Plag, Ralf",
+            "affiliation": "GSI Helmholtzzentrum für Schwerionenforschung, 64291 Darmstadt, Germany"
         },
         {
             "type": "Other",
-            "name": "Milhomens da Fonseca, Leandro"
-        },
-        {
-            "type": "Other",
-            "name": "Wagner, Vadim"
-        },
-        {
-            "type": "Other",
-            "name": "Plag, Ralf"
-        },
-        {
-            "type": "Other",
-            "name": "Ponnath, Lukas"
+            "name": "Ponnath, Lukas",
+            "affiliation": "Technische Universität Darmstadt, Fachbereich Physik, Institut für Kernphysik, 64289 Darmstadt, Germany"
         },
         {
             "type": "Other",
@@ -159,11 +326,28 @@
         },
         {
             "type": "Other",
-            "name": "Storck, Sonja"
+            "name": "Rose, Luke",
+            "affiliation": "School of Physics, Engineering and Technology, University of York, YO10 5DD York, United Kingdom"
         },
         {
             "type": "Other",
-            "name": "Syndikus, Ina"
+            "name": "Rossi, Dominic",
+            "affiliation": "Technische Universität Darmstadt, Fachbereich Physik, Institut für Kernphysik, 64289 Darmstadt, Germany"
+        },
+        {
+            "type": "Other",
+            "name": "Storck, Sonja",
+            "affiliation": "Technische Universität Darmstadt, Fachbereich Physik, Institut für Kernphysik, 64289 Darmstadt, Germany"
+        },
+        {
+            "type": "Other",
+            "name": "Sürder, Christian",
+            "affiliation": "Technische Universität Darmstadt, Fachbereich Physik, Institut für Kernphysik, 64289 Darmstadt, Germany"
+        },
+        {
+            "type": "Other",
+            "name": "Syndikus, Ina",
+            "affiliation": "Technische Universität Darmstadt, Fachbereich Physik, Institut für Kernphysik, 64289 Darmstadt, Germany"
         },
         {
             "type": "Other",
@@ -171,25 +355,12 @@
         },
         {
             "type": "Other",
-            "name": "Whitehead, Matthew"
-        },
-        {
-            "type": "Other",
             "name": "Wongel, Alicia"
         },
         {
             "type": "Other",
-            "name": "Zanetti, Lorenzo"
+            "name": "Zanetti, Lorenzo",
+            "affiliation": "GSI Helmholtzzentrum für Schwerionenforschung, 64291 Darmstadt, Germany"
         }
-    ],
-    "description": "The R3BRoot software is based on the FairRoot framework and can be used to perform Monte Carlo simulations and experimental data analysis of the R3B (Reactions with Relativistic Radioactive Beams) nuclear physics experiments at the GSI-FAIR research center (Facility for Antiproton and Ion Research). The user can create simulated data and/or perform analysis with the same framework. Geant3 and Geant4 transport engines are supported, however, the implemented tasks that create simulated data do not depend on a particular Monte Carlo engine. The framework delivers base classes which enable the users to construct their detectors and/or analysis tasks in a simple way, it also delivers some general functionality like track visualization. Moreover, an interface for reading experimental and/or simulated magnetic field maps is also implemented.",
-    "related_identifiers": [
-        {
-            "identifier": "https://github.com/R3BRootGroup/R3BRoot/",
-            "relation": "isSupplementTo",
-            "resource_type": "software",
-            "scheme": "url"
-        }
-    ],
-    "title": "R3BRoot"
+    ]
 }

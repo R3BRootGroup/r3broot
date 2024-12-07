@@ -9,13 +9,11 @@ on:
     paths:
     - AUTHORS
     - CONTRIBUTORS
-    - codemeta.json
     - .zenodo.json
   pull_request:
     paths:
     - AUTHORS
     - CONTRIBUTORS
-    - codemeta.json
     - .zenodo.json
 
 jobs:
