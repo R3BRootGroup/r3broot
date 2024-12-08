@@ -1,4 +1,5 @@
 {
+    "access_right": "open",
     "description": "The R3BRoot software is based on the FairRoot framework and can be used to perform Monte Carlo simulations and experimental data analysis of the R3B (Reactions with Relativistic Radioactive Beams) nuclear physics experiments at the GSI-FAIR research center (Facility for Antiproton and Ion Research). The user can create simulated data and/or perform analysis with the same framework. Geant3 and Geant4 transport engines are supported, however, the implemented tasks that create simulated data do not depend on a particular Monte Carlo engine. The framework delivers base classes which enable the users to construct their detectors and/or analysis tasks in a simple way, it also delivers some general functionality like track visualization. Moreover, an interface for reading experimental and/or simulated magnetic field maps is also implemented.",
     "maintainers": [
         {
@@ -10,16 +11,34 @@
     ],
     "related_identifiers": [
         {
+            "identifier": "https://github.com/FairRootGroup/FairSoft/",
+            "relation": "isDerivedFrom",
+            "resource_type": "software",
+            "scheme": "url"
+        },
+        {
             "identifier": "https://github.com/FairRootGroup/FairRoot/",
             "relation": "isDerivedFrom",
             "resource_type": "software",
             "scheme": "url"
         },
         {
+            "identifier": "https://gitlab.com/chalmers-subexp/ucesb/",
+            "relation": "isRelatedTo",
+            "resource_type": "software",
+            "scheme": "url"
+        },
+        {
             "identifier": "https://github.com/R3BRootGroup/R3BRoot/blob/dev/README.md",
             "relation": "isDocumentedBy",
-            "resource_type": "documentation",
+            "resource_type": "publication-softwaredocumentation",
             "scheme": "url"
+        },
+        {
+            "identifier": "10.1088/1742-6596/523/1/012034",
+            "relation": "isDocumentedBy",
+            "resource_type": "publication-annotationcollection",
+            "scheme": "handle"
         }
     ],
     "title": "R3BRoot Software",

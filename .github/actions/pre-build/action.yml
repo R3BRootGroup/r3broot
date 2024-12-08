@@ -8,9 +8,9 @@ runs:
       run: |
         git config --global --add safe.directory $GITHUB_WORKSPACE
         echo "UCESB_DIR=$GITHUB_WORKSPACE/ucesb/" >> $GITHUB_ENV
-        export SIMPATH=${CVMDIR}/debian10/fairsoft/nov22p1
+        export SIMPATH=${CVMDIR}/debian10/fairsoft/jan24p1
         echo "SIMPATH=${SIMPATH}" >> $GITHUB_ENV
-        echo "FAIRROOTPATH=${CVMDIR}/debian10/fairroot/v18.8.0_fs_nov22p1" >> $GITHUB_ENV
+        echo "FAIRROOTPATH=${CVMDIR}/debian10/fairroot/v18.8.2_jan24p1" >> $GITHUB_ENV
         echo "${SIMPATH}/bin" >> $GITHUB_PATH
         # variables for ccache
         echo "CCACHE_BASEDIR=${GITHUB_WORKSPACE}" >> $GITHUB_ENV
