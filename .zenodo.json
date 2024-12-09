@@ -1,6 +1,6 @@
 {
     "access_right": "open",
-    "description": "The R3BRoot software is based on the FairRoot framework and can be used to perform Monte Carlo simulations and experimental data analysis of the R3B (Reactions with Relativistic Radioactive Beams) nuclear physics experiments at the GSI-FAIR research center (Facility for Antiproton and Ion Research). The user can create simulated data and/or perform analysis with the same framework. Geant3 and Geant4 transport engines are supported, however, the implemented tasks that create simulated data do not depend on a particular Monte Carlo engine. The framework delivers base classes which enable the users to construct their detectors and/or analysis tasks in a simple way, it also delivers some general functionality like track visualization. Moreover, an interface for reading experimental and/or simulated magnetic field maps is also implemented.",
+    "description": "The R3BRoot software is based on the FairRoot framework and can be used to perform Monte Carlo simulations and experimental data analysis of the R3B (Reactions with Relativistic Radioactive Beams) nuclear physics experiments at the GSI-FAIR research center (Facility for Antiproton and Ion Research). The user can create simulated data and/or perform analysis with the same framework. Geant3 and Geant4 transport engines are supported, however, the implemented tasks that create simulated data do not depend on a particular Monte Carlo engine. The framework delivers base classes which enable the users to construct their detectors and/or analysis tasks in a simple way, it also delivers some general functionality like track visualization. Moreover, an interface for reading experimental and/or simulated magnetic field maps is also implemented. R3BRoot is a source distribution with recurring releases for macOS and Linux.",
     "maintainers": [
         {
             "name": "Rodriguez-Sánchez, Jose Luis",
@@ -92,6 +92,11 @@
             "name": "Atar, Leyla",
             "orcid": "0000-0001-6919-8869",
             "affiliation": "GSI Helmholtzzentrum für Schwerionenforschung, 64291 Darmstadt, Germany"
+        },
+        {
+            "name": "Barriere, Antoine",
+            "orcid": "0009-0005-2204-3516",
+            "affiliation": "GANIL, 14000 Caen, France"
         },
         {
             "name": "Bott, Lukas",
@@ -245,12 +250,6 @@
             "type": "Other",
             "name": "Bajzek, Martin",
             "affiliation": "GSI Helmholtzzentrum für Schwerionenforschung, 64291 Darmstadt, Germany"
-        },
-        {
-            "type": "Other",
-            "name": "Barriere, Antoine",
-            "orcid": "0009-0005-2204-3516",
-            "affiliation": "GANIL, 14000 Caen, France"
         },
         {
             "type": "Other",
