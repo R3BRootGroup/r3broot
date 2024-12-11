@@ -48,7 +48,7 @@ class R3BOptimizeGeometryS494 : public FairTask
 
     virtual void Exec(const Option_t* = "");
 
-    double Chi2();
+    std::vector<double> Chi2();
 
     virtual void Finish();
 
@@ -123,7 +123,7 @@ class R3BOptimizeGeometryS494 : public FairTask
     Double_t fBfield;
     Int_t maxevent;
     Bool_t fWriteOut;
-    Double_t minChi2;
+    Double_t minChi2, xChi2min, eChi2min;
     Double_t minChi2_12C;
     Double_t minChi2_4He;
     TLorentzVector alphaP, carbonP;

@@ -528,9 +528,15 @@ double Chi2AllEvents(const double* xx)
     // tofd->pos0.Print();
     // tofd->pos1.Print();
     // tofd->pos2.Print();
-
+    Double_t sigma_erel = 0.;
+    Double_t sigma_pos = 0.;
+    Double_t chi2_all_erel = 0.;
+    Double_t chi2_all_pos = 0.;
+    std::vector<double> chi2par;
     for (Int_t iev = 0; iev < gThisTask->GetNEvents(); iev++)
     {
+        //  cout << "***** STARTING WITH EVENT: "<<iev+1<<" **************"<< endl;
+
         gSetup->TakeHitsFromBuffer(iev);
         Double_t fieldScale;
 
@@ -541,18 +547,32 @@ double Chi2AllEvents(const double* xx)
         // Double_t field = ((R3BGladFieldMap *) FairRunAna::Instance()->GetField())->GetBy(0.,0.,240.);
         // cout << "Field:" << field << " scale: " << scale << endl;
 
-        Double_t chi2 = gThisTask->Chi2();
-        if (chi2 > 0)
+        // Double_t chi2 = gThisTask->Chi2();
+        chi2par = gThisTask->Chi2();
+        Double_t sigma1 = chi2par[0];
+        Double_t sigma2 = chi2par[1];
+        // cout<<"chi2s into Chi2AllEvents: "<<sigma1<<", "<<sigma2<<endl;
+        // if (chi2 > 0)
+        if (sigma1 > 0. && sigma2 > 0.)
         {
             // cout << "For event: "<<iev+1<<" Chi2 value: " << chi2 << endl;
             // cout<<"  "<<endl;
-            chi2_all += chi2;
+            // chi2_all += chi2;
+            sigma_erel += sigma1;
+            sigma_pos += sigma2;
             nof++;
         }
+        chi2par.clear();
     }
+    // cout<<"Test: "<<sigma_erel<<"; "<<sigma_pos<<endl;
+    chi2_all_pos = sigma_pos / (double)(nof - 1);
+    sigma_erel = sqrt(sigma_erel / (double)(nof - 1));
+    chi2_all_erel = sqrt((sigma_erel - 0.15) * (sigma_erel - 0.15)) * 100.;
+    chi2_all = sqrt(chi2_all_pos * chi2_all_pos + chi2_all_erel * chi2_all_erel);
 
-    // cout << "Test: " << nof << endl;
-    chi2_all = chi2_all / (double)nof;
+    // cout<<"chi2s out of Chi2AllEvents: sigma_erel= "<<sigma_erel<<", chi2_all_erel= "<<chi2_all_erel<<";
+    // chi2_all_pos= "<<chi2_all_pos<<", chi2_all= "<<chi2_all<<endl; cout << "NoF: " << nof << endl; chi2_all =
+    // chi2_all / (double)nof;
 
     if (nof < 1)
         chi2_all = 1.e6;
@@ -560,11 +580,12 @@ double Chi2AllEvents(const double* xx)
     cout << "With parameters: " << xx[0] << ", " << xx[1] << ", " << xx[2] << ", " << xx[3] << ", " << xx[4] << ", "
          << xx[5] << ", " << xx[6] << ", " << xx[7] << ", " << xx[8] << ", " << xx[9] << ", " << xx[10] << ", "
          << xx[11] << ", " << xx[12] << ", " << xx[13] << ", " << xx[14] << ", " << xx[15] << endl;
-    cout << "Chi2 all: " << chi2_all << " for nof: " << nof << endl;
+    cout << "Chi2 all: " << chi2_all << " for nof: " << nof << ", chi2_all_erel= " << chi2_all_erel
+         << "; chi2_all_pos= " << chi2_all_pos << endl;
     return chi2_all;
 }
 
-double R3BOptimizeGeometryS494::Chi2()
+std::vector<double> R3BOptimizeGeometryS494::Chi2()
 {
 
     fArrayFragments->Clear();
@@ -762,7 +783,10 @@ double R3BOptimizeGeometryS494::Chi2()
 
     Int_t iretrack_max = 1;
     Double_t psum_mem = -10000.;
-
+    vector<double> Chi2par;
+    vector<double> Chi2parfalse;
+    Chi2parfalse.push_back(-1.);
+    Chi2parfalse.push_back(-1.);
     for (Int_t iretrack = 0; iretrack < iretrack_max + 1; iretrack++)
     {
         Int_t ifi23a = 0;
@@ -877,6 +901,9 @@ double R3BOptimizeGeometryS494::Chi2()
             }
 
             z0 = 0.0;
+
+            //   cout<<"Starting with tracking for charge = "<<charge_requested<<", for iretack: "<<iretrack<<", and x0:
+            //   "<<x0<<endl;
 
             // Loop over all combinations of hits
             for (Int_t i = 0; i < tof->hits.size(); i++) // loop over all ToFD hits
@@ -1088,17 +1115,20 @@ double R3BOptimizeGeometryS494::Chi2()
                                              << " p0: " << p0 << " beta0: " << beta0 << " m0: " << m0 << endl;
                                         cout << "Hit Tofd # " << i << " x: " << tof->hits.at(i)->GetX()
                                              << " y: " << tof->hits.at(i)->GetY() << endl;
+
+                                        if (ifi23a > -1)
+                                            cout << " Fi23a left # " << ifi23a
+                                                 << " x: " << fi23a->hits.at(ifi23a)->GetX() << endl;
+                                        if (ifi23b > -1)
+                                            cout << " left Fi23b # " << ifi23b
+                                                 << " y: " << fi23b->hits.at(ifi23b)->GetY() << endl;
+                                        if (ifi30 > -1)
+                                            cout << " fi30 # " << ifi30 << " x: " << fi30->hits.at(ifi30)->GetX()
+                                                 << endl;
+                                        if (ifi32 > -1)
+                                            cout << " fi32 # " << ifi32 << " x: " << fi32->hits.at(ifi32)->GetX()
+                                                 << endl;
                                     }
-                                    if (ifi23a > -1 && debug)
-                                        cout << " Fi23a left # " << ifi23a << " x: " << fi23a->hits.at(ifi23a)->GetX()
-                                             << endl;
-                                    if (ifi23b > -1 && debug)
-                                        cout << " left Fi23b # " << ifi23b << " y: " << fi23b->hits.at(ifi23b)->GetY()
-                                             << endl;
-                                    if (ifi30 > -1 && debug)
-                                        cout << " fi30 # " << ifi30 << " x: " << fi30->hits.at(ifi30)->GetX() << endl;
-                                    if (ifi32 > -1 && debug)
-                                        cout << " fi32 # " << ifi32 << " x: " << fi32->hits.at(ifi32)->GetX() << endl;
                                     // add points through which tracker has to go:
                                     candidate->AddHit("target", 0);
                                     candidate->AddHit("tofd", i);
@@ -1323,17 +1353,20 @@ double R3BOptimizeGeometryS494::Chi2()
                                              << " p0: " << p0 << " beta0: " << beta0 << " m0: " << m0 << endl;
                                         cout << "Hit Tofd # " << i << " x: " << tof->hits.at(i)->GetX()
                                              << " y: " << tof->hits.at(i)->GetY() << endl;
+
+                                        if (ifi23a > -1)
+                                            cout << "Fi23a # " << ifi23a << " x: " << fi23a->hits.at(ifi23a)->GetX()
+                                                 << endl;
+                                        if (ifi23b > -1)
+                                            cout << "Fi23b # " << ifi23b << " y: " << fi23b->hits.at(ifi23b)->GetY()
+                                                 << endl;
+                                        if (ifi33 > -1)
+                                            cout << "Fi33 # " << ifi33 << " x: " << fi33->hits.at(ifi33)->GetX()
+                                                 << endl;
+                                        if (ifi31 > -1)
+                                            cout << "Fi31  # " << ifi31 << " x: " << fi31->hits.at(ifi31)->GetX()
+                                                 << endl;
                                     }
-                                    if (ifi23a > -1 && debug)
-                                        cout << "Fi23a # " << ifi23a << " x: " << fi23a->hits.at(ifi23a)->GetX()
-                                             << endl;
-                                    if (ifi23b > -1 && debug)
-                                        cout << "Fi23b # " << ifi23b << " y: " << fi23b->hits.at(ifi23b)->GetY()
-                                             << endl;
-                                    if (ifi33 > -1 && debug)
-                                        cout << "Fi33 # " << ifi33 << " x: " << fi33->hits.at(ifi33)->GetX() << endl;
-                                    if (ifi31 > -1 && debug)
-                                        cout << "Fi31  # " << ifi31 << " x: " << fi31->hits.at(ifi31)->GetX() << endl;
 
                                     candidate->AddHit("target", 0);
                                     candidate->AddHit("tofd", i);
@@ -1463,6 +1496,8 @@ double R3BOptimizeGeometryS494::Chi2()
             minChi2 = 1e10;
             pChi2 = 1e10;
             eChi2 = 1e10;
+            xChi2min = 1e10;
+            eChi2min = 1e10;
             Double_t parChi2 = 1e10;
             Double_t xChi2 = 1e10;
             Double_t sigmap = 0.01 * p0;
@@ -1492,7 +1527,7 @@ double R3BOptimizeGeometryS494::Chi2()
                             bestcandidate = x;
                             minChi2 = parChi2;
 
-                            // cout << "New min chi2 for 12C: " << minChi2 << endl;
+                            //  cout << "New min chi2 for 12C: " << minChi2 << " for iretrack= "<<iretrack<<endl;
                             // cout << "Corresponding Mass   : " << x->GetMass() << endl;
                             // cout << "Corresponding Mass   : " << bestcandidate->GetMass() << endl;
                         }
@@ -1532,10 +1567,15 @@ double R3BOptimizeGeometryS494::Chi2()
                             minChi2 = parChi2;
 
                             if (l == 2)
+                            {
                                 psum_mem = psum;
+                                xChi2min = xChi2;
+                                eChi2min = eChi2 * (sigmaErel * sigmaErel);
+                            }
 
-                            // cout << "For event: "<<fNEvents_nonull<<" new min chi2 for He: " << minChi2 << ", Erel:
-                            // "<<Erel<<", "<<Erel_check<<endl;
+                            //  cout << "New min chi2 for 4He: "<< minChi2 << ", xChi2: "<<xChi2min<< ", eChi2:
+                            //  "<<eChi2<<" for iretrack= "<<iretrack<<"; "
+                            // <<Erel<<", "<<psum<<endl;
                         }
                         //	cout<<"selected: "<<bestcandidate->GetStartMomentum().Z()<<",
                         //"<<bestcandidate->GetStartPosition().X()<<", "<< 	bestcandidate->GetStartPosition().Y()<<",
@@ -1630,15 +1670,30 @@ double R3BOptimizeGeometryS494::Chi2()
                         cout << "12C" << endl;
 
                     carbon = kTRUE;
-                    x0soll = x0C;
-                    y0soll = y0C;
-                    z0soll = z0C;
-                    px0soll = px0C;
-                    py0soll = py0C;
-                    pz0soll = pz0C;
-                    psoll = pC;
-                    m0soll = massC * 1.e-3;
-                    beta0soll = betaC;
+                    if (fSimu)
+                    {
+                        x0soll = x0C;
+                        y0soll = y0C;
+                        z0soll = z0C;
+                        px0soll = px0C;
+                        py0soll = py0C;
+                        pz0soll = pz0C;
+                        psoll = pC;
+                        m0soll = massC * 1.e-3;
+                        beta0soll = betaC;
+                    }
+                    else
+                    {
+                        x0soll = 0.;
+                        y0soll = 0.;
+                        z0soll = 0.;
+                        px0soll = 0.;
+                        py0soll = 0.;
+                        pz0soll = 13.043625;
+                        psoll = 13.043625;
+                        m0soll = massC * 1.e-3;
+                        beta0soll = 0.7593209;
+                    }
                     counterC += 1;
                     chargemem = Charge;
                 }
@@ -1648,20 +1703,35 @@ double R3BOptimizeGeometryS494::Chi2()
                     if (debug)
                         cout << "4He" << endl;
                     alpha = kTRUE;
-                    x0soll = xmem; // x0He;
-                    y0soll = ymem; // y0He;
-                    z0soll = zmem; // z0He;
-                    px0soll = px0He;
-                    py0soll = py0He;
-                    pz0soll = pz0He;
-                    psoll = pHe;
-                    m0soll = massHe * 1.e-3;
-                    beta0soll = betaHe;
+                    if (fSimu)
+                    {
+                        x0soll = xmem; // x0He;
+                        y0soll = ymem; // y0He;
+                        z0soll = zmem; // z0He;
+                        px0soll = px0He;
+                        py0soll = py0He;
+                        pz0soll = pz0He;
+                        psoll = pHe;
+                        m0soll = massHe * 1.e-3;
+                        beta0soll = betaHe;
+                    }
+                    else
+                    {
+                        x0soll = 0.;
+                        y0soll = 0.;
+                        z0soll = 0.;
+                        px0soll = 0.;
+                        py0soll = 0.;
+                        pz0soll = 4.347875;
+                        psoll = 4.347875;
+                        m0soll = massHe * 1.e-3;
+                        beta0soll = 0.7593209;
+                    }
                     counterHe += 1;
                 }
                 if (debug)
                 {
-                    cout << "Results after tracking :" << endl;
+                    cout << "Results after tracking for iretrack: " << iretrack << endl;
                     cout << "Charge   : " << charge << endl;
                     cout << "Position (soll) x: " << x0soll << " y: " << y0soll << " z: " << z0soll << endl;
                     cout << "Position (ist)  x: " << bestcandidate->GetStartPosition().X()
@@ -1693,7 +1763,12 @@ double R3BOptimizeGeometryS494::Chi2()
                     if (iretrack == 0)
                         m0Chi2 = sqrt(minChi2_12C * minChi2_12C + minChi2_4He * minChi2_4He);
                     if (iretrack == iretrack_max)
+                    {
                         m1Chi2 = sqrt(minChi2_12C * minChi2_12C + minChi2_4He * minChi2_4He);
+                        Chi2par.push_back(eChi2min);
+                        Double_t xChi2pair = sqrt(minChi2_12C * minChi2_12C + xChi2min * xChi2min);
+                        Chi2par.push_back(xChi2pair);
+                    }
                 }
 
                 fPropagator->SetVis(fVis);
@@ -1724,11 +1799,13 @@ double R3BOptimizeGeometryS494::Chi2()
         if (debug)
         {
             cout << "For iretrack = " << iretrack << endl;
-            cout << "chi2 12C: " << minChi2_12C << endl;
-            cout << "Momentum 12C: " << pCx << "  " << pCy << "  " << pCz << endl;
-            cout << "chi2 4He: " << minChi2 << endl;
-            cout << "Momentum 4He: " << pHex << "  " << pHey << "  " << pHez << endl;
-            cout << "Found Tracks with chi2 He/C= " << minChi2 << " / " << minChi2_12C << ", Erel: " << Erel
+            //  cout << "chi2 12C: " << minChi2_12C << endl;
+            //  cout << "Momentum 12C: " << pCx << "  " << pCy << "  " << pCz << endl;
+            //  cout << "chi2 4He: " << minChi2 << endl;
+            //  cout << "Momentum 4He: " << pHex << "  " << pHey << "  " << pHez << endl;
+            if (iretrack == iretrack_max)
+                cout << "Chi2par components: " << Chi2par[0] << ", " << Chi2par[1] << endl;
+            cout << "Found track with chi2 He/C= " << minChi2 << " / " << minChi2_12C << ", Erel: " << Erel
                  << ", and psum: " << psum << ", x0: " << xmem << ", y0: " << ymem << endl;
         }
 
@@ -1736,9 +1813,13 @@ double R3BOptimizeGeometryS494::Chi2()
 
     if (m1Chi2 < 1000000.0)
     {
-        return m1Chi2;
+        // return m1Chi2;
+        return Chi2par;
     }
-    return -1.;
+    return Chi2parfalse;
+
+    Chi2parfalse.clear();
+    Chi2par.clear();
 }
 
 void R3BOptimizeGeometryS494::Finish()
@@ -1760,8 +1841,8 @@ void R3BOptimizeGeometryS494::Finish()
     // Minimum = ROOT::Math::Factory::CreateMinimizer("Minuit2", "Migrad");
     // Migrad, Simplex, Scan,
     // set tolerance , etc...
-    mini->SetMaxFunctionCalls(1); // for Minuit/Minuit2
-    mini->SetMaxIterations(100);  // for GSL
+    mini->SetMaxFunctionCalls(10000); // for Minuit/Minuit2
+    mini->SetMaxIterations(100);      // for GSL
     mini->SetTolerance(10);
     mini->SetStrategy(1);
     mini->SetPrintLevel(1);
@@ -1813,7 +1894,7 @@ void R3BOptimizeGeometryS494::Finish()
 
     Double_t variable[16];
 
-    Int_t nroundsmax = 1; // 4;//000;
+    Int_t nroundsmax = 6; // 4;//000;
     Int_t nstepchi2 = 0;
     Int_t status = 0;
 
@@ -1825,6 +1906,8 @@ void R3BOptimizeGeometryS494::Finish()
 
         // ********************************************************************************************
         gRandom->SetSeed(0);
+
+        variable_mem[2] = variable_default[2] + (double)(i - 3) * 0.4;
 
         //   variable_mem[3] = gRandom->Gaus(variable_default[3], variable_sigma[3]);    // xfi30
         //   variable_mem[4] = gRandom->Gaus(variable_default[4], variable_sigma[4]);    // zfi30
@@ -1899,7 +1982,7 @@ void R3BOptimizeGeometryS494::Finish()
 
         mini->FixVariable(0);
         mini->FixVariable(1);
-        mini->FixVariable(2);
+        // mini->FixVariable(2);
         mini->FixVariable(3);
         mini->FixVariable(4);
         mini->FixVariable(5);
@@ -1928,7 +2011,7 @@ void R3BOptimizeGeometryS494::Finish()
 
         // *************************************************************************************************
 
-        if (chi2_start > 1000.)
+        if (chi2_start > -1000.)
         {
             cout << "Start chi2 to large: " << chi2_start << ", new start values will be chosen" << endl;
         }
@@ -1936,12 +2019,14 @@ void R3BOptimizeGeometryS494::Finish()
         {
             cout << "Start chi2 ok: " << chi2_start << ", optimization will start" << endl;
 
-            mini->ReleaseVariable(3);  // xfi30
-            mini->ReleaseVariable(4);  // zfi30
-            mini->ReleaseVariable(5);  // xfi32
-            mini->ReleaseVariable(12); // thetafi30
-            mini->ReleaseVariable(14); // thetafi32
-
+            mini->ReleaseVariable(2); // zfi23
+                                      /*
+                                          mini->ReleaseVariable(3);  // xfi30
+                                          mini->ReleaseVariable(4);  // zfi30
+                                          mini->ReleaseVariable(5);  // xfi32
+                                          mini->ReleaseVariable(12); // thetafi30
+                                          mini->ReleaseVariable(14); // thetafi32
+                                      */
             // do the minimization
             mini->Minimize();
 

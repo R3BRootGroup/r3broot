@@ -131,7 +131,7 @@ double Chi2MomentumForward(const double* xx)
 
     if (gCandidate->GetMass() > 110.0)
     {
-        cout << "In chi2 forward" << endl;
+        cout << "In chi2 forward with mass: " << gCandidate->GetMass() << endl;
         cout << "Starting momentum: " << gCandidate->GetMomentum().X() << "  " << gCandidate->GetMomentum().Y() << "  "
              << gCandidate->GetMomentum().Z() << endl;
         cout << "Starting position: " << gCandidate->GetPosition().X() << "  " << gCandidate->GetPosition().Y() << "  "
@@ -311,20 +311,23 @@ double Chi2MomentumForward(const double* xx)
             // chi2 += TMath::Power((x_l - hit->GetX()) / det->res_x, 2);
             // LOG(info) << nchi2 << "  " << chi2 << ",  dev: " << (x_l - det->hit_x);
             // LOG(debug)
-            //  cout << "chi2calc x: " << det->GetDetectorName().Data() << " res: " << det->res_x << " pos: " << x_l
-            //           << " hit: " << hit->GetX() << " dev: " << x_l - hit->GetX() << " chi2: " << chi2temp << endl;
+            // cout <<" At " << det->GetDetectorName() <<", chi2_x: "<<chi2temp<<", x_l= "<<x_l<<"; hit->GetX()= "
+            // <<hit->GetX()<<", diff: "<<x_l - hit->GetX()<<endl;
 
             nchi2 += 1;
         }
-        if (hit && det->res_y > 1e-6)
+        if (hit && TMath::Abs(det->res_y) > 1e-6)
         {
 
-            Double_t yres = det->res_y;
+            Double_t yres = TMath::Abs(det->res_y);
+            Double_t yscal = 1.;
+            if ((det->GetDetectorName() == "tofd" && det->res_y < 0.))
+                yscal = 0.1;
 
             if (det->GetDetectorName() == "tofd" && gCandidate->GetMass() < 3.8 && gCandidate->GetMass() > 3.7)
                 yres = 3.0 * yres;
 
-            chi2temp = TMath::Power((y_l - hit->GetY()) / yres, 2);
+            chi2temp = TMath::Power((y_l - hit->GetY()) / yres, 2) * yscal;
 
             if (det->GetDetectorName() == "fi23b")
             {
@@ -337,8 +340,8 @@ double Chi2MomentumForward(const double* xx)
 
             //  chi2temp = TMath::Power((y_l - hit->GetY()) / yres, 2);   // only for simu without granularity
 
-            //  cout <<" At " << det->GetDetectorName() <<", chi2_y: "<<chi2temp<<", y_l= "<<y_l<<"; hit->GetY()=
-            //  "<<hit->GetY()<<endl;
+            // cout <<" At " << det->GetDetectorName() <<", chi2_y: "<<chi2temp<<", y_l= "<<y_l<<"; hit->GetY()= "
+            //  <<hit->GetY()<<", diff: "<<y_l - hit->GetY()<<endl;
             chi2 += chi2temp;
 
             // chi2 += TMath::Power((y_l - hit->GetY()) / det->res_y, 2);
