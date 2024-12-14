@@ -144,7 +144,7 @@ jobs:
         # the speed of the run.
         NUM_THREADS: 4
       # Options for the Docker container to be run with cvmfs.
-      options: --user root --privileged  --ulimit nofile=10000:10000 --cap-add --device /dev/fuse
+      options: --user root --privileged  --ulimit nofile=10000:10000 --cap-add SYS_ADMIN --device /dev/fuse
 
     # Each job contains different steps that are executed sequentially. Each
     # step could be multiple shell commands or a composite action either from
