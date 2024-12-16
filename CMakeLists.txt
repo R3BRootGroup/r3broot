@@ -322,7 +322,7 @@ check_compiler()
 if(DEFINED ENV{WERROR} AND "$ENV{WERROR}")
     message(STATUS "Will compile with -Werror. ")
     set(CMAKE_CXX_FLAGS
-        "${CMAKE_CXX_FLAGS} -Wall -Wformat-security -Werror -Wno-sign-compare -Wno-reorder -Wno-unused-variable -Wno-unused-but-set-variable -Wfatal-errors"
+        "${CMAKE_CXX_FLAGS} -Wall -Wno-non-virtual-dtor -Wwrite-strings -Wpointer-arith -Wshadow -Wformat-security -Werror -Wno-sign-compare -Wno-reorder -Wno-unused-variable -Wno-unused-but-set-variable -Wfatal-errors"
     )
 else()
     if(NOT APPLE)
@@ -331,7 +331,7 @@ else()
                 "Set env WERROR to 1 to enable -Werror. If origin/dev compiles on your platform with that option, it is definitly a good idea to do that."
         )
         set(CMAKE_CXX_FLAGS
-            "${CMAKE_CXX_FLAGS} -Wall -Wformat-security -Wno-sign-compare -Wno-reorder -Wno-unused-variable -Wno-unused-but-set-variable"
+            "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -Wno-ignored-qualifiers -Wfatal-errors -Wno-vla -Wwrite-strings -Woverloaded-virtual -Wshadow -Wformat-security -Wno-sign-compare -Wno-reorder"
         )
     endif()
 endif()
