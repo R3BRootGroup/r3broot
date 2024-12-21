@@ -1,6 +1,6 @@
 /******************************************************************************
  *   Copyright (C) 2019 GSI Helmholtzzentrum für Schwerionenforschung GmbH    *
- *   Copyright (C) 2019-2024 Members of R3B Collaboration                     *
+ *   Copyright (C) 2019-2025 Members of R3B Collaboration                     *
  *                                                                            *
  *             This software is distributed under the terms of the            *
  *                 GNU General Public Licence (GPL) version 3,                *
@@ -51,12 +51,11 @@ void R3BMCTrack::Print(Option_t* option) const
 {
     std::cout << "Track " << option << ", mother : " << fMotherId << ", Type " << fPdgCode << ", momentum ("
               << fMomentumMass.Px() << ", " << fMomentumMass.Py() << ", " << fMomentumMass.Pz() << ") GeV" << std::endl;
-    std::cout << "       Ref " << GetNPoints(kREF) << ", DCH " << GetNPoints(kDCH) << ", CAL " << GetNPoints(kCAL)
-              << ", LAND " << GetNPoints(kLAND) << ", GFI " << GetNPoints(kGFI) << ", TOFd " << GetNPoints(kTOFD)
-              << ", TOF " << GetNPoints(kTOF) << ", TRACKER " << GetNPoints(kTRA) << ", CALIFA " << GetNPoints(kCALIFA)
-              << ", MFI " << GetNPoints(kMFI) << ", PSP " << GetNPoints(kPSP) << ", VETO " << GetNPoints(kVETO)
-              << ", RPC " << GetNPoints(kRPC) << ", STARTRACK " << GetNPoints(kSTARTRACK) << ", LUMON "
-              << GetNPoints(kLUMON) << ", NeuLAND " << GetNPoints(kNEULAND) << std::endl;
+    std::cout << "Ref " << GetNPoints(kREF) << ", DCH " << GetNPoints(kDCH) << ", CAL " << GetNPoints(kCAL) << ", LAND "
+              << GetNPoints(kLAND) << ", GFI " << GetNPoints(kGFI) << ", TOFd " << GetNPoints(kTOFD) << ", TOF "
+              << GetNPoints(kTOF) << ", TRACKER " << GetNPoints(kTRA) << ", CALIFA " << GetNPoints(kCALIFA) << ", PSP "
+              << GetNPoints(kPSP) << ", VETO " << GetNPoints(kVETO) << ", RPC " << GetNPoints(kRPC) << ", NeuLAND "
+              << GetNPoints(kNEULAND) << std::endl;
 #ifdef SOFIA
     std::cout << ", SCI " << GetNPoints(kSOFSCI) << ", AT " << GetNPoints(kSOFAT) << ", TRIM " << GetNPoints(kSOFTRIM)
               << ", MWPC1 " << GetNPoints(kSOFMWPC1) << ", TWIM " << GetNPoints(kSOFTWIM) << ", MWPC2 "

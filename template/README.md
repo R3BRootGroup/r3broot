@@ -1,4 +1,4 @@
-templates
+Templates {#templates}
 ========
 
 The starting points for implementation of different R3BRoot modules.

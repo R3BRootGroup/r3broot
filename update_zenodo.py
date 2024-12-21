@@ -1,5 +1,5 @@
 #! /usr/bin/env python3
-# Copyright (C) 2019-2024 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH
+# Copyright (C) 2019-2025 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH
 #
 # SPDX-License-Identifier: LGPL-3.0-or-later
 

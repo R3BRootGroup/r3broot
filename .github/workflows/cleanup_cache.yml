@@ -14,23 +14,36 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Git
-        run: git config --global user.email "actions@github.com" && git config --global user.name "GitHub Actions"
+      - name: Debug gh CLI
+        run: |
+          gh --version
+          gh auth status
+          gh extension list
+
+      - name: Update GitHub CLI
+        run: sudo apt-get install gh
+
+      - name: Install and Verify gh-actions-cache Extension
+        run: |
+          gh extension install actions/gh-actions-cache || exit 1
+          gh extension list | grep gh-actions-cache || (echo "Extension installation failed" && exit 1)
+
+      - name: Test actions-cache list
+        run: |
+          gh actions-cache list -R R3BRootGroup/R3BRoot -L 5 || echo "Failed to list caches"
 
       - name: Cleanup
         run: |
-          gh extension install actions/gh-actions-cache || exit 1
-          
           echo "Fetching list of cache keys"
           cacheKeys=$(gh actions-cache list -R R3BRootGroup/R3BRoot -L 100 | cut -f 1 | grep -v 'build-deps') || exit 1
 
-          ## Setting this to not fail the workflow while deleting cache keys. 
           set +e
           echo "Deleting old caches..."
           for cacheKey in $cacheKeys
           do
-              gh actions-cache delete $cacheKey -R R3BRootGroup/R3BRoot --confirm || exit 1
+              gh actions-cache delete $cacheKey -R R3BRootGroup/R3BRoot --confirm || echo "Failed to delete $cacheKey"
           done
           echo "Done"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+

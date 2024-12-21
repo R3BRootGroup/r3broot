@@ -1,0 +1,23 @@
+# SPDX-FileCopyrightText: 2024 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH, Darmstadt, Germany
+#
+# SPDX-License-Identifier: LGPL-3.0-or-later
+
+name: fair-software
+
+on:
+  push:
+    paths:
+    - README.md
+
+jobs:
+  verify:
+    name: "fair-software"
+    runs-on: ubuntu-latest
+    if: github.repository == 'R3BRootGroup/R3BRoot'
+    steps:
+      - uses: fair-software/howfairis-github-action@0.2.1
+        name: Measure compliance with fair-software.eu recommendations
+        env:
+          PYCHARM_HOSTED: "Trick colorama into displaying colored output"
+        with:
+          MY_REPO_URL: "https://github.com/${{ github.repository }}"

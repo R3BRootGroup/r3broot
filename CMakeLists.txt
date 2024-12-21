@@ -1,6 +1,6 @@
 ##############################################################################
 #   Copyright (C) 2019 GSI Helmholtzzentrum für Schwerionenforschung GmbH    #
-#   Copyright (C) 2019-2024 Members of R3B Collaboration                     #
+#   Copyright (C) 2019-2025 Members of R3B Collaboration                     #
 #                                                                            #
 #             This software is distributed under the terms of the            #
 #                 GNU General Public Licence (GPL) version 3,                #
@@ -24,7 +24,7 @@ endif()
 cmake_minimum_required(VERSION 3.15 FATAL_ERROR)
 
 # set cmake policies
-cmake_policy(VERSION 3.15...3.24)
+cmake_policy(VERSION 3.15...3.31)
 
 # Set name of our project to "R3BROOT". Has to be done after check of cmake version
 project(R3BROOT LANGUAGES C CXX Fortran)
@@ -112,8 +112,6 @@ if("${FairRoot_VERSION}" VERSION_LESS 18.2.1)
         FATAL_ERROR
             "Incompatible FairRoot version detected: ${FairRoot_VERSION}. R3BRoot requires FairRoot v18.2.1 or later"
     )
-else()
-    message(STATUS "You seem to be using FairRoot ${FairRoot_VERSION}.")
 endif()
 
 # added a variable to point to r3broot path in the system
@@ -343,6 +341,27 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 set(VMCWORKDIR ${CMAKE_SOURCE_DIR})
 
+# Display SUPPORTED_CXX_STANDARDS
+set(SUPPORTED_CXX_STANDARDS "")
+foreach(version 14 17 20 23)
+    string(CONCAT flag "cxx_std_" ${version})
+    if(flag IN_LIST CMAKE_CXX_COMPILE_FEATURES)
+        list(APPEND SUPPORTED_CXX_STANDARDS ${version})
+    endif()
+endforeach()
+
+if(SUPPORTED_CXX_STANDARDS)
+    message(STATUS "${Cyan}Supported C++ standards:${CR} ${SUPPORTED_CXX_STANDARDS}")
+    message(STATUS "${Cyan}CMake is using C++ standard:${CR} ${BGreen}${CMAKE_CXX_STANDARD}${CR}")
+else()
+    message(WARNING "No supported C++ standards found!")
+endif()
+
+# Display configurations
+message(STATUS "CMake C++ Flags: ${CMAKE_CXX_FLAGS}")
+message(STATUS "Library Output Directory: ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
+message(STATUS "Runtime Output Directory: ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
+
 if(USE_PATH_INFO)
     if(APPLE)
         set(LD_LIBRARY_PATH $ENV{DYLD_LIBRARY_PATH})
@@ -554,11 +573,9 @@ if(NOT MODULE)
     endif()
     add_subdirectory(neuland)
     add_subdirectory(glad)
-    add_subdirectory(xball)
     add_subdirectory(dch)
     add_subdirectory(fiber)
     add_subdirectory(gfi)
-    add_subdirectory(mfi)
     add_subdirectory(land)
     add_subdirectory(los)
     add_subdirectory(rolu)
@@ -575,7 +592,6 @@ if(NOT MODULE)
     add_subdirectory(strawtubes)
     add_subdirectory(music)
     add_subdirectory(r3bgen)
-    add_subdirectory(lumon)
     add_subdirectory(califa)
     add_subdirectory(evtvis)
     add_subdirectory(psp)

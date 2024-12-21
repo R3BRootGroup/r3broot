@@ -1,3 +1,6 @@
 #!/bin/bash
-find  -type f | grep -e '.(\.C\|\.cpp\|\.cxx\|\.h)$'  | grep -v ^./macros | grep -v ^./frs | grep -v ^./sofia | grep -v ^./asyeos | grep -v ^./glad-tpc | xargs -L 1 clang-format-15 -i 
+find . -type f \( -name "*.cpp" -o -name "*.cxx" -o -name "*.C" -o -name "*.h" \) \
+    ! -path "./macros" ! -path "./sofia" ! -path "./frs" ! -path "./asyeos" ! -path "./glad-tpc" -print0 |
+    xargs -0 -L 1 clang-format-15 -i
+
 echo "Use git add -A ; git commit -m \"clang-format all files\" --author=\"white space <whitespace@example.com>\" to commit changes."

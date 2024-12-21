@@ -42,7 +42,7 @@ void run(TString fname)
     cout << "Total energy:\t\t" << EA << " MeV" << endl;
     cout << "Excitation energy:\t" << Exe << " MeV" << endl;
     cout << "Beta (beam):\t\t" << (-bA) << "\nGamma (beam):\t" << gA << endl;
-   
+
     cout << "Beta (CM):\t\t" << PA / (EA + Mi) << endl;
     cout << "Processing " << MAX_STORY << " events........\n" << endl;
 

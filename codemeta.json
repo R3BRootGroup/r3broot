@@ -4,16 +4,24 @@
   "license": "https://spdx.org/licenses/GPL-3.0",
   "codeRepository": "https://github.com/R3BRootGroup/R3BRoot",
   "contIntegration": "https://github.com/R3BRootGroup/R3BRoot/actions",
+  "name": "R3BRoot",
+  "softwareVersion": "24.0.0",
+  "description": "Software for simulations and data analysis of Reactions with Relativistic Radioactive Beams (R3B) experiments at GSI/FAIR",
   "dateCreated": "2009-04-14",
   "datePublished": "2009-08-01",
   "dateModified": "2024-12-06",
   "downloadUrl": "https://github.com/R3BRootGroup/R3BRoot/archive/refs/tags/dec24.tar.gz",
   "issueTracker": "https://github.com/R3BRootGroup/R3BRoot/issues",
-  "name": "R3BRoot",
-  "softwareVersion": "dec24",
-  "description": "Software for simulations and data analysis of Reactions with Relativistic Radioactive Beams experiment at FAIR",
   "readme": "https://github.com/R3BRootGroup/R3BRoot/blob/dev/README.md",
+  "relatedLink": "https://www.gsi.de/work/forschung/nustarenna/nustarenna_divisions/kernreaktionen/activities/r3b",
   "releaseNotes": "",
+  "identifier": "https://doi.org/10.5281/zenodo.5549469",
+  "memoryRequirements": "8 GB of RAM (minimum), 16 GB recommended for large simulations or data analysis",
+  "processorRequirements": "Intel Core i5 or equivalent (minimum), i7 or better recommended for optimal performance",
+  "storageRequirements": "At least 2 GB of free disk space for the software",
+  "copyrightHolder": "GSI Helmholtzzentrum f\u00fcr Schwerionenforschung, 64291 Darmstadt, Germany",
+  "funder": "",
+  "funding": "",
   "applicationCategory": "Nuclear physics",
   "developmentStatus": "active",
   "referencePublication": "https://doi.org/10.1088/1742-6596/523/1/012034",
@@ -23,7 +31,7 @@
     "cmake",
     "vmc",
     "modular",
-    "Event reconstruction",
+    "Track reconstruction",
     "Simulation",
     "Data analysis",
     "Structure and dynamics of nuclei",
@@ -31,7 +39,9 @@
     "Nuclear fission",
     "Hypernuclei",
     "Equation of state",
-    "Short range NN correlations"
+    "Short range NN correlations",
+    "R3B experiments",
+    "GSI/FAIR facility"
   ],
   "programmingLanguage": [
     "C",
@@ -51,14 +61,43 @@
     "@type": "Person",
     "givenName": "Jose Luis",
     "familyName": "Rodriguez Sanchez",
-    "@id": "https://orcid.org/0000-0002-4702-5294"
+    "@id": "https://orcid.org/0000-0002-4702-5294",
+    "affiliation": "CITENI, Industrial Campus of Ferrol, University of Coru\u00f1a, 15403 Ferrol, Spain"
   },
   "author": [
     {
       "@type": "Person",
+      "givenName": "Jose Luis",
+      "familyName": "Rodr\u00edguez-S\u00e1nchez",
+      "email": "j.l.rodriguez.sanchez@udc.es",
+      "affiliation": "CITENI, Industrial Campus of Ferrol, University of Coru\u00f1a, 15403 Ferrol, Spain",
+      "identifier": "https://orcid.org/0000-0002-4702-5294"
+    },
+    {
+      "@type": "Person",
       "givenName": "Hector",
       "familyName": "Alvarez Pol",
-      "@id": "https://orcid.org/0000-0001-9643-6252"
+      "email": "hector.alvarez@usc.es",
+      "affiliation": "IGFAE, University of Santiago de Compostela, 15782 Santiago de Compostela, Spain",
+      "identifier": "https://orcid.org/0000-0001-9643-6252"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Leyla",
+      "familyName": "Atar",
+      "affiliation": "GSI Helmholtzzentrum f\u00fcr Schwerionenforschung, 64291 Darmstadt, Germany"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Antoine",
+      "familyName": "Barriere",
+      "affiliation": "GANIL, 14000 Caen, France"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Lukas",
+      "familyName": "Bott",
+      "affiliation": "Goethe University Frankfurt, 60629 Frankfurt am Main, Germany"
     },
     {
       "@type": "Person",
@@ -67,24 +106,100 @@
     },
     {
       "@type": "Person",
+      "givenName": "Martina",
+      "familyName": "Feijoo-Font\u00e1n",
+      "affiliation": "IGFAE, University of Santiago de Compostela, 15782 Santiago de Compostela, Spain"
+    },
+    {
+      "@type": "Person",
       "givenName": "Gabriel",
-      "familyName": "Garcia-Jimenez"
+      "familyName": "Garc\u00eda-Jim\u00e9nez",
+      "affiliation": "IGFAE, University of Santiago de Compostela, 15782 Santiago de Compostela, Spain"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Igor",
+      "familyName": "Gasparic",
+      "affiliation": "RBI Zagreb, HR10000 Zagreb, Croatia"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Antia",
+      "familyName": "Gra\u00f1a-Gonz\u00e1lez",
+      "affiliation": "CITENI, Industrial Campus of Ferrol, University of Coru\u00f1a, 15403 Ferrol, Spain"
     },
     {
       "@type": "Person",
       "givenName": "Michael",
-      "familyName": "Heil"
+      "familyName": "Heil",
+      "affiliation": "GSI Helmholtzzentrum f\u00fcr Schwerionenforschung, 64291 Darmstadt, Germany"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Andrea",
+      "familyName": "Horvat",
+      "affiliation": "RBI Zagreb, HR10000 Zagreb, Croatia"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Andrea",
+      "familyName": "Jedele",
+      "affiliation": "Technische Universit\u00e4t Darmstadt, Fachbereich Physik, Institut f\u00fcr Kernphysik, 64289 Darmstadt, Germany"
+    },
+    {
+      "@type": "Person",
+      "givenName": "H\u00e5kan",
+      "familyName": "Johansson",
+      "affiliation": "Institutionen f\u00f6r Fysik, Chalmers Tekniska H\u00f6gskola, 412 96 G\u00f6teborg, Sweden"
     },
     {
       "@type": "Person",
       "givenName": "Aleksandra",
-      "familyName": "Kelic-Heil"
+      "familyName": "Kelic-Heil",
+      "affiliation": "GSI Helmholtzzentrum f\u00fcr Schwerionenforschung, 64291 Darmstadt, Germany"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Philipp",
+      "familyName": "Klenze",
+      "affiliation": "GSI Helmholtzzentrum f\u00fcr Schwerionenforschung, 64291 Darmstadt, Germany"
     },
     {
       "@type": "Person",
       "givenName": "Dmytro",
       "familyName": "Kresan",
-      "@id": "https://orcid.org/0000-0002-7537-2875"
+      "email": "d.kresan@gsi.de",
+      "affiliation": "GSI Helmholtzzentrum f\u00fcr Schwerionenforschung, 64291 Darmstadt, Germany",
+      "identifier": "https://orcid.org/0000-0002-7537-2875"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Eleonora",
+      "familyName": "Kudaibergenova"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Andrea",
+      "familyName": "Lagni",
+      "affiliation": "IGFAE, University of Santiago de Compostela, 15782 Santiago de Compostela, Spain"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Ivana",
+      "familyName": "Lihtar",
+      "affiliation": "RBI Zagreb, HR10000 Zagreb, Croatia"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Leandro",
+      "familyName": "Milhomens da Fonseca",
+      "affiliation": "Technische Universit\u00e4t Darmstadt, Fachbereich Physik, Institut f\u00fcr Kernphysik, 64289 Darmstadt, Germany"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Pierre",
+      "familyName": "Morfouace",
+      "affiliation": "CEA, DAM, DIF, 91297 Arpajon, France"
     },
     {
       "@type": "Person",
@@ -104,37 +219,69 @@
     {
       "@type": "Person",
       "givenName": "Valerii",
-      "familyName": "Panin"
-    },
-    {
-      "@type": "Person",
-      "givenName": "Jose Luis",
-      "familyName": "Rodriguez Sanchez",
-      "@id": "https://orcid.org/0000-0002-4702-5294"
+      "familyName": "Panin",
+      "affiliation": "GSI Helmholtzzentrum f\u00fcr Schwerionenforschung, 64291 Darmstadt, Germany"
     },
     {
       "@type": "Person",
       "givenName": "Ryo",
-      "familyName": "Taniuchi"
+      "familyName": "Taniuchi",
+      "affiliation": "School of Physics, Engineering and Technology, University of York, YO10 5DD York, United Kingdom"
     },
     {
       "@type": "Person",
-      "@id": "https://orcid.org/0000-0002-7006-7986",
+      "givenName": "Hans",
+      "familyName": "T\u00f6rnqvist",
+      "affiliation": "Institutionen f\u00f6r Fysik, Chalmers Tekniska H\u00f6gskola, 412 96 G\u00f6teborg, Sweden"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Vadim",
+      "familyName": "Wagner"
+    },
+    {
+      "@type": "Person",
       "givenName": "Yanzhao",
-      "familyName": "Wang"
+      "familyName": "Wang",
+      "affiliation": "Universit\u00e4t zu K\u00f6ln, 50923 K\u00f6ln, Germany"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Matthew",
+      "familyName": "Whitehead"
     },
     {
       "@type": "Person",
       "givenName": "Manuel",
-      "familyName": "Xarepe"
+      "familyName": "Xarepe",
+      "affiliation": "Faculty of Science of the University of Lisbon, 1749-016 Lisboa, Portugal"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Laurent",
+      "familyName": "Audouin",
+      "email": "laurent.audouin@ijclab.in2p3.fr",
+      "affiliation": "IPN Orsay, 91406 Orsay, France",
+      "identifier": "https://orcid.org/0000-0001-9899-6923"
     }
   ],
   "contributor": [
     {
       "@type": "Person",
-      "@id": "https://orcid.org/0000-0002-8071-4497",
       "givenName": "Mohammad",
-      "familyName": "Al-Turany"
+      "familyName": "Al-Turany",
+      "affiliation": "GSI Helmholtzzentrum f\u00fcr Schwerionenforschung, 64291 Darmstadt, Germany"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Laurent",
+      "familyName": "Audouin",
+      "affiliation": "IPN Orsay, 91406 Orsay, France"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Martin",
+      "familyName": "Bajzek"
     },
     {
       "@type": "Person",
@@ -144,7 +291,8 @@
     {
       "@type": "Person",
       "givenName": "Pablo",
-      "familyName": "Cabanelas"
+      "familyName": "Cabanelas",
+      "affiliation": "IGFAE, University of Santiago de Compostela, 15782 Santiago de Compostela, Spain"
     },
     {
       "@type": "Person",
@@ -158,8 +306,9 @@
     },
     {
       "@type": "Person",
-      "givenName": "Martina",
-      "familyName": "Feijoo-Fontan"
+      "givenName": "Daniel",
+      "familyName": "Galaviz",
+      "affiliation": "Faculty of Science of the University of Lisbon, 1749-016 Lisboa, Portugal"
     },
     {
       "@type": "Person",
@@ -168,23 +317,9 @@
     },
     {
       "@type": "Person",
-      "givenName": "Igor",
-      "familyName": "Gasparic"
-    },
-    {
-      "@type": "Person",
-      "givenName": "Antia",
-      "familyName": "Gra\u00f1a-Gonzalez"
-    },
-    {
-      "@type": "Person",
-      "givenName": "Andrea",
-      "familyName": "Jedele"
-    },
-    {
-      "@type": "Person",
-      "givenName": "H\u00e5kan",
-      "familyName": "Johansson"
+      "givenName": "Roman",
+      "familyName": "Gernh\u00e4user",
+      "affiliation": "Technische Universit\u00e4t M\u00fcnchen, 85748 Garching, Germany"
     },
     {
       "@type": "Person",
@@ -193,18 +328,18 @@
     },
     {
       "@type": "Person",
-      "givenName": "Andrea",
-      "familyName": "Horvat"
-    },
-    {
-      "@type": "Person",
       "givenName": "Alexander",
       "familyName": "Inglessi"
     },
     {
       "@type": "Person",
-      "givenName": "Philipp",
-      "familyName": "Klenze"
+      "givenName": "De\u0161a",
+      "familyName": "Jelavic-Malenica"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Tobias",
+      "familyName": "Jenegger"
     },
     {
       "@type": "Person",
@@ -213,28 +348,25 @@
     },
     {
       "@type": "Person",
-      "givenName": "Eleonora",
-      "familyName": "Kudaibergenova"
-    },
-    {
-      "@type": "Person",
       "givenName": "Marc",
-      "familyName": "Labiche"
+      "familyName": "Labiche",
+      "affiliation": "STFC Daresbury Laboratory, Warrington, United Kingdom"
     },
     {
       "@type": "Person",
-      "givenName": "Andrea",
-      "familyName": "Lagni"
+      "givenName": "Enis",
+      "familyName": "Lorenz"
     },
     {
       "@type": "Person",
-      "givenName": "Ivana",
-      "familyName": "Lihtar"
+      "givenName": "Stefanos",
+      "familyName": "Paschalis",
+      "affiliation": "School of Physics, Engineering and Technology, University of York, YO10 5DD York, United Kingdom"
     },
     {
       "@type": "Person",
-      "givenName": "Leandro",
-      "familyName": "Milhomens da Fonseca"
+      "givenName": "Angel",
+      "familyName": "Perea"
     },
     {
       "@type": "Person",
@@ -248,13 +380,38 @@
     },
     {
       "@type": "Person",
+      "givenName": "Christine",
+      "familyName": "Qi"
+    },
+    {
+      "@type": "Person",
       "givenName": "Alexey",
       "familyName": "Rybalchenko"
     },
     {
       "@type": "Person",
+      "givenName": "Luke",
+      "familyName": "Rose"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Dominic",
+      "familyName": "Rossi"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Deniz",
+      "familyName": "Savran"
+    },
+    {
+      "@type": "Person",
       "givenName": "Sonja",
       "familyName": "Storck"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Christian",
+      "familyName": "S\u00fcrder"
     },
     {
       "@type": "Person",
@@ -265,16 +422,6 @@
       "@type": "Person",
       "givenName": "Joachim",
       "familyName": "Tscheuschner"
-    },
-    {
-      "@type": "Person",
-      "givenName": "Vadim",
-      "familyName": "Wagner"
-    },
-    {
-      "@type": "Person",
-      "givenName": "Matthew",
-      "familyName": "Whitehead"
     },
     {
       "@type": "Person",

@@ -12,7 +12,7 @@
     "related_identifiers": [
         {
             "identifier": "https://github.com/FairRootGroup/FairSoft/",
-            "relation": "isDerivedFrom",
+            "relation": "isCompiledBy",
             "resource_type": "software",
             "scheme": "url"
         },
@@ -24,7 +24,7 @@
         },
         {
             "identifier": "https://gitlab.com/chalmers-subexp/ucesb/",
-            "relation": "isRelatedTo",
+            "relation": "isSupplementedBy",
             "resource_type": "software",
             "scheme": "url"
         },
@@ -69,9 +69,10 @@
         "Data analysis",
         "Structure and dynamics of nuclei",
         "Nuclear reactions",
-        "Equation of state",
         "Nuclear fission",
         "Hypernuclei",
+        "Equation of state",
+        "Short range NN correlations",
         "R3B experiments",
         "GSI/FAIR facility"
     ],
@@ -92,6 +93,12 @@
             "name": "Atar, Leyla",
             "orcid": "0000-0001-6919-8869",
             "affiliation": "GSI Helmholtzzentrum für Schwerionenforschung, 64291 Darmstadt, Germany"
+        },
+        {
+            "name": "Audouin, Laurent",
+            "orcid": "0000-0001-9899-6923",
+            "email": "laurent.audouin@ijclab.in2p3.fr",
+            "affiliation": "IPN Orsay, 91406 Orsay, France"
         },
         {
             "name": "Barriere, Antoine",
@@ -319,6 +326,11 @@
         },
         {
             "type": "Other",
+            "name": "Lorenz, Enis",
+            "affiliation": "Technische Universität Darmstadt, Fachbereich Physik, Institut für Kernphysik, 64289 Darmstadt, Germany"
+        },
+        {
+            "type": "Other",
             "name": "Paschalis, Stefanos",
             "orcid": "0000-0002-9113-3778",
             "affiliation": "School of Physics, Engineering and Technology, University of York, YO10 5DD York, United Kingdom"
@@ -340,6 +352,11 @@
         },
         {
             "type": "Other",
+            "name": "Qi, Christine",
+            "affiliation": "Massachusetts Institute of Technology, MA 02139 Cambridge, USA"
+        },
+        {
+            "type": "Other",
             "name": "Rybalchenko, Alexey"
         },
         {
@@ -351,6 +368,11 @@
             "type": "Other",
             "name": "Rossi, Dominic",
             "affiliation": "Technische Universität Darmstadt, Fachbereich Physik, Institut für Kernphysik, 64289 Darmstadt, Germany"
+        },
+        {
+            "type": "Other",
+            "name": "Savran, Deniz",
+            "affiliation": "GSI Helmholtzzentrum für Schwerionenforschung, 64291 Darmstadt, Germany"
         },
         {
             "type": "Other",
