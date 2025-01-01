@@ -5,7 +5,7 @@
 
 ## The R3BRoot Framework
 
-The R3BRoot software is based on the FairRoot framework and can be used to perform Monte Carlo simulations and experimental data analysis of the R3B (Reactions with Relativistic Radioactive Beams) nuclear physics experiments at the GSI-FAIR research center (Facility for Antiproton and Ion Research). The user can create simulated data and/or perform analysis with the same framework. Geant3 and Geant4 transport engines are supported, however, the implemented tasks that create simulated data do not depend on a particular Monte Carlo engine. The framework delivers base classes which enable the users to construct their detectors and/or analysis tasks in a simple way, it also delivers some general functionality like track visualization. Moreover, an interface for reading experimental and/or simulated magnetic field maps is also implemented. R3BRoot is a source distribution with recurring releases for macOS and Linux.
+The R3BRoot software is based on the [FairRoot](https://github.com/FairRootGroup/FairRoot) framework and can be used to perform Monte Carlo simulations and experimental data analysis of the R3B (Reactions with Relativistic Radioactive Beams) nuclear physics experiments at the GSI-FAIR research center (Facility for Antiproton and Ion Research). The user can create simulated data and/or perform analysis with the same framework. Geant3 and [Geant4](https://geant4.web.cern.ch/) transport engines are supported, however, the implemented tasks that create simulated data do not depend on a particular Monte Carlo engine. The framework delivers base classes which enable the users to construct their detectors and/or analysis tasks in a simple way, it also delivers some general functionality like track visualization. Moreover, an interface for reading experimental and/or simulated magnetic field maps is also implemented. R3BRoot software is a source distribution with recurring releases for macOS and Linux.
 
 ## Discussion Forum
 
@@ -38,9 +38,9 @@ R3BRoot delivers various project templates that can be used as a starting point 
 
 First, you will need to install FairSoft and FairRoot. For more details:
 
-1. Install [FairSoft](https://github.com/FairRootGroup/FairSoft)
+1. Install [FairSoft](https://github.com/FairRootGroup/FairSoft), required version Nov22p1 or later
 
-2. Install [FairRoot](http://fairroot.gsi.de)
+2. Install [FairRoot](http://fairroot.gsi.de), required version 18.2.1 or later
 
 ### Configure and Compile
 

@@ -4,8 +4,8 @@ Upstream-Contact: Kresan Dmytro <d.kresan@gsi.de>
 Source: https://github.com/R3BRootGroup/R3BRoot
 
 Files: *
-Copyright: 2009-2025, GSI Helmholtzzentrum fuer Schwerionenforschung GmbH
-Copyright: 2009-2025, [see AUTHORS file]
-Copyright: 2009-2025, [see CONTRIBUTORS file]
-License: LGPL-3.0,    [see LICENSE file]
-License: GPL-3.0,     [see LICENSE file]
+Copyright: 2009-2025  GSI Helmholtzzentrum fuer Schwerionenforschung GmbH
+Copyright: 2009-2025  [see AUTHORS file]
+Copyright: 2009-2025  [see CONTRIBUTORS file]
+License: LGPL-3.0     [see LICENSE file]
+License: GPL-3.0      [see LICENSE file]
