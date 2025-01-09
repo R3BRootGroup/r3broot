@@ -1,6 +1,6 @@
 /******************************************************************************
  *   Copyright (C) 2022 GSI Helmholtzzentrum für Schwerionenforschung GmbH    *
- *   Copyright (C) 2022-2024 Members of R3B Collaboration                     *
+ *   Copyright (C) 2022-2025 Members of R3B Collaboration                     *
  *                                                                            *
  *             This software is distributed under the terms of the            *
  *                 GNU General Public Licence (GPL) version 3,                *
@@ -158,16 +158,20 @@ void R3BAlpideDigitizer::Exec(Option_t*)
         localpos.SetX(gRandom->Gaus(0., fsigma) + localpos.X());
         localpos.SetZ(gRandom->Gaus(0., fsigma) + localpos.Z());
 
+        auto eLoss = static_cast<double>(pointData[i]->GetEnergyLoss());
+
+        auto fClusterSize = static_cast<uint16_t>(eLoss * pixelSizeFactor + pixelSizeOffset);
+
         if (fLabframe)
         {
             // Lab frame
             TVector3 labpos = fRot * localpos + fTrans;
-            AddHitData(sid, 1, labpos.X() * 10., labpos.Y() * 10., labpos.Z() * 10.); // mm
+            AddHitData(sid, fClusterSize, labpos.X() * 10., labpos.Y() * 10., labpos.Z() * 10.); // mm
         }
         else
         {
             // Sensor frame
-            AddHitData(sid, 1, localpos.Z() * 10., localpos.X() * 10.); // mm
+            AddHitData(sid, fClusterSize, localpos.Z() * 10., localpos.X() * 10.); // mm
         }
         //}
     }
@@ -200,7 +204,7 @@ void R3BAlpideDigitizer::Reset()
 }
 
 // -----   Private method AddHitData  -------------------------------------------
-R3BAlpideHitData* R3BAlpideDigitizer::AddHitData(UInt_t sid, UInt_t clustersize, Double_t x, Double_t y, Double_t z)
+R3BAlpideHitData* R3BAlpideDigitizer::AddHitData(UInt_t sid, uint16_t clustersize, Double_t x, Double_t y, Double_t z)
 {
     // It fills the R3BAlpideHitData
     TClonesArray& clref = *fAlpideHits;
