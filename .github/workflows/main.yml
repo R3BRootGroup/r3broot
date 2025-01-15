@@ -76,6 +76,7 @@ jobs:
         # Here are the groups of repositories that need to be downloaded inside
         # r3broot. Each group is used by only one job.
         repos: [ r3broot, glad-tpc, sofia-frs-asy, r3broot-conan ]
+        os: [ debian10, debian11, debian12 ]
 
         # The list under "include" defines some properties for each group:
         #
@@ -133,7 +134,7 @@ jobs:
     # tool-kits for the building, such as clang-tidy and cvmfs. For more
     # information, please visit the Docker repository at Dockerhub.
     container: 
-      image: yanzhaowang/cvmfs_clang:latest
+      image: yanzhaowang/cvmfs_clang:${{ matrix.os }}
       volumes:
         - /tmp:/cvmfs
       env:

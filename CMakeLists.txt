@@ -90,14 +90,16 @@ option(WITH_FRS "Build FRS" OFF)
 option(WITH_ASYEOS "Build ASYEOS" OFF)
 option(BUILD_C3W "Build C3W" OFF)
 option(CONAN_ENABLED "conan package is enabled. (Use CMakePreset to set it)" OFF)
+option(FETCH_GTEST "Fetch GTest from CMake" OFF)
 
-find_package(FairCMakeModules 1.0.0 CONFIG REQUIRED)
+find_package(FairCMakeModules CONFIG REQUIRED)
 if(NOT FairCMakeModules_FOUND)
     message(FATAL_ERROR "Could not find FairCMakeModules! ")
 endif()
 
 include(FairFindPackage2)
 include(FairFormattedOutput)
+include(FetchAllContents)
 
 find_package2(PUBLIC FairRoot CONFIG REQUIRED)
 

@@ -32,8 +32,9 @@ jobs:
     strategy:
       matrix:
         preset: [ default ]
+        os: [ debian12 ]
     container: 
-      image: yanzhaowang/cvmfs_clang:latest
+      image: yanzhaowang/cvmfs_clang:${{ matrix.os }}
       volumes:
         - /tmp:/cvmfs
       env:

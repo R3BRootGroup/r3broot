@@ -15,7 +15,8 @@
                 "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
                 "BUILD_GEOMETRY": "OFF",
                 "USE_DIFFERENT_COMPILER": "ON",
-                "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+                "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+                "FETCH_GTEST": "ON"
             }
         },
         {
