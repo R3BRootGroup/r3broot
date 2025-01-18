@@ -15,6 +15,10 @@ For the software-related user support you can post a new topic on our [forum](ht
 
 R3BRoot is distributed under the terms of the GNU General Public Licence version 3 ([GPLv3](https://github.com/R3BRootGroup/R3BRoot/blob/dev/LICENSE)).
 
+## Code of Conduct
+
+We are committed to fostering a welcoming and inclusive environment in the R3BRoot project. Please take a moment to review our [Code of Conduct](./CODE_OF_CONDUCT.md), which outlines our expectations for all contributors and community members.
+
 ## Release Information
 
 Please visit [releases](https://github.com/R3BRootGroup/R3BRoot/releases)
@@ -78,6 +82,14 @@ The R3BRoot project uses clang-format-15 to ensure a common code formatting. The
 ~~~bash
 source util/clang-format-all.sh
 ~~~
+
+## Security Policy
+
+The R3BRoot project is focused on scientific computing and does not involve typical security concerns like handling sensitive data. However, we are committed to maintaining the integrity and quality of our codebase.
+
+If you discover any potential issues with this project, please refer to our [Security Policy](./SECURITY.md) for instructions on how to report them.
+
+Thank you for helping us keep R3BRoot secure and reliable!
 
 ## More Information
 

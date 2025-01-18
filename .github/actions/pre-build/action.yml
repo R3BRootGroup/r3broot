@@ -26,6 +26,9 @@ runs:
       run: |
         apt-get update
         apt-get install --fix-missing -y sudo
+        if [ "${{ matrix.os }}" == "debian10" ]; then
+          sudo apt upgrade libc6
+        fi
         sudo -H pip3 install -U conan
         wget https://cernbox.cern.ch/remote.php/dav/public-files/RmnTeeOZpYjCJQb/masterkey.gsi.de.pub
         mv masterkey.gsi.de.pub /etc/cvmfs/keys
