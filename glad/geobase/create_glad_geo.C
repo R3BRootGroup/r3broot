@@ -146,7 +146,7 @@ void create_glad_geo(bool create_flange_windows = false, const char* geoTag = "v
     gGeoMan->Test();
 
     TFile* geoFile = new TFile(geoFileName, "RECREATE");
-    top->Draw();
+    // top->Draw();
     top->Write();
     geoFile->Close();
 
