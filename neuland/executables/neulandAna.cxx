@@ -2,6 +2,7 @@
 #include "FairRootFileSink.h"
 #include "FairRunAna.h"
 #include "FairRuntimeDb.h"
+#include "NeulandPointFilter.h"
 #include "R3BDigitizingChannelMock.h"
 #include "R3BDigitizingPaddleMock.h"
 #include "R3BDigitizingPaddleNeuland.h"
@@ -135,9 +136,10 @@ auto main(int argc, const char** argv) -> int
         fileio2->open(paraFileName2->value().c_str());
         run->GetRuntimeDb()->setSecondInput(fileio2.release());
     }
-
     auto digiNeuland = std::make_unique<R3BNeulandDigitizer>();
+    double const minimum_filter_energy_gev = 0.000;
     digiNeuland->SetEngine((neulandEngines.at({ paddleName->value(), channelName->value() }))());
+    digiNeuland->SetNeulandPointFilter(R3B::Neuland::BitSetParticle::none, minimum_filter_energy_gev);
     run->AddTask(digiNeuland.release());
     auto hitmon = std::make_unique<R3BNeulandHitMon>();
     run->AddTask(hitmon.release());
