@@ -11,15 +11,13 @@
 # or submit itself to any jurisdiction.                                      #
 ##############################################################################
 
-# Create a library called "libR3BData" which includes the source files given in the array.
-# The extension is already found. Any number of sources could be listed here.
-
-# Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-overloaded-virtual") Set(CMAKE_CXX_FLAGS
-# "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wformat-security -march=native")
+# Create a library called "libR3BData" which includes the source files given in 
+# the array. The extension is already found. Any number of sources could be 
+# listed here.
 
 set(SRCS
     #cmake-format: sortable
-    actarData/R3BActarPoint.cxx
+    actafData/R3BActafPoint.cxx
     alpideData/R3BAlpideCalData.cxx
     alpideData/R3BAlpideHitData.cxx
     alpideData/R3BAlpideMappedData.cxx
@@ -165,7 +163,7 @@ set(SRCS
 
 set(HEADERS
     #cmake-format: sortable
-    actarData/R3BActarPoint.h
+    actafData/R3BActafPoint.h
     alpideData/R3BAlpideCalData.h
     alpideData/R3BAlpideHitData.h
     alpideData/R3BAlpideMappedData.h
@@ -310,7 +308,7 @@ set(HEADERS
     wrData/R3BWRData.h)
 
 set(DIRS
-    actarData
+    actafData
     alpideData
     amsData
     beammonitorData
