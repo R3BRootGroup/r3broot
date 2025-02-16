@@ -12,24 +12,23 @@
  ******************************************************************************/
 
 // -------------------------------------------------------------------------
-// -----                      R3BActarPoint header file                -----
+// -----                      R3BActafPoint header file                -----
 // -----                  Created 27/04/16  by D. Kresan               -----
 // -------------------------------------------------------------------------
 
-#ifndef R3BACTARPOINT_H
-#define R3BACTARPOINT_H
+#pragma once
 
 #include "TObject.h"
 #include "TVector3.h"
 
 #include "FairMCPoint.h"
 
-class R3BActarPoint : public FairMCPoint
+class R3BActafPoint : public FairMCPoint
 {
 
   public:
     /** Default constructor **/
-    R3BActarPoint();
+    R3BActafPoint();
 
     /** Constructor with arguments
      *@param trackID  Index of MCTrack
@@ -43,7 +42,7 @@ class R3BActarPoint : public FairMCPoint
      *@param length   Track length since creation [cm]
      *@param eLoss    Energy deposit [GeV]
      **/
-    R3BActarPoint(Int_t trackID,
+    R3BActafPoint(Int_t trackID,
                   Int_t detID,
                   Int_t plane,
                   TVector3 posIn,
@@ -55,10 +54,10 @@ class R3BActarPoint : public FairMCPoint
                   Double_t eLoss);
 
     /** Copy constructor **/
-    R3BActarPoint(const R3BActarPoint& point) { *this = point; };
+    R3BActafPoint(const R3BActafPoint& point) { *this = point; };
 
     /** Destructor **/
-    virtual ~R3BActarPoint();
+    virtual ~R3BActafPoint();
 
     /** Accessors **/
     Int_t GetModule() const { return fModule; }
@@ -98,21 +97,19 @@ class R3BActarPoint : public FairMCPoint
     Double32_t fPy_out;
     Double32_t fPz_out;
 
-    ClassDef(R3BActarPoint, 1)
+    ClassDef(R3BActafPoint, 1)
 };
 
-inline void R3BActarPoint::SetPositionOut(TVector3 pos)
+inline void R3BActafPoint::SetPositionOut(TVector3 pos)
 {
     fX_out = pos.X();
     fY_out = pos.Y();
     fZ_out = pos.Z();
 }
 
-inline void R3BActarPoint::SetMomentumOut(TVector3 mom)
+inline void R3BActafPoint::SetMomentumOut(TVector3 mom)
 {
     fPx_out = mom.Px();
     fPy_out = mom.Py();
     fPz_out = mom.Pz();
 }
-
-#endif

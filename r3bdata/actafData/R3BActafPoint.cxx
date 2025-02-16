@@ -12,15 +12,15 @@
  ******************************************************************************/
 
 // -------------------------------------------------------------------------
-// -----                     R3BActarPoint source file                 -----
+// -----                     R3BActafPoint source file                 -----
 // -------------------------------------------------------------------------
 
-#include "R3BActarPoint.h"
+#include "R3BActafPoint.h"
 
 #include "FairLogger.h"
 
 // -----   Default constructor   -------------------------------------------
-R3BActarPoint::R3BActarPoint()
+R3BActafPoint::R3BActafPoint()
     : FairMCPoint()
     , fModule(-1)
     , fX_out(0.)
@@ -34,7 +34,7 @@ R3BActarPoint::R3BActarPoint()
 // -------------------------------------------------------------------------
 
 // -----   Standard constructor   ------------------------------------------
-R3BActarPoint::R3BActarPoint(Int_t trackID,
+R3BActafPoint::R3BActafPoint(Int_t trackID,
                              Int_t detID,
                              Int_t plane,
                              TVector3 posIn,
@@ -57,13 +57,13 @@ R3BActarPoint::R3BActarPoint(Int_t trackID,
 // -------------------------------------------------------------------------
 
 // -----   Destructor   ----------------------------------------------------
-R3BActarPoint::~R3BActarPoint() {}
+R3BActafPoint::~R3BActafPoint() {}
 // -------------------------------------------------------------------------
 
 // -----   Public method Print   -------------------------------------------
-void R3BActarPoint::Print(const Option_t* opt) const
+void R3BActafPoint::Print(const Option_t* opt) const
 {
-    LOG(info) << "R3BActarPoint: STS Point for track " << fTrackID << " in detector " << fDetectorID << "    Position ("
+    LOG(info) << "R3BActafPoint: STS Point for track " << fTrackID << " in detector " << fDetectorID << "    Position ("
               << fX << ", " << fY << ", " << fZ << ") cm"
               << "    Momentum (" << fPx << ", " << fPy << ", " << fPz << ") GeV"
               << "    Time " << fTime << " ns,  Length " << fLength << " cm,  Energy loss " << fELoss * 1.0e06
@@ -72,7 +72,7 @@ void R3BActarPoint::Print(const Option_t* opt) const
 // -------------------------------------------------------------------------
 
 // -----   Point x coordinate from linear extrapolation   ------------------
-Double_t R3BActarPoint::GetX(Double_t z) const
+Double_t R3BActafPoint::GetX(Double_t z) const
 {
     //  cout << fZ << " " << z << " " << fZ_out << endl;
     if ((fZ_out - z) * (fZ - z) >= 0.)
@@ -83,7 +83,7 @@ Double_t R3BActarPoint::GetX(Double_t z) const
 // -------------------------------------------------------------------------
 
 // -----   Point y coordinate from linear extrapolation   ------------------
-Double_t R3BActarPoint::GetY(Double_t z) const
+Double_t R3BActafPoint::GetY(Double_t z) const
 {
     if ((fZ_out - z) * (fZ - z) >= 0.)
         return (fY_out + fY) / 2.;
@@ -94,7 +94,7 @@ Double_t R3BActarPoint::GetY(Double_t z) const
 // -------------------------------------------------------------------------
 
 // -----   Public method IsUsable   ----------------------------------------
-Bool_t R3BActarPoint::IsUsable() const
+Bool_t R3BActafPoint::IsUsable() const
 {
     Double_t dz = fZ_out - fZ;
     if (TMath::Abs(dz) < 1.e-4)
@@ -103,4 +103,4 @@ Bool_t R3BActarPoint::IsUsable() const
 }
 // -------------------------------------------------------------------------
 
-ClassImp(R3BActarPoint)
+ClassImp(R3BActafPoint)
