@@ -18,6 +18,7 @@
 set(SRCS
     #cmake-format: sortable
     actafData/R3BActafPoint.cxx
+    actafData/R3BActafMappedData.cxx
     alpideData/R3BAlpideCalData.cxx
     alpideData/R3BAlpideHitData.cxx
     alpideData/R3BAlpideMappedData.cxx
@@ -164,6 +165,7 @@ set(SRCS
 set(HEADERS
     #cmake-format: sortable
     actafData/R3BActafPoint.h
+    actafData/R3BActafMappedData.h
     alpideData/R3BAlpideCalData.h
     alpideData/R3BAlpideHitData.h
     alpideData/R3BAlpideMappedData.h
