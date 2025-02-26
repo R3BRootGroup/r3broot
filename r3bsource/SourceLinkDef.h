@@ -81,6 +81,7 @@
 #pragma link C++ class R3BMwpcReader+;
 #pragma link C++ class R3BSyncCheckReader+;
 #pragma link C++ class R3BMosaicReader+;
+#pragma link C++ class R3BActafReader+;
 
 
 #pragma link C++ class EXT_STR_h101_unpack_t;
@@ -146,5 +147,6 @@
 #pragma link C++ class EXT_STR_h101_RPC_t;
 #pragma link C++ class EXT_STR_h101_SYNC_CHECK_t;
 #pragma link C++ class EXT_STR_h101_MOSAIC_onion_t;
+#pragma link C++ class EXT_STR_h101_ACTAF_onion_t;
 
 #endif

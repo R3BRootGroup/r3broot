@@ -18,6 +18,7 @@
 set(INCLUDE_DIRECTORIES
     #cmake-format: sortable
     ${CMAKE_CURRENT_SOURCE_DIR}
+    actaf
     alpide
     ams
     base
@@ -110,7 +111,8 @@ set(SRCS
     tttx/R3BTttxReader.cxx
     musli/R3BMusliReader.cxx
     mwpc/R3BMwpcReader.cxx
-    sync_check/R3BSyncCheckReader.cxx)
+    sync_check/R3BSyncCheckReader.cxx
+    actaf/R3BActafReader.cxx)
 
 set(STRUCT_HEADERS
     base/ext_h101_unpack.h
@@ -181,7 +183,8 @@ set(STRUCT_HEADERS
     trloii/ext_h101_samplosms.h
     pdc/ext_h101_pdc.h
     rpc/ext_h101_rpc.h
-    sync_check/ext_h101_sync_check.h)
+    sync_check/ext_h101_sync_check.h
+    actaf/ext_h101_actaf.h)
 
 set(HEADERS
     base/R3BUcesbSource.h
@@ -248,11 +251,13 @@ set(HEADERS
     twim/R3BTwimReader.h
     musli/R3BMusliReader.h
     mwpc/R3BMwpcReader.h
-    sync_check/R3BSyncCheckReader.h)
+    sync_check/R3BSyncCheckReader.h
+    actaf/R3BActafReader.h)
 
 set(HEADERS ${STRUCT_HEADERS} ${HEADERS})
 
 set(DIRS
+    actaf
     alpide
     ams
     base
