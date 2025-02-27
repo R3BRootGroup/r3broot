@@ -18,8 +18,8 @@ set(SRCS
     R3BDigitizingPaddleNeuland.cxx
     R3BNeulandHitMon.cxx
     R3BNeulandDigitizer.cxx
-    R3BDigitizingPaddleMock.h
-    R3BDigitizingChannelMock.h)
+    R3BNeulandHitMon.cxx
+    NeulandPointFilter.cxx)
 
 set(HEADERS
     R3BDigitizingChannel.h
@@ -31,7 +31,8 @@ set(HEADERS
     R3BDigitizingTacQuila.h
     R3BDigitizingTamex.h
     R3BNeulandDigitizer.h
-    R3BNeulandHitMon.h)
+    R3BNeulandHitMon.h
+    NeulandPointFilter.h)
 
 add_library_with_dictionary(
     LIBNAME

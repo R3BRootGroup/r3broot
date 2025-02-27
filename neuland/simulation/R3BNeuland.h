@@ -15,6 +15,8 @@
 #define R3BNEULAND_H
 
 #include "R3BDetector.h"
+#include "R3BIOConnector.h"
+#include "R3BNeulandPoint.h"
 #include "TLorentzVector.h"
 #include <memory>
 #include <string>
@@ -53,52 +55,46 @@ class R3BNeuland : public R3BDetector
      *@param nDP     number of double planes
      *@param trans   position
      *@param rot     rotation */
-    R3BNeuland(Int_t nDP, const TGeoTranslation& trans, const TGeoRotation& rot = TGeoRotation());
+    R3BNeuland(int nDP, const TGeoTranslation& trans, const TGeoRotation& rot = TGeoRotation());
 
     /** Standard constructor.
      *@param nDP     number of double planes
      *@param combi   position + rotation */
-    explicit R3BNeuland(Int_t nDP, const TGeoCombiTrans& combi = TGeoCombiTrans());
+    explicit R3BNeuland(int nDP, const TGeoCombiTrans& combi = TGeoCombiTrans());
 
-    /** Default Destructor */
-    ~R3BNeuland() override;
-
-    void Initialize() override;
-
-    Bool_t ProcessHits(FairVolume* = nullptr) override;
+    auto ProcessHits(FairVolume* /*v*/ = nullptr) -> bool override;
 
     void EndOfEvent() override;
 
-    void Register() override;
-
-    TClonesArray* GetCollection(Int_t iColl) const override;
-
-    void Print(Option_t* = "") const override;
+    void Print(Option_t* /*unused*/ = "") const override;
 
     void Reset() override;
 
-    Bool_t CheckIfSensitive(std::string name) override;
+    auto CheckIfSensitive(std::string name) -> bool override;
 
-    // No copy and no move is allowed (Rule of three/five)
-    R3BNeuland(const R3BNeuland&) = delete;            // copy constructor
-    R3BNeuland(R3BNeuland&&) = delete;                 // move constructor
-    R3BNeuland& operator=(const R3BNeuland&) = delete; // copy assignment
-    R3BNeuland& operator=(R3BNeuland&&) = delete;      // move assignment
+    [[nodiscard]] auto GetCollection(Int_t /*iColl*/) const -> TClonesArray* override { return nullptr; }
+
+    void Register() override;
 
   private:
-    TClonesArray* fNeulandPoints;     //!
-    R3BNeulandGeoPar* fNeulandGeoPar; //!
+    R3B::OutputVectorConnector<R3BNeulandPoint> neuland_points_{ "NeulandPoints" }; //!
+    R3BNeulandGeoPar* neuland_geo_par_ = nullptr;                                   //!
+    std::map<int, int> trackid_pid_map_;
 
     /** Track information to be stored until the track leaves the active volume. */
-    Int_t fTrackID;
-    Int_t fPaddleID;
-    TLorentzVector fPosIn, fPosOut;
-    TLorentzVector fMomIn, fMomOut;
-    Double_t fTime;
-    Double_t fLength;
-    Double_t fELoss;
-    Double_t fLightYield;
-    Bool_t fLastHitDone;
+    int track_id_ = 0;
+    int paddle_id_ = 0;
+    TLorentzVector pos_in_{};
+    TLorentzVector pos_out_{};
+    TLorentzVector mom_in_{};
+    TLorentzVector mom_out_{};
+    double time_ = 0.;
+    double length_ = 0.;
+    double energy_loss_ = 0.;
+    double light_yield_ = 0.;
+    bool is_last_hit_done_ = false;
+    int particle_id_ = 0;
+    int partent_particle_id_ = 0;
 
     void ResetValues();
 
