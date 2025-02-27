@@ -1,8 +1,6 @@
-// clang-format off
-
 /******************************************************************************
- *   Copyright (C) 2019 GSI Helmholtzzentrum für Schwerionenforschung GmbH    *
- *   Copyright (C) 2019-2025 Members of R3B Collaboration                     *
+ *   Copyright (C) 2025 GSI Helmholtzzentrum für Schwerionenforschung GmbH    *
+ *   Copyright (C) 2025 Members of R3B Collaboration                          *
  *                                                                            *
  *             This software is distributed under the terms of the            *
  *                 GNU General Public Licence (GPL) version 3,                *
@@ -13,15 +11,23 @@
  * or submit itself to any jurisdiction.                                      *
  ******************************************************************************/
 
-#ifdef __CINT__
+#pragma once
 
-#pragma link off all globals;
-#pragma link off all classes;
-#pragma link off all functions;
- 
-#pragma link C++ class R3BActaf+;
-#pragma link C++ class R3BActafOnlineSpectra+;
-#pragma link C++ class R3BActafContFact+;
+#include <FairContFact.h>
 
-#endif
+class FairContainer;
 
+class R3BActafContFact : public FairContFact
+{
+  public:
+    R3BActafContFact();
+    virtual ~R3BActafContFact() = default;
+
+    FairParSet* createContainer(FairContainer*) override;
+
+  private:
+    void setAllContainers();
+
+  public:
+    ClassDefOverride(R3BActafContFact, 0)
+};

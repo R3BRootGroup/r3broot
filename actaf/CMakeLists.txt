@@ -19,8 +19,8 @@ file(
     GLOB
     SRCS
     ./sim/*.cxx
-#    ./pars/*.cxx
-#    ./online/*.cxx
+    ./pars/*.cxx
+    ./online/*.cxx
 #    ./calibration/*.cxx
 #    ./ana/*.cxx
     )
@@ -45,5 +45,6 @@ add_library_with_dictionary(
     ana
     DEPENDENCIES
     R3BBase 
+    R3BTracking
     R3BData)
 
